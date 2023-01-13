@@ -1,0 +1,4 @@
+enum CommonResponseCode {
+    SUCCESS,
+    FAIL
+}
