@@ -18,3 +18,6 @@ features = [
   "sqlx-mysql",
   "runtime-async-std-native-tls",
 ]
+
+[env]
+DATABASE_URL = "mysql://root:1234qwer@localhost:3306/feed_inbox"

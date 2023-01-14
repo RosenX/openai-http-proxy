@@ -1,28 +1,18 @@
-use rocket_db_pools::{sqlx, Database};
-use rocket::fairing::{self, AdHoc};
-use rocket::{Rocket, Build};
+use sea_orm::*;
 
+const DATABASE_URL: &str = "mysql://root:1234qwer@localhost:3306";
+const DB_NAME: &str = "feed_inbox";
 
-#[derive(Database)]
-#[database("feed_inbox")]
-pub struct MysqlConnection(sqlx::MySqlPool);
-
-async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
-    match MysqlConnection::fetch(&rocket) {
-        Some(db) => match sqlx::migrate!("db/sqlx/migrations").run(&**db).await {
-            Ok(_) => Ok(rocket),
-            Err(e) => {
-                error!("Failed to initialize SQLx database: {}", e);
-                Err(rocket)
-            }
-        }
-        None => Err(rocket),
-    }
+async fn setup_database() -> Result<DatabaseConnection, DbErr> {
+    let url = format!("{}/{}", DATABASE_URL, DB_NAME);
+    let db = Database::connect(&url).await?;
+    Ok(db)
 }
 
-pub fn stage() -> AdHoc {
-    AdHoc::on_ignite("SQLx Stage", |rocket| async {
-        rocket.attach(MysqlConnection::init())
-            .attach(AdHoc::try_on_ignite("SQLx Migrations", run_migrations))
-    })
+pub async fn init_database() -> DatabaseConnection {
+    let db = match setup_database().await {
+        Ok(db) => db,
+        Err(e) => panic!("{}", e),
+    };
+    db
 }

@@ -1,8 +1,13 @@
 mod entities;
+mod database;
+mod routes;
+mod utils;
 
-use futures::executor::block_on;
+use rocket::{launch};
+
 use sea_orm::*;
 use entities::{prelude::*, *};
+use database::init_database;
 
 
 
@@ -29,9 +34,11 @@ async fn db_init() -> Result<(), DbErr> {
 }
 
 
+#[launch]
+fn rocket() -> _ {
+    let db = init_database();
 
-fn main() {
-    if let Err(err) = block_on(db_init()) {
-        panic!("{}", err);
-    }
+    rocket::build()
+        .manage(db)
+        .attach(routes::user::stage())
 }
