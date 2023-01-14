@@ -1,5 +1,5 @@
+use crate::database::ErrorResponder;
 use crate::entities::{prelude::*, user_profile};
-use crate::utils::CommonResponse;
 use rocket::fairing::AdHoc;
 use rocket::serde::{Deserialize};
 use rocket::serde::json::{Json};
@@ -16,27 +16,28 @@ struct UserRegister {
 }
 
 #[post("/user/create", data = "<user>")]
-async fn user_register(user: Json<UserRegister>, db: DatabaseConnection) -> Result<CommonResponse> {
-    let email = user.into_inner().email;
-    let password = user.into_inner().password;
-    let username = user.into_inner().username;
+async fn user_register(user: Json<UserRegister>, db: &State<DatabaseConnection>) 
+    ->  Result<(), ErrorResponder> 
+{
+    let user = user.into_inner();
 
     let now_datetime = Local::now().naive_local();
     println!("{}", now_datetime);
 
     let user = user_profile::ActiveModel {
-        username: ActiveValue::Set(username),
-        email: ActiveValue::Set(email),
-        hash_password: ActiveValue::Set(password),
+        username: ActiveValue::Set(user.username),
+        email: ActiveValue::Set(user.email),
+        hash_password: ActiveValue::Set(user.password),
         created_time: ActiveValue::Set(now_datetime),
         ..Default::default()
     };
-    UserProfile::insert(user).exec(&db).await?;
-    Ok(CommonResponse::SUCCESS)
+
+    UserProfile::insert(user).exec(db.inner()).await?;
+    Ok(())
 }
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("User Stage", |rocket| async {
-        rocket.mount("/user", routes![user_register])
+        rocket.mount("/", routes![user_register])
     })
 }

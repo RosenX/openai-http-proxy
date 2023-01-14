@@ -1,3 +1,3 @@
 pub mod structs;
 
-pub use structs::CommonResponse;
+pub use structs::{ResponseCode, ErrorInfo};

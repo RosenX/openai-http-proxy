@@ -1,2 +1,2 @@
-[default.databases.sqlx]
+[default.databases.sea_orm]
 url = "mysql://root:1234qwer@localhost:3306/feed_inbox"
