@@ -13,7 +13,7 @@ pub struct Model {
     pub email: String,
     pub hash_password: String,
     pub is_pro: i8,
-    pub pro_end_time: DateTime,
+    pub pro_end_time: Option<DateTime>,
     pub created_time: DateTime,
 }
 

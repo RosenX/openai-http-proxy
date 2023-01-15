@@ -1,3 +1,5 @@
-pub mod structs;
+pub mod responder;
+pub mod prelude;
 
-pub use structs::{ResponseCode, ErrorInfo};
+pub const SUCCESS: &str = "SUCCESS";
+pub const FAILURE: &str = "FAILURE";
