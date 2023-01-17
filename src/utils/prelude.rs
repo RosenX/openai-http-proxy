@@ -1,2 +1,2 @@
 
-pub use super::responder::{StringBodyData, SuccessJsonResponder};
+pub use super::responder::{BodyData, SuccessJsonResponder, FailureJsonResponder};
