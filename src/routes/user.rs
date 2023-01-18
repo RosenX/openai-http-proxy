@@ -80,6 +80,7 @@ async fn user_login(info: Json<LoginInfo>, db: &State<DatabaseConnection>)
                         is_pro: user.is_pro, 
                         pro_end_time: user.pro_end_time 
                     })?;
+                    
                     Ok(BodyData{data: token}.into())
                 }
                 Ok(_) => Err(BodyData{data: "Wrong Password".to_string()}.into()),
