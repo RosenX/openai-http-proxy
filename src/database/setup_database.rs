@@ -1,11 +1,10 @@
 
 use sea_orm::*;
 
-const DATABASE_URL: &str = "mysql://root:1234qwer@localhost:3306";
-const DB_NAME: &str = "feed_inbox";
+use crate::config::DatabaseConfig;
 
-pub async fn setup_database() -> Result<DatabaseConnection, DbErr> {
-    let url = format!("{}/{}", DATABASE_URL, DB_NAME);
+pub async fn setup_database(config: &DatabaseConfig) -> Result<DatabaseConnection, DbErr> {
+    let url = format!("{}/{}", config.url, config.database);
     let db = Database::connect(&url).await?;
     Ok(db)
 }

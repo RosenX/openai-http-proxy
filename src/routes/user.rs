@@ -2,15 +2,13 @@ use crate::routes::authorization::{AuthorizedUser, Token};
 use crate::utils::crypto::hash_password;
 
 use crate::utils::responder::{SuccessJsonResponder, FailureJsonResponder, BodyData};
-use crate::utils::{prelude::*, SUCCESS};
 use crate::entities::{prelude::*, user_profile};
 use rocket::fairing::AdHoc;
-use rocket::response::Redirect;
 use rocket::serde::{Deserialize};
 use rocket::serde::json::{Json};
-use rocket::{post, State, routes, get, uri};
+use rocket::{post, State, routes, get};
 use chrono::{Local};
-use super::authorization::{encode_token, JwtData, decode_refresh_token, JwtToken};
+use super::authorization::{PublicData, JwtToken, JsonWebTokenTool, JsonWebTokenConfig};
 use sea_orm::*;
 use bcrypt::verify;
 
@@ -30,7 +28,10 @@ struct LoginInfo {
 }
 
 #[post("/create", data = "<info>")]
-async fn user_register(info: Json<RegisterInfo>, db: &State<DatabaseConnection>) 
+async fn user_register(
+    info: Json<RegisterInfo>, 
+    db: &State<DatabaseConnection>,
+    jwt: &State<JsonWebTokenConfig>) 
     ->  Result<SuccessJsonResponder<JwtToken>, FailureJsonResponder<String>>
 {
     let info = info.into_inner();
@@ -51,18 +52,21 @@ async fn user_register(info: Json<RegisterInfo>, db: &State<DatabaseConnection>)
     
     let user = user.insert(db.inner()).await?;
 
-    let tokens = encode_token(JwtData{
+    let tokens = JsonWebTokenTool::encode_token(PublicData{
         user_id: user.id,
         is_pro: user.is_pro,
         pro_end_time: user.pro_end_time
-    })?;
+    }, jwt.inner())?;
 
     Ok(BodyData{data: tokens}.into())
 }
 
 #[post("/", data = "<info>")]
-async fn user_login(info: Json<LoginInfo>, db: &State<DatabaseConnection>) 
-    ->  Result<SuccessJsonResponder<JwtToken>, FailureJsonResponder<String>>
+async fn user_login(
+    info: Json<LoginInfo>, 
+    db: &State<DatabaseConnection>,
+    jwt: &State<JsonWebTokenConfig>
+) ->  Result<SuccessJsonResponder<JwtToken>, FailureJsonResponder<String>>
 {
     let info = info.into_inner();
 
@@ -75,12 +79,12 @@ async fn user_login(info: Json<LoginInfo>, db: &State<DatabaseConnection>)
         Some(user) => {
             match verify(&info.password, &user.hash_password) {
                 Ok(true) => {
-                    let token = encode_token(JwtData { 
+                    let token = JsonWebTokenTool::encode_token(PublicData { 
                         user_id: user.id, 
                         is_pro: user.is_pro, 
                         pro_end_time: user.pro_end_time 
-                    })?;
-                    
+                    }, jwt.inner())?;
+
                     Ok(BodyData{data: token}.into())
                 }
                 Ok(_) => Err(BodyData{data: "Wrong Password".to_string()}.into()),
@@ -93,14 +97,23 @@ async fn user_login(info: Json<LoginInfo>, db: &State<DatabaseConnection>)
 
 #[post("/refresh-token", data = "<refresh_token>", format = "json")]
 async fn refresh_token(
-    refresh_token: Json<Token>) 
-    ->  Result<SuccessJsonResponder<JwtToken>, FailureJsonResponder<String>>
+    refresh_token: Json<Token>,
+    jwt: &State<JsonWebTokenConfig>
+) ->  Result<SuccessJsonResponder<JwtToken>, FailureJsonResponder<String>>
 {
     println!("{:?}", refresh_token.clone().into_inner());
-    let result =  decode_refresh_token(refresh_token.into_inner());
+    let result =  
+        JsonWebTokenTool::decode_refresh_token(
+            refresh_token.into_inner(),
+            jwt.inner()
+        );
     match result {
         Ok(token_data) => {
-            let new_token = encode_token(token_data.claims.jwt_data)?;
+            let new_token = 
+                JsonWebTokenTool::encode_token(
+                    token_data.claims.jwt_data,
+                    jwt.inner()
+                )?;
             Ok(BodyData{data: new_token}.into())
         }
         Err(_) => Err(BodyData{data: "invalid refresh token".to_string()}.into())

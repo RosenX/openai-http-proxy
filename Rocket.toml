@@ -1,2 +1,13 @@
-[default.databases.sea_orm]
-url = "mysql://root:1234qwer@localhost:3306/feed_inbox"
+[default]
+address = "127.0.0.1"
+port = 8000
+
+[mysql]
+url = "mysql://root:1234qwer@localhost:3306"
+database = "feed_inbox"
+
+[jsonwebtoken]
+access_secret_key = "access_secret_key"
+access_expiration_hour = 1 # 1 hour
+refresh_secret_key = "refresh_secret_key"
+refresh_expiration_hour = 360 # 30 days
