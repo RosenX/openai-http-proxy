@@ -59,7 +59,7 @@ impl JsonWebTokenTool {
         Ok(token)
     }
 
-    fn decode_jwt(token: String, secret: &'static str)
+    fn decode_jwt(token: String, secret: &str)
     -> Result<TokenData<Claims>, FailureJsonResponder<String>>
     {
         let decode_token = decode::<Claims>(
@@ -100,7 +100,7 @@ impl JsonWebTokenTool {
         Ok(JwtToken{token, refresh_token})
     }
 
-    pub fn decode_access_token(token: Token, config: &JsonWebTokenConfig)
+    pub fn decode_access_token<'a>(token: Token, config: &'a JsonWebTokenConfig)
     -> Result<TokenData<Claims>, FailureJsonResponder<String>> 
     {
         let token_data = Self::decode_jwt(
@@ -110,7 +110,7 @@ impl JsonWebTokenTool {
         Ok(token_data)
     }
 
-    pub fn decode_refresh_token(token: Token, config: &JsonWebTokenConfig)
+    pub fn decode_refresh_token<'a>(token: Token, config: &'a JsonWebTokenConfig)
         -> Result<TokenData<Claims>, FailureJsonResponder<String>> 
     {
         let token_data = Self::decode_jwt(
