@@ -1,7 +1,7 @@
 
 use sea_orm::*;
 
-use crate::config::DatabaseConfig;
+use super::DatabaseConfig;
 
 pub async fn setup_database(config: &DatabaseConfig) -> Result<DatabaseConnection, DbErr> {
     let url = format!("{}/{}", config.url, config.database);

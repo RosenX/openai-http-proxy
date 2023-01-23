@@ -2,16 +2,15 @@ mod entities;
 mod database;
 mod routes;
 mod utils;
-mod config;
+#[cfg(test)] mod test;
 
-use config::DatabaseConfig;
-use rocket::{launch, Config, fairing::AdHoc};
-use database::setup_database;
-use routes::authorization::{JsonWebTokenConfig, JsonWebTokenTool};
+use rocket::{launch, Config};
+use database::{setup_database, DatabaseConfig};
+use routes::authorization::{JsonWebTokenConfig};
 
 
 #[launch]
-async fn rocket() -> _ {
+async fn rocket_app() -> _ {
     let rocket = rocket::build();
     let mysql_config: DatabaseConfig = Config::figment().select("mysql").extract().expect("MySQL配置解析失败");
     
@@ -30,4 +29,5 @@ async fn rocket() -> _ {
         .manage(db)
         .manage(jwt_config)
         .attach(routes::user::stage())
+        .attach(routes::source::stage())
 }
