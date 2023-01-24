@@ -4,6 +4,8 @@ use crate::utils::crypto::hash_password;
 use crate::utils::responder::{SuccessJsonResponder, FailureJsonResponder, BodyData};
 use crate::entities::{prelude::*, user_profile};
 use rocket::fairing::AdHoc;
+use rocket::response::status;
+use anyhow::Error;
 use rocket::serde::{Deserialize};
 use rocket::serde::json::{Json};
 use rocket::{post, State, routes, get};
@@ -32,7 +34,7 @@ async fn user_register(
     info: Json<RegisterInfo>, 
     db: &State<DatabaseConnection>,
     jwt: &State<JsonWebTokenConfig>) 
-    ->  Result<SuccessJsonResponder<JwtToken>, FailureJsonResponder<String>>
+    ->  Result<SuccessResponse<JwtToken>, ErrorResponse<String>>
 {
     let info = info.into_inner();
 
@@ -50,15 +52,18 @@ async fn user_register(
         ..Default::default()
     };
     
-    let user = user.insert(db.inner()).await?;
+    // let user = user.insert(db.inner()).await?;
+    let user = match user.insert(db.inner()).await {
+        Ok(user) => user,
+        Err(err) => return Err(ErrorResponse::NotFound(err)),
+    };
 
     let tokens = JsonWebTokenTool::encode_token(PublicData{
         user_id: user.id,
         is_pro: user.is_pro,
         pro_end_time: user.pro_end_time
     }, jwt.inner())?;
-
-    Ok(BodyData{data: tokens}.into())
+    Ok(SuccessResponse::Accepted(tokens))
 }
 
 #[post("/", data = "<info>")]
