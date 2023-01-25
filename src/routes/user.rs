@@ -1,14 +1,13 @@
-use crate::routes::authorization::{AuthorizedUser, Token};
+use crate::routes::authorization::{Token};
 use crate::utils::crypto::hash_password;
 
-use crate::utils::responder::{SuccessJsonResponder, FailureJsonResponder, BodyData};
+use crate::utils::prelude::ErrorResponse;
+use crate::utils::responder::{SuccessResponse, InvalidEmail, HashError, UserNotExist, InvalidPassword, InvalidRefreshToken, JwtEncodeFail};
 use crate::entities::{prelude::*, user_profile};
 use rocket::fairing::AdHoc;
-use rocket::response::status;
-use anyhow::Error;
 use rocket::serde::{Deserialize};
 use rocket::serde::json::{Json};
-use rocket::{post, State, routes, get};
+use rocket::{post, State, routes};
 use chrono::{Local};
 use super::authorization::{PublicData, JwtToken, JsonWebTokenTool, JsonWebTokenConfig};
 use sea_orm::*;
@@ -30,19 +29,19 @@ struct LoginInfo {
 }
 
 #[post("/create", data = "<info>")]
-async fn user_register(
+async fn register_by_email(
     info: Json<RegisterInfo>, 
     db: &State<DatabaseConnection>,
     jwt: &State<JsonWebTokenConfig>) 
-    ->  Result<SuccessResponse<JwtToken>, ErrorResponse<String>>
+    ->  Result<SuccessResponse<JwtToken>, ErrorResponse>
 {
     let info = info.into_inner();
 
     let now_datetime = Local::now().naive_local();
     println!("{}", now_datetime);
 
-    let hashed_password = hash_password(info.password)?;
-    println!("{}", hashed_password);
+    let hashed_password = 
+        hash_password(info.password).map_err(|_| HashError)?;
 
     let user = user_profile::ActiveModel {
         username: ActiveValue::Set(info.username.clone()),
@@ -52,51 +51,53 @@ async fn user_register(
         ..Default::default()
     };
     
-    // let user = user.insert(db.inner()).await?;
-    let user = match user.insert(db.inner()).await {
-        Ok(user) => user,
-        Err(err) => return Err(ErrorResponse::NotFound(err)),
-    };
+    let user = 
+        user.insert(db.inner()).await.map_err(|_|InvalidEmail)?;
 
     let tokens = JsonWebTokenTool::encode_token(PublicData{
         user_id: user.id,
         is_pro: user.is_pro,
         pro_end_time: user.pro_end_time
-    }, jwt.inner())?;
-    Ok(SuccessResponse::Accepted(tokens))
+    }, jwt.inner()).map_err(|_| JwtEncodeFail)?;
+
+    Ok(SuccessResponse::Created(Json(tokens)))
 }
 
 #[post("/", data = "<info>")]
-async fn user_login(
+async fn login_by_email(
     info: Json<LoginInfo>, 
     db: &State<DatabaseConnection>,
     jwt: &State<JsonWebTokenConfig>
-) ->  Result<SuccessJsonResponder<JwtToken>, FailureJsonResponder<String>>
+) ->  Result<SuccessResponse<JwtToken>, ErrorResponse>
 {
     let info = info.into_inner();
 
     let res = UserProfile::find()
         .filter(user_profile::Column::Email.eq(info.email))
         .one(db.inner())
-        .await?;
+        .await
+        .map_err(|_| UserNotExist)?;
     
     match res {
         Some(user) => {
             match verify(&info.password, &user.hash_password) {
                 Ok(true) => {
-                    let token = JsonWebTokenTool::encode_token(PublicData { 
-                        user_id: user.id, 
-                        is_pro: user.is_pro, 
-                        pro_end_time: user.pro_end_time 
-                    }, jwt.inner())?;
-
-                    Ok(BodyData{data: token}.into())
-                }
-                Ok(_) => Err(BodyData{data: "Wrong Password".to_string()}.into()),
-                Err(_) => Err(BodyData{data: "Wrong Password".to_string()}.into()),
+                    let token = 
+                        JsonWebTokenTool::encode_token(
+                            PublicData {
+                                user_id: user.id, 
+                                is_pro: user.is_pro, 
+                                pro_end_time: user.pro_end_time 
+                            }, 
+                            jwt.inner()
+                        )
+                        .map_err(|_| JwtEncodeFail)?;
+                    Ok(SuccessResponse::Accepted(Json(token)))
+                },
+                _ => return Err(InvalidPassword),
             }
         },
-        None => return Err(BodyData{data: "User Not Exist".to_string()}.into())
+        None => Err(UserNotExist)
     }
 }
 
@@ -104,7 +105,7 @@ async fn user_login(
 async fn refresh_token(
     refresh_token: Json<Token>,
     jwt: &State<JsonWebTokenConfig>
-) ->  Result<SuccessJsonResponder<JwtToken>, FailureJsonResponder<String>>
+) ->  Result<SuccessResponse<JwtToken>, ErrorResponse>
 {
     println!("{:?}", refresh_token.clone().into_inner());
     let result =  
@@ -118,38 +119,19 @@ async fn refresh_token(
                 JsonWebTokenTool::encode_token(
                     token_data.claims.jwt_data,
                     jwt.inner()
-                )?;
-            Ok(BodyData{data: new_token}.into())
+                )
+                .map_err(|_| JwtEncodeFail)?;
+            Ok(SuccessResponse::Created(new_token.into()))
         }
-        Err(_) => Err(BodyData{data: "invalid refresh token".to_string()}.into())
-    }
-}
-
-#[get("/")]
-async fn get_user_info(
-    db: &State<DatabaseConnection>,
-    auth: AuthorizedUser) 
-    ->  Result<SuccessJsonResponder<String>, FailureJsonResponder<String>>
-{
-    let res = UserProfile::find()
-        .filter(user_profile::Column::Id.eq(auth.user_id))
-        .one(db.inner())
-        .await?;
-    
-    match res {
-        Some(user) => {
-            Ok(BodyData{data: user.username}.into())
-        }
-        None => return Err(BodyData{data: "User Not Exist".to_string()}.into())
+        Err(_) => Err(InvalidRefreshToken)
     }
 }
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("User Stage", |rocket| async {
         rocket.mount("/user", routes![
-            user_register, 
-            user_login, 
-            get_user_info, 
+            register_by_email, 
+            login_by_email, 
             refresh_token
         ])
     })

@@ -1,55 +1,64 @@
-use bcrypt::BcryptError;
 use rocket::{serde::{Serialize, json::Json}, Responder};
-use sea_orm::DbErr;
 
-use crate::routes::authorization::JwtToken;
+#[derive(Responder)]
+pub enum SuccessResponse<T> {
+    #[response(status = 200)]
+    Created(Json<T>),
+
+    #[response(status = 200)]
+    Accepted(Json<T>),
+
+    #[response(status = 200)]
+    Success(Json<T>),
+}
+
+pub const DefaultSuccessResponse: SuccessResponse<String> = 
+    SuccessResponse::Success("Success".to_string().into());
+
+
+////////////////////////////////
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
-pub struct BodyData<T> {
-    pub data: T
+pub struct ErrorInfo {
+    pub code: Option<i32>,
+    pub message: String,
 }
 
-#[derive(Responder)]
-#[response(status = 200, content_type = "json")]
-pub struct SuccessJsonResponder<T>(pub Json<BodyData<T>>);
-
-impl From<BodyData<String>> for SuccessJsonResponder<String> {
-    fn from(data: BodyData<String>) -> SuccessJsonResponder<String> {
-        SuccessJsonResponder(Json(data))
-    }
-}
-
-impl From<BodyData<JwtToken>> for SuccessJsonResponder<JwtToken> {
-    fn from(data: BodyData<JwtToken>) -> SuccessJsonResponder<JwtToken> {
-        SuccessJsonResponder(Json(data))
+impl ErrorInfo {
+    pub fn new(code: Option<i32>, message: String) -> ErrorInfo {
+        ErrorInfo { code, message }
     }
 }
 
 #[derive(Responder)]
-#[response(status = 500, content_type = "json")]
-pub struct FailureJsonResponder<T>(pub Json<BodyData<T>>);
+pub enum ErrorResponse {
+    #[response(status =401)]
+    LoginFail(Json<ErrorInfo>),
 
-impl From<BodyData<String>> for FailureJsonResponder<String> {
-    fn from(data: BodyData<String>) -> FailureJsonResponder<String> {
-        FailureJsonResponder(Json(data))
-    }
+    #[response(status = 500)]
+    Default(Json<ErrorInfo>)
 }
 
-impl From<DbErr> for FailureJsonResponder<String> {
-    fn from(err: DbErr) -> FailureJsonResponder<String> {
-        FailureJsonResponder(Json(BodyData{data: err.to_string()}))
-    }
-}
+pub const DefaultErrorResponse: ErrorResponse = 
+    ErrorResponse::Default(ErrorInfo::new(None, "失败".to_string()).into());
 
-impl From<BcryptError> for FailureJsonResponder<String> {
-    fn from(err: BcryptError) -> FailureJsonResponder<String> {
-        FailureJsonResponder(Json(BodyData{data: err.to_string()}))
-    }
-}
 
-impl From<jsonwebtoken::errors::Error>  for FailureJsonResponder<String> {
-    fn from(err: jsonwebtoken::errors::Error) -> FailureJsonResponder<String> {
-        FailureJsonResponder(Json(BodyData{data: err.to_string()}))
-    }
-}
+// 用户登录
+pub const HashError: ErrorResponse = 
+    ErrorResponse::LoginFail(ErrorInfo::new(None, "密码哈希失败".to_string()).into());
+
+pub const InvalidEmail: ErrorResponse = 
+    ErrorResponse::LoginFail(ErrorInfo::new(None, "邮箱已注册".to_string()).into());
+
+pub const UserNotExist: ErrorResponse = 
+    ErrorResponse::LoginFail(ErrorInfo::new(None, "用户不存在".to_string()).into());
+
+pub const InvalidPassword: ErrorResponse = 
+    ErrorResponse::LoginFail(ErrorInfo::new(None, "密码错误".to_string()).into());
+
+pub const InvalidRefreshToken: ErrorResponse = 
+    ErrorResponse::LoginFail(ErrorInfo::new(None, "密码过期，请重新登陆".to_string()).into());
+
+pub const JwtEncodeFail: ErrorResponse = 
+    ErrorResponse::LoginFail(ErrorInfo::new(None, "登录失败".to_string()).into());

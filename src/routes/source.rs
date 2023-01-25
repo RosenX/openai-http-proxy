@@ -2,10 +2,12 @@ use rocket::State;
 use rocket::serde::Deserialize;
 use rocket::{fairing::AdHoc, routes, post};
 use rocket::serde::json::{Json};
-use sea_orm::{DatabaseConnection, ActiveValue, ActiveModelTrait};
+use sea_orm::{DatabaseConnection, ActiveValue, ActiveModelTrait, EntityTrait, QueryFilter};
 
 use crate::entities::{subscribe_source, user_subscribe_source};
-use crate::utils::responder::{SuccessJsonResponder, FailureJsonResponder, BodyData};
+use crate::entities::prelude::*;
+use crate::utils::prelude::{ErrorResponse, SuccessResponse};
+use crate::utils::responder::DefaultSuccessResponse;
 
 use super::authorization::AuthorizedUser;
 
@@ -22,14 +24,21 @@ async fn create_exist_source(
     user: AuthorizedUser,
     info: Json<ExistSourceInfo>,
     db: &State<DatabaseConnection>,
-) ->  Result<SuccessJsonResponder<String>, FailureJsonResponder<String>>
+) ->  Result<SuccessResponse<String>, ErrorResponse>
 {
     let info = info.into_inner();
+
+    let source = SubscribeSource::find()
+        .filter(subscribe_source::Column::UriIdentity.eq(info.uri))
+        .one(db.inner())
+        .await?;
 
     let source = subscribe_source::ActiveModel {
         uri_identity: ActiveValue::Set(info.uri),
         ..Default::default()
     };
+
+    
 
     let source = source.insert(db.inner()).await?;
 
@@ -43,7 +52,7 @@ async fn create_exist_source(
 
     let user_source = user_source.insert(db.inner()).await?;
     
-    Ok(BodyData{data: "Success".to_string()}.into())
+    Ok(DefaultSuccessResponse)
 }
 
 pub fn stage() -> AdHoc {

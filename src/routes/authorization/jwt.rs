@@ -1,7 +1,7 @@
 use chrono::Utc;
 use rocket::serde::{Serialize, Deserialize};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, Validation};
-use crate::utils::{prelude::FailureJsonResponder};
+use anyhow::Result;
 
 use super::{PublicData, Token};
 
@@ -40,7 +40,7 @@ impl JsonWebTokenTool {
     }
 
     fn encode_jwt(jwt_data: &PublicData, secret: &str, expiration_time: i64)
-    -> Result<String, FailureJsonResponder<String>> 
+    -> Result<String> 
     {
         let expiration = Utc::now()
             .checked_add_signed(chrono::Duration::hours(expiration_time)).unwrap()
@@ -60,7 +60,7 @@ impl JsonWebTokenTool {
     }
 
     fn decode_jwt(token: String, secret: &str)
-    -> Result<TokenData<Claims>, FailureJsonResponder<String>>
+    -> Result<TokenData<Claims>>
     {
         let decode_token = decode::<Claims>(
             &token, 
@@ -71,7 +71,7 @@ impl JsonWebTokenTool {
     }
 
     pub fn encode_access_token(jwt_data: &PublicData, config: &JsonWebTokenConfig)
-        -> Result<Token, FailureJsonResponder<String>> 
+        -> Result<Token> 
     {
         let token = Self::encode_jwt(
             jwt_data,
@@ -82,7 +82,7 @@ impl JsonWebTokenTool {
     }
 
     pub fn encode_refresh_token(jwt_data: &PublicData, config: &JsonWebTokenConfig)
-        -> Result<Token, FailureJsonResponder<String>> 
+        -> Result<Token> 
     {
         let token = Self::encode_jwt(
             jwt_data, 
@@ -93,7 +93,7 @@ impl JsonWebTokenTool {
     }
 
     pub fn encode_token(jwt_data: PublicData, config: &JsonWebTokenConfig)
-        -> Result<JwtToken, FailureJsonResponder<String>>
+        -> Result<JwtToken>
     {
         let token = Self::encode_access_token(&jwt_data, config)?;
         let refresh_token = Self::encode_refresh_token(&jwt_data, config)?;
@@ -101,7 +101,7 @@ impl JsonWebTokenTool {
     }
 
     pub fn decode_access_token<'a>(token: Token, config: &'a JsonWebTokenConfig)
-    -> Result<TokenData<Claims>, FailureJsonResponder<String>> 
+    -> Result<TokenData<Claims>> 
     {
         let token_data = Self::decode_jwt(
             token.into(), 
@@ -111,7 +111,7 @@ impl JsonWebTokenTool {
     }
 
     pub fn decode_refresh_token<'a>(token: Token, config: &'a JsonWebTokenConfig)
-        -> Result<TokenData<Claims>, FailureJsonResponder<String>> 
+        -> Result<TokenData<Claims>> 
     {
         let token_data = Self::decode_jwt(
             token.into(), 
