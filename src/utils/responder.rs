@@ -12,9 +12,11 @@ pub enum SuccessResponse<T> {
     Success(Json<T>),
 }
 
-pub const DefaultSuccessResponse: SuccessResponse<String> = 
-    SuccessResponse::Success("Success".to_string().into());
-
+impl SuccessResponse<String> {
+    pub fn DefaultSuccessResponse() -> SuccessResponse<String> {
+        SuccessResponse::Success("Success".to_string().into())
+    }
+}
 
 ////////////////////////////////
 
@@ -27,7 +29,7 @@ pub struct ErrorInfo {
 
 impl ErrorInfo {
     pub fn new(code: Option<i32>, message: String) -> ErrorInfo {
-        ErrorInfo { code, message }
+        ErrorInfo { code, message}
     }
 }
 
@@ -40,25 +42,27 @@ pub enum ErrorResponse {
     Default(Json<ErrorInfo>)
 }
 
-pub const DefaultErrorResponse: ErrorResponse = 
-    ErrorResponse::Default(ErrorInfo::new(None, "失败".to_string()).into());
-
-
-// 用户登录
-pub const HashError: ErrorResponse = 
-    ErrorResponse::LoginFail(ErrorInfo::new(None, "密码哈希失败".to_string()).into());
-
-pub const InvalidEmail: ErrorResponse = 
-    ErrorResponse::LoginFail(ErrorInfo::new(None, "邮箱已注册".to_string()).into());
-
-pub const UserNotExist: ErrorResponse = 
-    ErrorResponse::LoginFail(ErrorInfo::new(None, "用户不存在".to_string()).into());
-
-pub const InvalidPassword: ErrorResponse = 
-    ErrorResponse::LoginFail(ErrorInfo::new(None, "密码错误".to_string()).into());
-
-pub const InvalidRefreshToken: ErrorResponse = 
-    ErrorResponse::LoginFail(ErrorInfo::new(None, "密码过期，请重新登陆".to_string()).into());
-
-pub const JwtEncodeFail: ErrorResponse = 
-    ErrorResponse::LoginFail(ErrorInfo::new(None, "登录失败".to_string()).into());
+impl ErrorResponse {
+    pub fn DefaultErrorResponse() -> ErrorResponse {
+        ErrorResponse::Default(ErrorInfo{code: None, message: "失败".to_string()}.into())
+    }
+    // 用户登录
+    pub fn HashError() -> ErrorResponse {
+        ErrorResponse::LoginFail(ErrorInfo::new(None, "密码哈希失败".to_string()).into())
+    }
+    pub fn InvalidEmail() -> ErrorResponse {
+        ErrorResponse::LoginFail(ErrorInfo::new(None, "邮箱已注册".to_string()).into())
+    }
+    pub fn UserNotExist() -> ErrorResponse {
+        ErrorResponse::LoginFail(ErrorInfo::new(None, "用户不存在".to_string()).into())
+    }
+    pub fn InvalidPassword() -> ErrorResponse {
+        ErrorResponse::LoginFail(ErrorInfo::new(None, "密码错误".to_string()).into())
+    }
+    pub fn InvalidRefreshToken() -> ErrorResponse {
+        ErrorResponse::LoginFail(ErrorInfo::new(None, "密码过期，请重新登陆".to_string()).into())
+    }
+    pub fn JwtEncodeFail() -> ErrorResponse {
+        ErrorResponse::LoginFail(ErrorInfo::new(None, "登录失败".to_string()).into())
+    }
+}

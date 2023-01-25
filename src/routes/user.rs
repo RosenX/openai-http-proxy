@@ -2,7 +2,7 @@ use crate::routes::authorization::{Token};
 use crate::utils::crypto::hash_password;
 
 use crate::utils::prelude::ErrorResponse;
-use crate::utils::responder::{SuccessResponse, InvalidEmail, HashError, UserNotExist, InvalidPassword, InvalidRefreshToken, JwtEncodeFail};
+use crate::utils::responder::{SuccessResponse};
 use crate::entities::{prelude::*, user_profile};
 use rocket::fairing::AdHoc;
 use rocket::serde::{Deserialize};
@@ -41,7 +41,7 @@ async fn register_by_email(
     println!("{}", now_datetime);
 
     let hashed_password = 
-        hash_password(info.password).map_err(|_| HashError)?;
+        hash_password(info.password).map_err(|_| ErrorResponse::HashError())?;
 
     let user = user_profile::ActiveModel {
         username: ActiveValue::Set(info.username.clone()),
@@ -52,13 +52,13 @@ async fn register_by_email(
     };
     
     let user = 
-        user.insert(db.inner()).await.map_err(|_|InvalidEmail)?;
+        user.insert(db.inner()).await.map_err(|_| ErrorResponse::InvalidEmail())?;
 
     let tokens = JsonWebTokenTool::encode_token(PublicData{
         user_id: user.id,
         is_pro: user.is_pro,
         pro_end_time: user.pro_end_time
-    }, jwt.inner()).map_err(|_| JwtEncodeFail)?;
+    }, jwt.inner()).map_err(|_| ErrorResponse::JwtEncodeFail())?;
 
     Ok(SuccessResponse::Created(Json(tokens)))
 }
@@ -76,7 +76,7 @@ async fn login_by_email(
         .filter(user_profile::Column::Email.eq(info.email))
         .one(db.inner())
         .await
-        .map_err(|_| UserNotExist)?;
+        .map_err(|_| ErrorResponse::UserNotExist())?;
     
     match res {
         Some(user) => {
@@ -91,13 +91,13 @@ async fn login_by_email(
                             }, 
                             jwt.inner()
                         )
-                        .map_err(|_| JwtEncodeFail)?;
+                        .map_err(|_| ErrorResponse::JwtEncodeFail())?;
                     Ok(SuccessResponse::Accepted(Json(token)))
                 },
-                _ => return Err(InvalidPassword),
+                _ => return Err(ErrorResponse::InvalidPassword()),
             }
         },
-        None => Err(UserNotExist)
+        None => Err(ErrorResponse::UserNotExist())
     }
 }
 
@@ -120,10 +120,10 @@ async fn refresh_token(
                     token_data.claims.jwt_data,
                     jwt.inner()
                 )
-                .map_err(|_| JwtEncodeFail)?;
+                .map_err(|_| ErrorResponse::JwtEncodeFail())?;
             Ok(SuccessResponse::Created(new_token.into()))
         }
-        Err(_) => Err(InvalidRefreshToken)
+        Err(_) => Err(ErrorResponse::InvalidRefreshToken())
     }
 }
 
