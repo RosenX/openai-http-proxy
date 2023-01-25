@@ -41,7 +41,7 @@ async fn register_by_email(
     println!("{}", now_datetime);
 
     let hashed_password = 
-        hash_password(info.password).map_err(|_| ErrorResponse::HashError())?;
+        hash_password(info.password).map_err(|_| ErrorResponse::hash_error())?;
 
     let user = user_profile::ActiveModel {
         username: ActiveValue::Set(info.username.clone()),
@@ -52,13 +52,13 @@ async fn register_by_email(
     };
     
     let user = 
-        user.insert(db.inner()).await.map_err(|_| ErrorResponse::InvalidEmail())?;
+        user.insert(db.inner()).await.map_err(|_| ErrorResponse::invalid_email())?;
 
     let tokens = JsonWebTokenTool::encode_token(PublicData{
         user_id: user.id,
         is_pro: user.is_pro,
         pro_end_time: user.pro_end_time
-    }, jwt.inner()).map_err(|_| ErrorResponse::JwtEncodeFail())?;
+    }, jwt.inner()).map_err(|_| ErrorResponse::jwt_encode_fail())?;
 
     Ok(SuccessResponse::Created(Json(tokens)))
 }
@@ -76,7 +76,7 @@ async fn login_by_email(
         .filter(user_profile::Column::Email.eq(info.email))
         .one(db.inner())
         .await
-        .map_err(|_| ErrorResponse::UserNotExist())?;
+        .map_err(|_| ErrorResponse::user_not_exist())?;
     
     match res {
         Some(user) => {
@@ -91,13 +91,13 @@ async fn login_by_email(
                             }, 
                             jwt.inner()
                         )
-                        .map_err(|_| ErrorResponse::JwtEncodeFail())?;
+                        .map_err(|_| ErrorResponse::jwt_encode_fail())?;
                     Ok(SuccessResponse::Accepted(Json(token)))
                 },
-                _ => return Err(ErrorResponse::InvalidPassword()),
+                _ => return Err(ErrorResponse::invalid_password()),
             }
         },
-        None => Err(ErrorResponse::UserNotExist())
+        None => Err(ErrorResponse::user_not_exist())
     }
 }
 
@@ -120,10 +120,10 @@ async fn refresh_token(
                     token_data.claims.jwt_data,
                     jwt.inner()
                 )
-                .map_err(|_| ErrorResponse::JwtEncodeFail())?;
+                .map_err(|_| ErrorResponse::jwt_encode_fail())?;
             Ok(SuccessResponse::Created(new_token.into()))
         }
-        Err(_) => Err(ErrorResponse::InvalidRefreshToken())
+        Err(_) => Err(ErrorResponse::invalid_refresh_token())
     }
 }
 

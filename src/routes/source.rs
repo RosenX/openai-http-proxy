@@ -32,7 +32,7 @@ async fn create_exist_source(
         .filter(subscribe_source::Column::UriIdentity.eq(info.uri.clone()))
         .one(db.inner())
         .await
-        .map_err(|_| ErrorResponse::DefaultErrorResponse())?;
+        .map_err(|_| ErrorResponse::default_error_response())?;
 
     let source = match source {
         None => {
@@ -42,7 +42,7 @@ async fn create_exist_source(
             }
             .insert(db.inner())
             .await
-            .map_err(|_| ErrorResponse::DefaultErrorResponse())?;
+            .map_err(|_| ErrorResponse::default_error_response())?;
             source
         },
         Some(source) => source,
@@ -55,10 +55,10 @@ async fn create_exist_source(
         ..Default::default()
     }
     .insert(db.inner())
-    .map_err(|_| ErrorResponse::DefaultErrorResponse())
+    .map_err(|_| ErrorResponse::default_error_response())
     .await?;
 
-    Ok(SuccessResponse::DefaultSuccessResponse())
+    Ok(SuccessResponse::default_success_response())
 
 }
 

@@ -29,16 +29,9 @@ pub struct JsonWebTokenConfig {
 }
 
 pub struct JsonWebTokenTool{
-    config: JsonWebTokenConfig,
 }
 
 impl JsonWebTokenTool {
-    pub fn new(jwt_config: JsonWebTokenConfig) -> JsonWebTokenTool {
-        JsonWebTokenTool{
-            config: jwt_config
-        }
-    }
-
     fn encode_jwt(jwt_data: &PublicData, secret: &str, expiration_time: i64)
     -> Result<String> 
     {
