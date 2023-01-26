@@ -12,6 +12,7 @@ pub struct Claims {
     exp: usize
 }
 
+
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct JwtToken {
