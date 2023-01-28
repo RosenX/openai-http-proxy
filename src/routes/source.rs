@@ -63,7 +63,7 @@ async fn create_exist_source(
 }
 
 pub fn stage() -> AdHoc {
-    AdHoc::on_ignite("User Stage", |rocket| async {
+    AdHoc::on_ignite("Describe Source Stage", |rocket| async {
         rocket.mount("/source", routes![
             create_exist_source,
         ])

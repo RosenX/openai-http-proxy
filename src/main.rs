@@ -30,4 +30,5 @@ async fn rocket_app() -> _ {
         .manage(jwt_config)
         .attach(routes::user::stage())
         .attach(routes::source::stage())
+        .attach(routes::content::stage())
 }
