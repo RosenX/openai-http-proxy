@@ -16,7 +16,9 @@ struct Uri {
 async fn get_lastest_post(uri: Json<Uri>) -> Result<SuccessResponse<String>, ErrorResponse> {
     let result = fetcher::fetch_uri(&uri.uri)
         .await
-        .map_err(|_| ErrorResponse::default_error_response())?;
+        .map_err(|_| {
+            ErrorResponse::default_error_response()
+        })?;
     println!("{:?}", result);
     Ok(SuccessResponse::Success(Json(result)))
 }
