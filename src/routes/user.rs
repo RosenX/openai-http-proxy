@@ -1,3 +1,4 @@
+use log::{info, warn, debug, error};
 use crate::routes::authorization::{Token};
 use crate::utils::crypto::hash_password;
 
@@ -7,7 +8,7 @@ use crate::entities::{prelude::*, user_profile};
 use rocket::fairing::AdHoc;
 use rocket::serde::{Deserialize};
 use rocket::serde::json::{Json};
-use rocket::{post, State, routes};
+use rocket::{post, State, routes, async_trait};
 use chrono::{Local};
 use super::authorization::{PublicData, JwtToken, JsonWebTokenTool, JsonWebTokenConfig};
 use sea_orm::*;
@@ -15,7 +16,7 @@ use bcrypt::verify;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
-struct RegisterInfo {
+struct SignUpInfo {
     username: String,
     email: String,
     password: String
@@ -23,49 +24,90 @@ struct RegisterInfo {
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
-struct LoginInfo {
+struct SignInInfo {
     email: String,
     password: String
 }
 
+impl TryFrom<SignUpInfo> for user_profile::ActiveModel {
+    type Error = anyhow::Error;
+    fn try_from(info: SignUpInfo) -> Result<Self, Self::Error> {
+        let now_datetime = Local::now().naive_local();
+        let hashed_password = hash_password(info.password)
+            .map_err(|err| {
+                error!("{}", err.to_string());
+                err
+            })?;
+        let res = Self {
+            username: ActiveValue::Set(info.username.clone()),
+            email: ActiveValue::Set(info.email),
+            hash_password: ActiveValue::Set(hashed_password),
+            created_time: ActiveValue::Set(now_datetime),
+            ..Default::default()
+        };
+        Ok(res)
+    }
+}
+
+#[async_trait]
+pub trait DbOperator<In, Out> {
+    type Error;
+    async fn insert_item(&self, model: In) -> Result<Out, Self::Error>;
+}
+
+#[async_trait]
+impl DbOperator<user_profile::ActiveModel, user_profile::Model> for DatabaseConnection {
+    type Error = anyhow::Error;
+    async fn insert_item(&self, item: user_profile::ActiveModel) 
+        -> Result<user_profile::Model, Self::Error> 
+    {
+        let entity = item.insert(self).await.map_err(|err| {
+            error!("insert_item: {:?}", err);
+            err
+        })?;
+        Ok(entity)
+    }
+}
+
+pub trait SignUp<>{
+    type Error;
+}
+
+pub trait TokenGenerator<Data, Token> {
+    type Error;
+    fn token_generator(encode_data: Data) -> Result<Token, anyhow::Error>;
+}
+
 #[post("/create", data = "<info>")]
 async fn register_by_email(
-    info: Json<RegisterInfo>, 
+    info: Json<SignUpInfo>, 
     db: &State<DatabaseConnection>,
     jwt: &State<JsonWebTokenConfig>) 
     ->  Result<SuccessResponse<JwtToken>, ErrorResponse>
 {
     let info = info.into_inner();
 
-    let now_datetime = Local::now().naive_local();
-    println!("{}", now_datetime);
+    let user: user_profile::ActiveModel = info.try_into()
+        .map_err(|_| ErrorResponse::hash_error())?;
 
-    let hashed_password = 
-        hash_password(info.password).map_err(|_| ErrorResponse::hash_error())?;
-
-    let user = user_profile::ActiveModel {
-        username: ActiveValue::Set(info.username.clone()),
-        email: ActiveValue::Set(info.email),
-        hash_password: ActiveValue::Set(hashed_password),
-        created_time: ActiveValue::Set(now_datetime),
-        ..Default::default()
-    };
+    let user = db.inner().insert_item(user).await
+        .map_err(|_| ErrorResponse::invalid_email())?;
     
-    let user = 
-        user.insert(db.inner()).await.map_err(|_| ErrorResponse::invalid_email())?;
-
-    let tokens = JsonWebTokenTool::encode_token(PublicData{
+    let encode_data = PublicData{
         user_id: user.id,
         is_pro: user.is_pro,
         pro_end_time: user.pro_end_time
-    }, jwt.inner()).map_err(|_| ErrorResponse::jwt_encode_fail())?;
+    };
+
+    let tokens = JsonWebTokenTool::encode_token(encode_data, jwt.inner())
+        .map_err(|_| ErrorResponse::jwt_encode_fail())?;
 
     Ok(SuccessResponse::Created(Json(tokens)))
 }
 
 #[post("/", data = "<info>")]
 async fn login_by_email(
-    info: Json<LoginInfo>, 
+    info: Json<SignInInfo>, 
     db: &State<DatabaseConnection>,
     jwt: &State<JsonWebTokenConfig>
 ) ->  Result<SuccessResponse<JwtToken>, ErrorResponse>

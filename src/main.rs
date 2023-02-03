@@ -5,7 +5,6 @@ mod utils;
 #[cfg(test)] mod test;
 
 use env_logger::Env;
-use log::{info, warn, debug, error};
 use rocket::{launch, Config};
 use database::{setup_database, DatabaseConfig};
 use routes::authorization::{JsonWebTokenConfig};
@@ -33,13 +32,6 @@ async fn rocket_app() -> _ {
         .extract()
         .expect("jsonwebtoken配置解析失败");
 
-    
-
-    error!("Bright red error");
-    info!("This only appears in the log file");
-    warn!("This only appears in the log file");
-    debug!("This level is currently not enabled for any logger");
-    
     rocket
         .manage(db)
         .manage(jwt_config)
