@@ -73,9 +73,21 @@ pub trait SignUp<>{
     type Error;
 }
 
-pub trait TokenGenerator<Data, Token> {
+pub trait Encode<Data, Token> {
     type Error;
-    fn token_generator(encode_data: Data) -> Result<Token, anyhow::Error>;
+    fn encode(&self, encode_data: Data) -> Result<Token, anyhow::Error>;
+}
+
+impl Encode<PublicData, JwtToken> for JsonWebTokenConfig {
+    type Error = anyhow::Error;
+    fn encode(&self, encode_data: PublicData) -> Result<JwtToken, anyhow::Error> {
+        let token = JsonWebTokenTool::encode_token(encode_data, self)
+            .map_err(|err| {
+                error!("encode_token: {}", err);
+                err
+            })?;
+        Ok(token)
+    }
 }
 
 #[post("/create", data = "<info>")]
@@ -99,7 +111,7 @@ async fn register_by_email(
         pro_end_time: user.pro_end_time
     };
 
-    let tokens = JsonWebTokenTool::encode_token(encode_data, jwt.inner())
+    let tokens = jwt.encode(encode_data)
         .map_err(|_| ErrorResponse::jwt_encode_fail())?;
 
     Ok(SuccessResponse::Created(Json(tokens)))
