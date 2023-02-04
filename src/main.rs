@@ -7,7 +7,7 @@ mod utils;
 use env_logger::Env;
 use rocket::{launch, Config};
 use database::{setup_database, DatabaseConfig};
-use routes::authorization::{JsonWebTokenConfig};
+use utils::jwt::structs::JsonWebToken;
 
 
 #[launch]
@@ -27,7 +27,7 @@ async fn rocket_app() -> _ {
         Err(e) => panic!("{}", e),
     };
 
-    let jwt_config: JsonWebTokenConfig = Config::figment()
+    let jwt_config: JsonWebToken = Config::figment()
         .select("jsonwebtoken")
         .extract()
         .expect("jsonwebtoken配置解析失败");

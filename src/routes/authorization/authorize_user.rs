@@ -1,7 +1,7 @@
 use chrono::{NaiveDateTime};
 use rocket::{request::{FromRequest, Outcome}, Request, http::Status, serde::{Serialize, Deserialize}};
 
-use super::{JsonWebTokenTool, JsonWebTokenConfig};
+use crate::{entities::user_profile, utils::jwt::{structs::JsonWebToken, jwt::JsonWebTokenTool}};
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(crate = "rocket::serde")]
@@ -9,6 +9,16 @@ pub struct PublicData {
     pub user_id: i32,
     pub is_pro: bool,
     pub pro_end_time: Option<NaiveDateTime>
+}
+
+impl From<user_profile::Model> for PublicData {
+    fn from(user_model: user_profile::Model) -> Self {
+        Self {
+            user_id: user_model.id,
+            is_pro: user_model.is_pro,
+            pro_end_time: user_model.pro_end_time
+        }
+    }
 }
 
 pub struct AuthorizedUser {
@@ -38,7 +48,7 @@ impl<'r> FromRequest<'r> for AuthorizedUser {
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let auth_header = request.headers().get_one("Authorization");
-        let jwt = match request.rocket().state::<JsonWebTokenConfig>() {
+        let jwt = match request.rocket().state::<JsonWebToken>() {
             Some(jwt) => jwt,
             None => return Outcome::Failure((Status::Unauthorized, ())),
         };

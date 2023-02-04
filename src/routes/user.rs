@@ -1,18 +1,22 @@
 use log::{info, warn, debug, error};
-use crate::routes::authorization::{Token};
+use crate::database::DbOperator;
 use crate::utils::crypto::hash_password;
 
+use crate::utils::jwt::jwt::JsonWebTokenTool;
+use crate::utils::jwt::structs::{JwtToken, JsonWebToken, Token};
+use crate::utils::jwt::traits::Encode;
 use crate::utils::prelude::ErrorResponse;
 use crate::utils::responder::{SuccessResponse};
 use crate::entities::{prelude::*, user_profile};
 use rocket::fairing::AdHoc;
 use rocket::serde::{Deserialize};
 use rocket::serde::json::{Json};
-use rocket::{post, State, routes, async_trait};
+use rocket::{post, State, routes};
 use chrono::{Local};
-use super::authorization::{PublicData, JwtToken, JsonWebTokenTool, JsonWebTokenConfig};
 use sea_orm::*;
 use bcrypt::verify;
+
+use super::authorization::PublicData;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -49,71 +53,17 @@ impl TryFrom<SignUpInfo> for user_profile::ActiveModel {
     }
 }
 
-#[async_trait]
-pub trait DbOperator<In, Out> {
-    type Error;
-    async fn insert_item(&self, model: In) -> Result<Out, Self::Error>;
-}
-
-#[async_trait]
-impl DbOperator<user_profile::ActiveModel, user_profile::Model> for DatabaseConnection {
-    type Error = anyhow::Error;
-    async fn insert_item(&self, item: user_profile::ActiveModel) 
-        -> Result<user_profile::Model, Self::Error> 
-    {
-        let entity = item.insert(self).await.map_err(|err| {
-            error!("insert_item: {:?}", err);
-            err
-        })?;
-        Ok(entity)
-    }
-}
-
-pub trait SignUp<>{
-    type Error;
-}
-
-pub trait Encode<Data, Token> {
-    type Error;
-    fn encode(&self, encode_data: Data) -> Result<Token, anyhow::Error>;
-}
-
-impl Encode<PublicData, JwtToken> for JsonWebTokenConfig {
-    type Error = anyhow::Error;
-    fn encode(&self, encode_data: PublicData) -> Result<JwtToken, anyhow::Error> {
-        let token = JsonWebTokenTool::encode_token(encode_data, self)
-            .map_err(|err| {
-                error!("encode_token: {}", err);
-                err
-            })?;
-        Ok(token)
-    }
-}
-
 #[post("/create", data = "<info>")]
 async fn register_by_email(
     info: Json<SignUpInfo>, 
     db: &State<DatabaseConnection>,
-    jwt: &State<JsonWebTokenConfig>) 
+    jwt: &State<JsonWebToken>) 
     ->  Result<SuccessResponse<JwtToken>, ErrorResponse>
 {
     let info = info.into_inner();
-
-    let user: user_profile::ActiveModel = info.try_into()
-        .map_err(|_| ErrorResponse::hash_error())?;
-
-    let user = db.inner().insert_item(user).await
-        .map_err(|_| ErrorResponse::invalid_email())?;
-    
-    let encode_data = PublicData{
-        user_id: user.id,
-        is_pro: user.is_pro,
-        pro_end_time: user.pro_end_time
-    };
-
-    let tokens = jwt.encode(encode_data)
-        .map_err(|_| ErrorResponse::jwt_encode_fail())?;
-
+    let user: user_profile::ActiveModel = info.try_into()?;
+    let user_model = db.inner().insert_item(user).await?;
+    let tokens = jwt.encode(user_model.into())?;
     Ok(SuccessResponse::Created(Json(tokens)))
 }
 
@@ -121,7 +71,7 @@ async fn register_by_email(
 async fn login_by_email(
     info: Json<SignInInfo>, 
     db: &State<DatabaseConnection>,
-    jwt: &State<JsonWebTokenConfig>
+    jwt: &State<JsonWebToken>
 ) ->  Result<SuccessResponse<JwtToken>, ErrorResponse>
 {
     let info = info.into_inner();
@@ -156,9 +106,9 @@ async fn login_by_email(
 }
 
 #[post("/refresh-token", data = "<refresh_token>", format = "json")]
-async fn refresh_token(
+fn refresh_token(
     refresh_token: Json<Token>,
-    jwt: &State<JsonWebTokenConfig>
+    jwt: &State<JsonWebToken>
 ) ->  Result<SuccessResponse<JwtToken>, ErrorResponse>
 {
     println!("{:?}", refresh_token.clone().into_inner());

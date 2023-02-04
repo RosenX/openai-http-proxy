@@ -45,6 +45,15 @@ pub enum ErrorResponse {
     Default(Json<ErrorInfo>),
 }
 
+impl From<anyhow::Error> for ErrorResponse {
+    fn from(err: anyhow::Error) -> Self {
+        ErrorResponse::Default(ErrorInfo {
+            code: None,
+            message: err.to_string(),
+        }.into())
+    }
+}
+
 impl ErrorResponse {
     pub fn default_error_response() -> ErrorResponse {
         ErrorResponse::Default(
