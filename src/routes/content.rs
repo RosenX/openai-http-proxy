@@ -1,7 +1,7 @@
-use rocket::http::hyper::request;
 use rocket::{fairing::AdHoc, routes, get, serde::Deserialize};
 use rocket::serde::json::{Json};
 
+use crate::utils::errors::InternalError;
 use crate::utils::responder::{SuccessResponse, ErrorResponse};
 
 use super::fetcher;
@@ -16,10 +16,7 @@ struct Uri {
 async fn get_lastest_post(uri: Json<Uri>) -> Result<SuccessResponse<String>, ErrorResponse> {
     let result = fetcher::fetch_uri(&uri.uri)
         .await
-        .map_err(|_| {
-            ErrorResponse::default_error_response()
-        })?;
-    println!("{:?}", result);
+        .map_err(|err| InternalError::InvalidUrl(err.to_string()))?;
     Ok(SuccessResponse::Success(Json(result)))
 }
 

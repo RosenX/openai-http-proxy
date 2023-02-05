@@ -7,16 +7,26 @@ use sea_orm::{DatabaseConnection, ActiveValue, ActiveModelTrait, EntityTrait, Qu
 
 use crate::entities::{subscribe_source, user_subscribe_source};
 use crate::entities::prelude::*;
+use crate::utils::errors::InternalError;
 use crate::utils::prelude::{ErrorResponse, SuccessResponse};
 
 use super::authorization::AuthorizedUser;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 #[serde(crate = "rocket::serde")]
 struct ExistSourceInfo {
     uri: String,
     name: String,
     icon: String,
+}
+
+impl From<ExistSourceInfo> for subscribe_source::ActiveModel {
+    fn from(info: ExistSourceInfo) -> Self {
+        Self {
+            uri_identity: ActiveValue::Set(info.uri),
+            ..Default::default()
+        }
+    }
 }
 
 #[post("/exist", data = "<info>")]
@@ -32,17 +42,14 @@ async fn create_exist_source(
         .filter(subscribe_source::Column::UriIdentity.eq(info.uri.clone()))
         .one(db.inner())
         .await
-        .map_err(|_| ErrorResponse::default_error_response())?;
+        .map_err(|err| InternalError::SourceNotExist(err.to_string()))?;
 
     let source = match source {
         None => {
-            let source = subscribe_source::ActiveModel {
-                uri_identity: ActiveValue::Set(info.uri),
-                ..Default::default()
-            }
-            .insert(db.inner())
-            .await
-            .map_err(|_| ErrorResponse::default_error_response())?;
+            let source:subscribe_source::ActiveModel = info.clone().into();
+            let source = source
+                .insert(db.inner()).await
+                .map_err(|err| InternalError::DatabaseError(err.to_string()))?;
             source
         },
         Some(source) => source,
@@ -55,7 +62,7 @@ async fn create_exist_source(
         ..Default::default()
     }
     .insert(db.inner())
-    .map_err(|_| ErrorResponse::default_error_response())
+    .map_err(|err| InternalError::DatabaseError(err.to_string()))
     .await?;
 
     Ok(SuccessResponse::default_success_response())

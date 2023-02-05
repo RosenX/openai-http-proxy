@@ -1,7 +1,10 @@
+use log::error;
 use rocket::{
     serde::{json::Json, Serialize},
     Responder,
 };
+
+use super::errors::InternalError;
 
 #[derive(Responder)]
 pub enum SuccessResponse<T> {
@@ -26,8 +29,8 @@ impl SuccessResponse<String> {
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct ErrorInfo {
-    pub code: Option<i32>,
-    pub message: String,
+    code: Option<i32>,
+    message: String,
 }
 
 impl ErrorInfo {
@@ -45,42 +48,23 @@ pub enum ErrorResponse {
     Default(Json<ErrorInfo>),
 }
 
-impl From<anyhow::Error> for ErrorResponse {
-    fn from(err: anyhow::Error) -> Self {
-        ErrorResponse::Default(ErrorInfo {
-            code: None,
-            message: err.to_string(),
-        }.into())
+impl From<InternalError> for ErrorResponse {
+    fn from(err: InternalError) -> Self {
+        error!("{}", err);
+        match err {
+            InternalError::PasswordHashError(err_info) => ErrorResponse::Default(
+                ErrorInfo::new(None, err_info).into()
+            ),
+            InternalError::WrongPassword => ErrorResponse::LoginFail(
+                ErrorInfo::new(None, err.to_string()).into()
+            ),
+            _ => ErrorResponse::default()
+        }
     }
 }
 
-impl ErrorResponse {
-    pub fn default_error_response() -> ErrorResponse {
-        ErrorResponse::Default(
-            ErrorInfo {
-                code: None,
-                message: "失败".to_string(),
-            }
-            .into(),
-        )
-    }
-    // 用户登录
-    pub fn hash_error() -> ErrorResponse {
-        ErrorResponse::LoginFail(ErrorInfo::new(None, "密码哈希失败".to_string()).into())
-    }
-    pub fn invalid_email() -> ErrorResponse {
-        ErrorResponse::LoginFail(ErrorInfo::new(None, "邮箱已注册".to_string()).into())
-    }
-    pub fn user_not_exist() -> ErrorResponse {
-        ErrorResponse::LoginFail(ErrorInfo::new(None, "用户不存在".to_string()).into())
-    }
-    pub fn invalid_password() -> ErrorResponse {
-        ErrorResponse::LoginFail(ErrorInfo::new(None, "密码错误".to_string()).into())
-    }
-    pub fn invalid_refresh_token() -> ErrorResponse {
-        ErrorResponse::LoginFail(ErrorInfo::new(None, "密码过期，请重新登陆".to_string()).into())
-    }
-    pub fn jwt_encode_fail() -> ErrorResponse {
-        ErrorResponse::LoginFail(ErrorInfo::new(None, "登录失败".to_string()).into())
+impl Default for ErrorResponse{
+    fn default() -> Self {
+        ErrorResponse::Default(ErrorInfo::new(None,"服务器错误".to_string()).into())
     }
 }

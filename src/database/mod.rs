@@ -11,7 +11,8 @@ pub struct DatabaseConfig {
 }
 
 #[async_trait]
-pub trait DbOperator<In, Out> {
+pub trait DbOperator<Entity, ActiveModel, Model> {
     type Error;
-    async fn insert_item(&self, model: In) -> Result<Out, Self::Error>;
+    async fn insert_item(&self, model: ActiveModel) -> Result<Model, Self::Error>;
+    async fn find_by_uniqe_field(&self, entity: Entity) -> Result<Model, Self::Error>;
 }
