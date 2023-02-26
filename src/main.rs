@@ -20,7 +20,6 @@ async fn rocket_app() -> _ {
 
     let rocket = rocket::build();
     let mysql_config: DatabaseConfig = Config::figment().select("mysql").extract().expect("MySQL配置解析失败");
-    
 
     let db = match setup_database(&mysql_config).await {
         Ok(db) => db,

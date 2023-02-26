@@ -3,8 +3,8 @@ address = "127.0.0.1"
 port = 8000
 
 [mysql]
-url = "mysql://root:1234qwer@localhost:3306"
-database = "feed_inbox"
+url = "mysql://root:1234@localhost:3306"
+database = "feedbox_dev"
 
 [jsonwebtoken]
 access_secret_key = "access_secret_key"
