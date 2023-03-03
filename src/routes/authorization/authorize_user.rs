@@ -1,7 +1,7 @@
 use chrono::{NaiveDateTime};
 use rocket::{request::{FromRequest, Outcome}, Request, http::Status, serde::{Serialize, Deserialize}};
 
-use crate::{entities::user_profile, utils::errors::InternalError};
+use crate::{entities::user_profile, common::errors::InternalError};
 
 use super::jwt::JsonWebTokenTool;
 

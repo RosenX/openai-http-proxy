@@ -1,7 +1,9 @@
 mod entities;
 mod database;
 mod routes;
-mod utils;
+mod common;
+mod models;
+
 #[cfg(test)] mod test;
 
 use env_logger::Env;

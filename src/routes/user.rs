@@ -1,57 +1,21 @@
+use crate::common::responder::{SuccessResponse, ErrorResponse};
+use crate::common::utils::crypto::PasswordVerify;
+use crate::models::request::login_req::LoginReq;
+use crate::models::request::register_req::RegisterReq;
 use crate::routes::authorization::{JsonWebTokenTool, JwtToken, Token};
-use crate::utils::crypto::hash_password;
 
-use crate::utils::errors::InternalError;
-use crate::utils::prelude::ErrorResponse;
-use crate::utils::responder::{SuccessResponse};
+use crate::common::errors::InternalError;
 use crate::entities::{prelude::*, user_profile};
 use rocket::fairing::AdHoc;
-use rocket::serde::{Deserialize};
 use rocket::serde::json::{Json};
 use rocket::{post, State, routes};
-use chrono::{Local};
 use sea_orm::*;
-use bcrypt::verify;
 
 use super::authorization::PublicData;
 
-#[derive(Deserialize)]
-#[serde(crate = "rocket::serde")]
-struct SignUpInfo {
-    username: String,
-    email: String,
-    password: String
-}
-
-#[derive(Deserialize)]
-#[serde(crate = "rocket::serde")]
-struct SignInInfo {
-    email: String,
-    password: String
-}
-
-impl TryFrom<SignUpInfo> for user_profile::ActiveModel {
-    type Error = InternalError;
-    fn try_from(info: SignUpInfo) -> Result<Self, Self::Error> {
-        let now_datetime = Local::now().naive_local();
-
-        let hashed_password = hash_password(info.password)
-            .map_err(|err| InternalError::PasswordHashError(err.to_string()))?;
-
-        let res = Self {
-            username: ActiveValue::Set(info.username.clone()),
-            email: ActiveValue::Set(info.email),
-            hash_password: ActiveValue::Set(hashed_password),
-            created_time: ActiveValue::Set(now_datetime),
-            ..Default::default()
-        };
-        Ok(res)
-    }
-}
-
-#[post("/create", data = "<info>")]
+#[post("/register", data = "<info>")]
 async fn register_by_email(
-    info: Json<SignUpInfo>, 
+    info: Json<RegisterReq>, 
     db: &State<DatabaseConnection>,
     jwt: &State<JsonWebTokenTool>) 
     ->  Result<SuccessResponse<JwtToken>, ErrorResponse>
@@ -68,24 +32,18 @@ async fn register_by_email(
     Ok(SuccessResponse::Created(Json(tokens)))
 }
 
-#[post("/", data = "<info>")]
+#[post("/login", data = "<info>")]
 async fn login_by_email(
-    info: Json<SignInInfo>, 
+    info: Json<LoginReq>, 
     db: &State<DatabaseConnection>,
     jwt: &State<JsonWebTokenTool>
 ) ->  Result<SuccessResponse<JwtToken>, ErrorResponse>
 {
     let info = info.into_inner();
 
-    let res = UserProfile::find()
-        .filter(user_profile::Column::Email.eq(info.email))
-        .one(db.inner())
-        .await
-        .map_err(|err| InternalError::DatabaseError(err.to_string()))?;
-    
-    match res {
+    match info.find_user_by_email(db.inner()).await? {
         Some(user) => {
-            match verify(&info.password, &user.hash_password) {
+            match info.verify(&user.hash_password) {
                 Ok(true) => {
                     let token = jwt.encode_tokens(PublicData::from(user))
                         .map_err(|err| InternalError::JsonWebTokenError(err.to_string()))?; 

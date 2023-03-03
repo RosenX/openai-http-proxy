@@ -2,7 +2,7 @@ use chrono::Utc;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use rocket::serde::{Serialize, Deserialize};
 
-use crate::utils::errors::InternalError;
+use crate::common::errors::InternalError;
 
 use super::{PublicData, Token};
 

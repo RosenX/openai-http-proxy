@@ -1,8 +1,8 @@
 use rocket::{fairing::AdHoc, routes, get, serde::Deserialize};
 use rocket::serde::json::{Json};
 
-use crate::utils::errors::InternalError;
-use crate::utils::responder::{SuccessResponse, ErrorResponse};
+use crate::common::errors::InternalError;
+use crate::common::responder::{SuccessResponse, ErrorResponse};
 
 use super::fetcher;
 

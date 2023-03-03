@@ -8,7 +8,7 @@ use super::errors::InternalError;
 
 #[derive(Responder)]
 pub enum SuccessResponse<T> {
-    #[response(status = 200)]
+    #[response(status = 201)]
     Created(Json<T>),
 
     #[response(status = 200)]

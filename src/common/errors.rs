@@ -1,4 +1,4 @@
-use rocket::figment::error;
+use bcrypt::BcryptError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -32,5 +32,13 @@ pub enum InternalError {
 
     // database
     #[error("error info: {0}")]
-    DatabaseError(String)
+    DatabaseError(String),
+
+    // encrypt
+    #[error("error info: {0}")]
+    EncryptError(#[from] BcryptError),
+
+    // network
+    #[error("error info: {0}")]
+    NetworkError(#[from] reqwest::Error),
 }

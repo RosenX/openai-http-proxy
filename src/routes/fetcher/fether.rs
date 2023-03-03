@@ -1,7 +1,8 @@
-use anyhow::Result;
 use reqwest::{Client};
 
-pub async fn fetch_uri(url: &str) -> Result<String> {
+use crate::common::errors::InternalError;
+
+pub async fn fetch_uri(url: &str) -> Result<String, InternalError> {
     let client = Client::new();
     let resp = client.get(url).send().await?;
     Ok(resp.text().await?)
