@@ -6,7 +6,7 @@ use crate::entities::user_profile;
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct BasicProfile {
-    user_id: i32,
+    pub user_id: i32,
     email: String,
     username: String,
     pro_level: bool,

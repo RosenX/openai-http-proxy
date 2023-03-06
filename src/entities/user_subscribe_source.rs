@@ -9,8 +9,8 @@ pub struct Model {
     pub id: i32,
     pub user_id: i32,
     pub subscribe_source_id: i32,
-    pub subscribe_source_name: String,
-    pub subscribe_source_icon: String,
+    pub subscribe_source_name: Option<String>,
+    pub subscribe_source_icon: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
