@@ -4,9 +4,6 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum InternalError {
     // user 
-    #[error("password hash error, error info: {0}")]
-    PasswordHashError(String),
-    
     #[error("email is already in use, error info: {0}")]
     DuplicateEmail(String),
 

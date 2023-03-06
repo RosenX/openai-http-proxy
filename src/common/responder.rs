@@ -11,6 +11,18 @@ pub enum SuccessResponse<T> {
     #[response(status = 201)]
     Created(Json<T>),
 
+    #[response(status = 204)]
+    Deleted(Json<T>),
+
+    #[response(status = 500)]
+    Failure(Json<T>),
+
+    #[response(status = 400)]
+    BadRequest(Json<T>),
+
+    #[response(status = 401)]
+    Unauthorized(Json<T>),
+
     #[response(status = 200)]
     Accepted(Json<T>),
 
@@ -52,9 +64,6 @@ impl From<InternalError> for ErrorResponse {
     fn from(err: InternalError) -> Self {
         error!("{}", err);
         match err {
-            InternalError::PasswordHashError(err_info) => ErrorResponse::Default(
-                ErrorInfo::new(None, err_info).into()
-            ),
             InternalError::WrongPassword => ErrorResponse::LoginFail(
                 ErrorInfo::new(None, err.to_string()).into()
             ),

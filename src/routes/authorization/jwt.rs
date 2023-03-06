@@ -2,14 +2,14 @@ use chrono::Utc;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use rocket::serde::{Serialize, Deserialize};
 
-use crate::common::errors::InternalError;
+use crate::{common::errors::InternalError, models::response::user_info::BasicProfile};
 
-use super::{PublicData, Token};
+use super::Token;
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct Claims {
-    pub data: PublicData,
+    pub data: BasicProfile,
     exp: usize
 }
 
@@ -52,11 +52,14 @@ impl JsonWebTokenTool {
         Ok(decode_token.claims)
     }
 
-    fn generate_token_data(&self, data: &PublicData, expiration_time: i64) 
+    fn generate_token_data(&self, data: &BasicProfile, expiration_time: i64) 
         -> Claims
     {
+        // let expiration = Utc::now()
+        //     .checked_add_signed(chrono::Duration::hours(expiration_time)).unwrap()
+        //     .timestamp();
         let expiration = Utc::now()
-            .checked_add_signed(chrono::Duration::hours(expiration_time)).unwrap()
+            .checked_add_signed(chrono::Duration::minutes(expiration_time)).unwrap()
             .timestamp();
         let my_claims = Claims {
             data: data.clone(),
@@ -65,7 +68,7 @@ impl JsonWebTokenTool {
         my_claims
     }
 
-    pub fn encode_access_token(&self, data: &PublicData)
+    pub fn encode_access_token(&self, data: &BasicProfile)
         -> Result<Token, InternalError> 
     {
         let data = self.generate_token_data(
@@ -76,7 +79,7 @@ impl JsonWebTokenTool {
         Ok(token)
     }
 
-    pub fn encode_refresh_token(&self, data: &PublicData)
+    pub fn encode_refresh_token(&self, data: &BasicProfile)
         -> Result<Token, InternalError> 
     {
         let data = self.generate_token_data(
@@ -87,7 +90,7 @@ impl JsonWebTokenTool {
         Ok(token)
     }
 
-    pub fn encode_tokens(&self, data: PublicData) ->
+    pub fn encode_tokens(&self, data: BasicProfile) ->
         Result<JwtToken, InternalError> 
     {
         let access_token = self.encode_access_token(&data)?;
