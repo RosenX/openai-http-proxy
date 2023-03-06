@@ -1,31 +1,10 @@
-use chrono::{NaiveDateTime};
-use rocket::{request::{FromRequest, Outcome}, Request, http::Status, serde::{Serialize, Deserialize}};
+use rocket::{request::{FromRequest, Outcome}, Request, http::Status};
 
-use crate::{entities::user_profile, common::errors::InternalError};
+use crate::{common::errors::InternalError, models::response::user_info::BasicProfile};
 
 use super::jwt::JsonWebTokenTool;
 
-#[derive(Serialize, Deserialize, Clone)]
-#[serde(crate = "rocket::serde")]
-pub struct PublicData {
-    user_id: i32,
-    is_pro: bool,
-    pro_end_time: Option<NaiveDateTime>,
-}
-
-impl From<user_profile::Model> for PublicData {
-    fn from(user_model: user_profile::Model) -> Self {
-        Self {
-            user_id: user_model.id,
-            is_pro: user_model.is_pro,
-            pro_end_time: user_model.pro_end_time
-        }
-    }
-}
-
-pub struct AuthorizedUser {
-    pub user_id: i32,
-}
+pub type AuthorizedUser = BasicProfile;
 
 fn check_auth_header(auth_header: Option<&str>) 
     -> Result<String, InternalError> 
@@ -37,7 +16,7 @@ fn check_auth_header(auth_header: Option<&str>)
         }
     }
     return Err(InternalError::InvalidAuthToken(
-        "auth token in http head is invalid".to_string()
+        "Token错误".to_string()
     ));
 }
 
@@ -56,9 +35,7 @@ impl<'r> FromRequest<'r> for AuthorizedUser {
                 match jwt.decode_access_token(token.into()) {
                     Ok(data) => {
                         Outcome::Success(
-                            AuthorizedUser {
-                                user_id: data.data.user_id
-                            }
+                            data.data
                         )
                     },
                     Err(err) => {
