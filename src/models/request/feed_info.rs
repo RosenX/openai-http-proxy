@@ -1,8 +1,8 @@
-use crate::common::errors::InternalError;
-use crate::entities::prelude::*;
-use crate::entities::{subscribe_source};
+use crate::{
+    common::errors::InternalError, database::DatabasePool, routes::authorization::AuthorizedUser,
+};
+use chrono::Utc;
 use rocket::serde::Deserialize;
-use sea_orm::*;
 
 #[derive(Deserialize, Clone)]
 #[serde(crate = "rocket::serde")]
@@ -10,15 +10,6 @@ pub struct ExistSourceInfo {
     pub url: String,
     pub name: Option<String>,
     pub icon: Option<String>,
-}
-
-impl From<ExistSourceInfo> for subscribe_source::ActiveModel {
-    fn from(info: ExistSourceInfo) -> Self {
-        Self {
-            uri_identity: ActiveValue::Set(info.url),
-            ..Default::default()
-        }
-    }
 }
 
 impl ExistSourceInfo {
@@ -30,24 +21,32 @@ impl ExistSourceInfo {
         }
     }
 
-    pub async fn create_exist_source(&self, db: &DatabaseConnection) 
-    -> Result<subscribe_source::Model, InternalError> {
-        let source = SubscribeSource::find()
-            .filter(subscribe_source::Column::UriIdentity.eq(self.url.clone()))
-            .one(db)
-            .await
-            .map_err(|err| InternalError::DatabaseError(err.to_string()))?;
-
-        let source = match source {
-            None => {
-                let source:subscribe_source::ActiveModel = self.clone().into();
-                let source = source
-                    .insert(db).await
-                    .map_err(|err| InternalError::DatabaseError(err.to_string()))?;
-                source
-            },
-            Some(source) => source,
-        };
-        Ok(source)
+    pub async fn create_user_feed(
+        &self,
+        pool: &DatabasePool,
+        user: AuthorizedUser,
+    ) -> Result<u64, InternalError> {
+        let now_datetime = Utc::now();
+        let res = sqlx::query_as!(
+            UserFeed,
+            r#"
+            INSERT INTO user_feed (
+                user_id, 
+                url, 
+                name, 
+                icon,
+                created_time
+            ) VALUES (?,?,?,?,?)
+            "#,
+            user.user_id,
+            self.url,
+            self.name,
+            self.icon,
+            now_datetime,
+        )
+        .execute(pool)
+        .await?
+        .last_insert_id();
+        Ok(res)
     }
 }

@@ -1,35 +1,36 @@
 use rocket::serde::Deserialize;
-use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter};
-use crate::entities::{prelude::*, user_profile};
 
-use crate::{common::{utils::crypto::{PasswordVerify, EncryptUtil}, errors::InternalError}};
-
-use sea_orm::*;
+use crate::{
+    common::{
+        errors::InternalError,
+        utils::crypto::{EncryptUtil, PasswordVerify},
+    },
+    database::{user_profile::UserProfile, DatabasePool},
+};
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct LoginReq {
-    email: String,
-    password: String
+    pub email: String,
+    pub password: String,
 }
 
 impl PasswordVerify for LoginReq {
     type Error = InternalError;
     fn verify(self, target: &String) -> Result<bool, Self::Error> {
-        EncryptUtil::verify_password(&self.password, 
-            &target)
+        EncryptUtil::verify_password(&self.password, &target)
     }
 }
 
 impl LoginReq {
-    pub async fn find_user_by_email(&self, db: &DatabaseConnection) 
-        -> Result<Option<user_profile::Model>, InternalError> {
-        let res = UserProfile::find()
-        .filter(user_profile::Column::Email.eq(self.email.clone()))
-        .one(db)
-        .await
-        .map_err(|err| InternalError::DatabaseError(err.to_string()))?;
+    pub async fn find_user_by_email(
+        &self,
+        db: &DatabasePool,
+    ) -> Result<Option<UserProfile>, InternalError> {
+        let res = sqlx::query_as!(UserProfile, 
+            "SELECT * FROM user_profile WHERE email = ?", self.email)
+            .fetch_optional(db)
+            .await?;
         Ok(res)
     }
 }
-

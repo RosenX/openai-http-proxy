@@ -1,4 +1,3 @@
-mod entities;
 mod database;
 mod routes;
 mod common;
@@ -23,8 +22,8 @@ async fn rocket_app() -> _ {
     let rocket = rocket::build();
     let mysql_config: DatabaseConfig = Config::figment().select("mysql").extract().expect("MySQL配置解析失败");
 
-    let db = match setup_database(&mysql_config).await {
-        Ok(db) => db,
+    let pool = match setup_database(&mysql_config).await {
+        Ok(pool) => pool,
         Err(e) => panic!("{}", e),
     };
 
@@ -34,7 +33,7 @@ async fn rocket_app() -> _ {
         .expect("jsonwebtoken配置解析失败");
 
     rocket
-        .manage(db)
+        .manage(pool)
         .manage(jwt)
         .attach(routes::user::stage())
         .attach(routes::source::stage())

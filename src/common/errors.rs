@@ -29,7 +29,7 @@ pub enum InternalError {
 
     // database
     #[error("error info: {0}")]
-    DatabaseError(String),
+    DatabaseError(#[from] sqlx::Error),
 
     // encrypt
     #[error("error info: {0}")]

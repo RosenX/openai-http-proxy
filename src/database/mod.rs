@@ -1,8 +1,13 @@
-use rocket::serde::Deserialize;
-use rocket::async_trait;
+pub mod user_profile;
+pub mod user_feed;
 
-mod setup_database;
-pub use setup_database::setup_database;
+use rocket::{serde::Deserialize};
+use sqlx::{mysql::MySqlPoolOptions, MySql};
+
+use crate::common::errors::InternalError;
+
+pub type DatabasePool = sqlx::Pool<MySql>;
+
 #[derive(Debug, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct DatabaseConfig {
@@ -10,9 +15,11 @@ pub struct DatabaseConfig {
     pub database: String,
 }
 
-#[async_trait]
-pub trait DbOperator<Entity, ActiveModel, Model> {
-    type Error;
-    async fn insert_item(&self, model: ActiveModel) -> Result<Model, Self::Error>;
-    async fn find_by_uniqe_field(&self, entity: Entity) -> Result<Model, Self::Error>;
+pub async fn setup_database(config: &DatabaseConfig) -> Result<DatabasePool, InternalError> {
+    let url = format!("{}/{}", config.url, config.database);
+    let pool = MySqlPoolOptions::new()
+        .max_connections(5) //todo
+        .connect(&url)
+        .await?;
+    Ok(pool)
 }
