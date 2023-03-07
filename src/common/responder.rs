@@ -24,9 +24,6 @@ pub enum SuccessResponse<T> {
     Unauthorized(Json<T>),
 
     #[response(status = 200)]
-    Accepted(Json<T>),
-
-    #[response(status = 200)]
     Success(Json<T>),
 }
 

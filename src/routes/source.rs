@@ -1,6 +1,7 @@
 use rocket::State;
 use rocket::{fairing::AdHoc, routes, post};
 use rocket::serde::json::{Json};
+use crate::common::config::common::CommonConfig;
 use crate::common::responder::{SuccessResponse, ErrorResponse};
 use crate::database::DatabasePool;
 use crate::models::request::feed_info::ExistSourceInfo;
@@ -12,12 +13,13 @@ async fn create_exist_source(
     user: AuthorizedUser,
     info: Json<ExistSourceInfo>,
     pool: &State<DatabasePool>,
-) ->  Result<SuccessResponse<String>, ErrorResponse>
+    common_config: &State<CommonConfig>,
+) ->  Result<SuccessResponse<ExistSourceInfo>, ErrorResponse>
 {
-    let info = info.into_inner();
+    let mut info: ExistSourceInfo = info.into_inner();
+    info.complete_info(&common_config);
     info.create_user_feed(pool, user).await?;
-    Ok(SuccessResponse::default_success_response())
-
+    Ok(SuccessResponse::Created(Json(info)))
 }
 
 pub fn stage() -> AdHoc {

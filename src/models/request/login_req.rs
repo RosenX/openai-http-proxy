@@ -27,10 +27,13 @@ impl LoginReq {
         &self,
         db: &DatabasePool,
     ) -> Result<Option<UserProfile>, InternalError> {
-        let res = sqlx::query_as!(UserProfile, 
-            "SELECT * FROM user_profile WHERE email = ?", self.email)
-            .fetch_optional(db)
-            .await?;
+        let res = sqlx::query_as!(
+            UserProfile,
+            "SELECT * FROM user_profile WHERE email = ?",
+            self.email
+        )
+        .fetch_optional(db)
+        .await?;
         Ok(res)
     }
 }

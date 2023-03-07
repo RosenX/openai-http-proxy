@@ -11,3 +11,7 @@ access_secret_key = "access_secret_key"
 access_expiration_hour = 1 # 1 hour
 refresh_secret_key = "refresh_secret_key"
 refresh_expiration_hour = 360 # 30 days
+
+[feed]
+default_name = '未命名'
+default_icon = 'https://c-ssl.duitang.com/uploads/blog/202105/09/20210509012315_89541.jpeg'

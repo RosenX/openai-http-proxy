@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS user_profile(
     email VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(200) NOT NULL,
     pro_level INT NOT NULL DEFAULT 0,
-    created_time DATETIME NOT NULL,
-    pro_end_time DATETIME NOT NULL
+    created_time TIMESTAMP NOT NULL,
+    pro_end_time TIMESTAMP NOT NULL
 );

@@ -1,15 +1,13 @@
-mod database;
-mod routes;
 mod common;
+mod database;
 mod models;
+mod routes;
 
-#[cfg(test)] mod test;
-
+use common::config::common::CommonConfig;
+use database::setup_database;
 use env_logger::Env;
 use rocket::{launch, Config};
-use database::{setup_database, DatabaseConfig};
 use routes::authorization::JsonWebTokenTool;
-
 
 #[launch]
 async fn rocket_app() -> _ {
@@ -20,7 +18,15 @@ async fn rocket_app() -> _ {
     env_logger::init_from_env(env);
 
     let rocket = rocket::build();
-    let mysql_config: DatabaseConfig = Config::figment().select("mysql").extract().expect("MySQL配置解析失败");
+    let mysql_config = Config::figment()
+        .select("mysql")
+        .extract()
+        .expect("MySQL配置解析失败");
+
+    let common_config: CommonConfig = Config::figment()
+        .select("feed")
+        .extract()
+        .expect("Feed配置解析失败");
 
     let pool = match setup_database(&mysql_config).await {
         Ok(pool) => pool,
@@ -35,6 +41,7 @@ async fn rocket_app() -> _ {
     rocket
         .manage(pool)
         .manage(jwt)
+        .manage(common_config)
         .attach(routes::user::stage())
         .attach(routes::source::stage())
         .attach(routes::content::stage())
