@@ -21,7 +21,7 @@ async fn get_lastest_post(uri: Json<Uri>) -> Result<SuccessResponse<String>, Err
 }
 
 pub fn stage() -> AdHoc {
-    AdHoc::on_ignite("Describe Source Stage", |rocket| async {
+    AdHoc::on_ignite("Loading Routes About Content", |rocket| async {
         rocket.mount("/content", routes![
             get_lastest_post,
         ])

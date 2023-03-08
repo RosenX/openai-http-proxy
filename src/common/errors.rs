@@ -7,6 +7,9 @@ pub enum InternalError {
     #[error("email is already in use, error info: {0}")]
     DuplicateEmail(String),
 
+    #[error("token is expired, error info: {0}")]
+    TokenExpired(String),
+
     #[error("error info: {0}")]
     JsonWebTokenError(String),
 

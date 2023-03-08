@@ -23,7 +23,7 @@ async fn create_exist_source(
 }
 
 pub fn stage() -> AdHoc {
-    AdHoc::on_ignite("Describe Source Stage", |rocket| async {
+    AdHoc::on_ignite("Loading Routes About Feed Source", |rocket| async {
         rocket.mount("/feed", routes![
             create_exist_source,
         ])

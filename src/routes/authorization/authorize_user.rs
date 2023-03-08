@@ -1,23 +1,26 @@
-use rocket::{request::{FromRequest, Outcome}, Request, http::Status};
+use rocket::{
+    http::Status,
+    request::{FromRequest, Outcome},
+    Request,
+};
 
-use crate::{common::errors::InternalError, models::response::user_info::BasicProfile};
+use crate::{
+    common::{errors::InternalError, responder::ErrorInfo},
+    models::response::user_info::BasicProfile,
+};
 
 use super::jwt::JsonWebTokenTool;
 
 pub type AuthorizedUser = BasicProfile;
 
-fn check_auth_header(auth_header: Option<&str>) 
-    -> Result<String, InternalError> 
-{
-    if let Some(auth_string)= auth_header {
+fn check_auth_header(auth_header: Option<&str>) -> Result<String, InternalError> {
+    if let Some(auth_string) = auth_header {
         let vec_header: Vec<&str> = auth_string.split_whitespace().collect();
         if vec_header.len() == 2 && vec_header[0] == "Bearer" {
             return Ok(vec_header[1].to_string());
         }
     }
-    return Err(InternalError::InvalidAuthToken(
-        "Token错误".to_string()
-    ));
+    return Err(InternalError::InvalidAuthToken("Token错误".to_string()));
 }
 
 #[rocket::async_trait]
@@ -29,29 +32,19 @@ impl<'r> FromRequest<'r> for AuthorizedUser {
         let jwt = request.rocket().state::<JsonWebTokenTool>().unwrap();
 
         let auth_token = check_auth_header(auth_header);
-        
+
         match auth_token {
-            Ok(token) => {
-                match jwt.decode_access_token(token.into()) {
-                    Ok(data) => {
-                        Outcome::Success(
-                            data.data
-                        )
-                    },
-                    Err(err) => {
-                        Outcome::Failure((
-                            Status::Unauthorized, 
-                            InternalError::JsonWebTokenError(err.to_string())
-                        ))
-                    }
-                }
-            }
-            Err(err) => {
-                Outcome::Failure((
-                    Status::Unauthorized, 
-                    InternalError::JsonWebTokenError(err.to_string())
-                ))
-            }
+            Ok(token) => match jwt.decode_access_token(token.into()) {
+                Ok(data) => Outcome::Success(data.data),
+                Err(err) => Outcome::Failure((
+                    Status::Unauthorized,
+                    InternalError::JsonWebTokenError(err.to_string()),
+                )),
+            },
+            Err(err) => Outcome::Failure((
+                Status::Unauthorized,
+                InternalError::TokenExpired(err.to_string()),
+            )),
         }
     }
 }

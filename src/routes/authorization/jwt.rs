@@ -1,5 +1,8 @@
+use std::fmt::Display;
+
 use chrono::Utc;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use log::info;
 use rocket::serde::{Serialize, Deserialize};
 
 use crate::{common::errors::InternalError, models::response::user_info::BasicProfile};
@@ -11,6 +14,12 @@ use super::Token;
 pub struct Claims {
     pub data: BasicProfile,
     exp: usize
+}
+
+impl Display for Claims {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Data: {} \n exp: {}", self.data, self.exp)
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -45,7 +54,7 @@ impl JsonWebTokenTool {
         -> Result<Claims, InternalError> 
     {
         let decode_token = decode::<Claims>(
-            token.as_ref(), 
+            token.as_ref(),
             &DecodingKey::from_secret(key.as_bytes()), 
             &Validation::default()
         ).map_err(|err| InternalError::JsonWebTokenError(err.to_string()))?;
@@ -60,11 +69,12 @@ impl JsonWebTokenTool {
         //     .timestamp();
         let expiration = Utc::now()
             .checked_add_signed(chrono::Duration::minutes(expiration_time)).unwrap()
-            .timestamp();
+            .timestamp_millis();
         let my_claims = Claims {
             data: data.clone(),
             exp: expiration as usize,
         };
+        info!("{}", my_claims);
         my_claims
     }
 

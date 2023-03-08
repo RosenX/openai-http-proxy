@@ -45,4 +45,5 @@ async fn rocket_app() -> _ {
         .attach(routes::user::stage())
         .attach(routes::source::stage())
         .attach(routes::content::stage())
+        .attach(common::catcher::stage())
 }

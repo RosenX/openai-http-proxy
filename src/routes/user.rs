@@ -45,12 +45,12 @@ async fn login_by_email(
     }
 }
 
-#[post("/refresh-token", data = "<refresh_token>", format = "json")]
+#[post("/refresh_token", data = "<refresh_token>", format = "json")]
 fn refresh_token(
-    refresh_token: Json<Token>,
+    refresh_token: Token,
     jwt: &State<JsonWebTokenTool>,
 ) -> Result<SuccessResponse<JwtToken>, ErrorResponse> {
-    let data = jwt.decode_refresh_token(refresh_token.into_inner())?;
+    let data = jwt.decode_refresh_token(refresh_token)?;
     let new_token = jwt.encode_tokens(data.data)?;
     Ok(SuccessResponse::Created(new_token.into()))
 }
@@ -62,7 +62,7 @@ fn get_profile(user: AuthorizedUser) -> Result<SuccessResponse<UserInfo>, ErrorR
 }
 
 pub fn stage() -> AdHoc {
-    AdHoc::on_ignite("User Stage", |rocket| async {
+    AdHoc::on_ignite("Loading Routes About User", |rocket| async {
         rocket.mount(
             "/user",
             routes![
