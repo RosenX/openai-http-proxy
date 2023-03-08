@@ -1,18 +1,28 @@
 use crate::{
-    common::{errors::InternalError, config::{common::CommonConfig}}, database::DatabasePool, routes::authorization::AuthorizedUser,
+    common::{errors::InternalError, config::{common::CommonConfig}}, database::{DatabasePool, user_feed::UserFeed}, routes::{authorization::AuthorizedUser, feed},
 };
 use chrono::Utc;
 use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Clone, Serialize)]
 #[serde(crate = "rocket::serde")]
-pub struct ExistSourceInfo {
+pub struct FeedInfo {
     pub url: String,
     pub name: Option<String>,
     pub icon: Option<String>,
 }
 
-impl ExistSourceInfo {
+impl From<UserFeed> for FeedInfo {
+    fn from(value: UserFeed) -> Self {
+        Self {
+            url: value.url,
+            name: Some(value.name),
+            icon: value.icon
+        }
+    }
+}
+
+impl FeedInfo {
     pub fn complete_info(&mut self, config: &CommonConfig) {
         self.name = Some(config.default_name.clone());
         self.icon = Some(config.default_icon.clone());

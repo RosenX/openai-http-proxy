@@ -43,7 +43,7 @@ async fn rocket_app() -> _ {
         .manage(jwt)
         .manage(common_config)
         .attach(routes::user::stage())
-        .attach(routes::source::stage())
+        .attach(routes::feed::stage())
         .attach(routes::content::stage())
         .attach(common::catcher::stage())
 }

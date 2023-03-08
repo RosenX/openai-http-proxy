@@ -64,11 +64,8 @@ impl JsonWebTokenTool {
     fn generate_token_data(&self, data: &BasicProfile, expiration_time: i64) 
         -> Claims
     {
-        // let expiration = Utc::now()
-        //     .checked_add_signed(chrono::Duration::hours(expiration_time)).unwrap()
-        //     .timestamp();
         let expiration = Utc::now()
-            .checked_add_signed(chrono::Duration::minutes(expiration_time)).unwrap()
+            .checked_add_signed(chrono::Duration::hours(expiration_time)).unwrap()
             .timestamp_millis();
         let my_claims = Claims {
             data: data.clone(),
