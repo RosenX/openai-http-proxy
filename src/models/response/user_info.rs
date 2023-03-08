@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use rocket::serde::{Deserialize, Serialize};
 
 use crate::database::user_profile::UserProfile;
@@ -10,6 +12,16 @@ pub struct BasicProfile {
     username: String,
     pro_level: i32,
     pro_end_time: String,
+}
+
+impl Display for BasicProfile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "user_id: {}, email: {}, username: {}, pro_level: {}, pro_end_time: {}",
+            self.user_id, self.email, self.username, self.pro_level, self.pro_end_time
+        )
+    }
 }
 
 impl From<UserProfile> for BasicProfile {
