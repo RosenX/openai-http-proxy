@@ -6,12 +6,12 @@ use rocket::{
 
 use crate::{
     common::{errors::InternalError, responder::ErrorInfo},
-    models::response::user_info::BasicProfile,
+    models::response::user_info::BasicUserProfile,
 };
 
 use super::jwt::JsonWebTokenTool;
 
-pub type AuthorizedUser = BasicProfile;
+pub type AuthorizedUser = BasicUserProfile;
 
 fn check_auth_header(auth_header: Option<&str>) -> Result<String, InternalError> {
     if let Some(auth_string) = auth_header {

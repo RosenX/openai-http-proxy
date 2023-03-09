@@ -37,6 +37,7 @@ async fn login_by_email(
         Some(user) => match req.verify(&user.password) {
             Ok(true) => {
                 let token = jwt.encode_tokens(user.into())?;
+                info!("{}", token);
                 Ok(SuccessResponse::Success(Json(token)))
             }
             _ => Err(InternalError::WrongPassword.into()),
@@ -52,6 +53,7 @@ fn refresh_token(
 ) -> Result<SuccessResponse<JwtToken>, ErrorResponse> {
     let data = jwt.decode_refresh_token(refresh_token)?;
     let new_token = jwt.encode_tokens(data.data)?;
+    info!("{}", new_token);
     Ok(SuccessResponse::Created(new_token.into()))
 }
 

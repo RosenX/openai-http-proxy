@@ -1,5 +1,6 @@
 pub mod user_profile;
 pub mod user_feed;
+pub mod feed_profile;
 
 use sqlx::{mysql::MySqlPoolOptions, MySql};
 use crate::common::errors::InternalError;

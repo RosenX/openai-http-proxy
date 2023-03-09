@@ -4,5 +4,5 @@ use rocket::serde::Deserialize;
 #[serde(crate = "rocket::serde")]
 pub struct CommonConfig {
     pub default_name: String,
-    pub default_icon: String,
+    pub default_logo: String,
 }

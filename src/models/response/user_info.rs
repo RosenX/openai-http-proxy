@@ -6,28 +6,28 @@ use crate::database::user_profile::UserProfile;
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(crate = "rocket::serde")]
-pub struct BasicProfile {
-    pub user_id: i32,
+pub struct BasicUserProfile {
+    pub id: i32,
     email: String,
     username: String,
     pro_level: i32,
     pro_end_time: String,
 }
 
-impl Display for BasicProfile {
+impl Display for BasicUserProfile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
             "user_id: {}, email: {}, username: {}, pro_level: {}, pro_end_time: {}",
-            self.user_id, self.email, self.username, self.pro_level, self.pro_end_time
+            self.id, self.email, self.username, self.pro_level, self.pro_end_time
         )
     }
 }
 
-impl From<UserProfile> for BasicProfile {
+impl From<UserProfile> for BasicUserProfile {
     fn from(user_profile: UserProfile) -> Self {
         Self {
-            user_id: user_profile.user_id,
+            id: user_profile.id,
             email: user_profile.email,
             username: user_profile.username,
             pro_level: user_profile.pro_level,
@@ -39,11 +39,11 @@ impl From<UserProfile> for BasicProfile {
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct UserInfo {
-    basic_profile: BasicProfile,
+    basic_profile: BasicUserProfile,
 }
 
 impl UserInfo {
-    pub fn new(basic_profile: BasicProfile) -> Self {
+    pub fn new(basic_profile: BasicUserProfile) -> Self {
         Self {
             basic_profile: basic_profile,
         }

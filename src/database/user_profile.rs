@@ -10,7 +10,7 @@ use super::{DatabasePool};
 
 #[derive(Clone, Debug, FromRow)]
 pub struct UserProfile {
-    pub user_id: i32,
+    pub id: i32,
     pub username: String,
     pub email: String,
     pub password: String,
@@ -48,7 +48,7 @@ impl TryFrom<RegisterReq> for UserProfile {
         let now_datetime = Utc::now();
         let info: RegisterReq = value.hash()?;
         let user = UserProfile {
-            user_id: 0, // todo!有没有更好的方法？
+            id: 0, // todo!有没有更好的方法？
             username: info.username,
             email: info.email,
             password: info.password,

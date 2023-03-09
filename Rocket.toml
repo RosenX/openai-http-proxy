@@ -14,4 +14,4 @@ refresh_expiration_hour =  720 # 30 days
 
 [feed]
 default_name = '未命名'
-default_icon = 'https://c-ssl.duitang.com/uploads/blog/202105/09/20210509012315_89541.jpeg'
+default_logo = 'https://c-ssl.duitang.com/uploads/blog/202105/09/20210509012315_89541.jpeg'
