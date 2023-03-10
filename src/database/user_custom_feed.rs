@@ -9,7 +9,7 @@ use super::{DatabasePool, feed_profile::FeedProfile};
 
 #[derive(Clone, Debug, FromRow, Serialize)]
 #[serde(crate = "rocket::serde")]
-pub struct UserFeed {
+pub struct UserCustomFeed {
     pub user_id: i32,
     pub feed_id: i32,
     pub url: String,
@@ -21,7 +21,7 @@ pub struct UserFeed {
     pub created_time: DateTime<Utc>,
 }
 
-impl UserFeed {
+impl UserCustomFeed {
     pub fn new(feed_profile: FeedProfile, user: AuthorizedUser) -> Self {
         let now_datetime = Utc::now();
         Self {
@@ -39,7 +39,7 @@ impl UserFeed {
     pub async fn insert(&self, pool: &DatabasePool) -> Result<(), InternalError> {
         sqlx::query!(
             r#"
-            INSERT INTO user_feed (
+            INSERT INTO user_custom_feed (
                 user_id, feed_id, name, icon, logo, description, created_time
             ) VALUES (?,?,?,?,?,?,?)
             "#,
@@ -59,22 +59,22 @@ impl UserFeed {
     pub async fn retrieve_feed_by_user(
         user_id: i32,
         pool: &DatabasePool,
-    ) -> Result<Vec<UserFeed>, InternalError> {
+    ) -> Result<Vec<UserCustomFeed>, InternalError> {
         let res = sqlx::query_as!(
-            UserFeed,
+            UserCustomFeed,
             r#"
             SELECT 
                 user_id,
                 feed_id,
                 url,
-                IF (user_feed.name IS NULL, feed_profile.name, user_feed.name) as name,
-                IF (user_feed.icon IS NULL, feed_profile.icon, user_feed.icon) as icon,
-                IF (user_feed.logo IS NULL, feed_profile.logo, user_feed.logo) as logo,
-                IF (user_feed.description IS NULL, feed_profile.description, user_feed.description) as description,
+                IF (uf.name IS NULL, fp.name, uf.name) as name,
+                IF (uf.icon IS NULL, fp.icon, uf.icon) as icon,
+                IF (uf.logo IS NULL, fp.logo, uf.logo) as logo,
+                IF (uf.description IS NULL, fp.description, uf.description) as description,
                 created_time
-            FROM user_feed 
-            JOIN feed_profile 
-            ON user_feed.feed_id = feed_profile.id
+            FROM user_custom_feed uf
+            JOIN feed_profile  fp
+            ON uf.feed_id = fp.id
             WHERE user_id = ?
             "#,
             user_id

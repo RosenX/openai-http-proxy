@@ -1,12 +1,18 @@
 use crate::{
     common::{
-        config::common::CommonConfig, errors::InternalError, service::http_service::fetch_url,
+        config::common::CommonConfig, errors::InternalError
     },
     database::DatabasePool,
     models::request::feed_req::FeedReq,
 };
-use feed_rs::parser;
+use feed_rs::{
+    model::{Entry, Feed},
+    parser,
+};
+use futures::SinkExt;
 use rocket::serde::{Deserialize, Serialize};
+
+use super::feed_post::FeedPost;
 
 #[derive(Deserialize, Clone, Serialize)]
 #[serde(crate = "rocket::serde")]
@@ -22,10 +28,7 @@ pub struct FeedProfile {
 }
 
 impl FeedProfile {
-    pub async fn new(feed_req: FeedReq, config: &CommonConfig) -> Result<Self, InternalError> {
-        let data = fetch_url(&feed_req.url).await?;
-        let feed = parser::parse(data.as_bytes()).unwrap();
-        println!("title: {:?}, author: {:?}, ", feed.title, feed.authors);
+    pub async fn new(feed: Feed, feed_req: FeedReq, config: &CommonConfig) -> Result<Self, InternalError> {
         let feed_info = Self {
             id: 0,
             url: feed_req.url,

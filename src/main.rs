@@ -3,7 +3,6 @@ mod database;
 mod models;
 mod routes;
 
-use common::config::common::CommonConfig;
 use database::setup_database;
 use env_logger::Env;
 use rocket::{launch, Config};
@@ -23,11 +22,6 @@ async fn rocket_app() -> _ {
         .extract()
         .expect("MySQL配置解析失败");
 
-    let common_config: CommonConfig = Config::figment()
-        .select("feed")
-        .extract()
-        .expect("Feed配置解析失败");
-
     let pool = match setup_database(&mysql_config).await {
         Ok(pool) => pool,
         Err(e) => panic!("{}", e),
@@ -41,9 +35,9 @@ async fn rocket_app() -> _ {
     rocket
         .manage(pool)
         .manage(jwt)
-        .manage(common_config)
+        .attach(common::service::stage())
         .attach(routes::user::stage())
         .attach(routes::feed::stage())
-        .attach(routes::content::stage())
+        .attach(routes::post::stage())
         .attach(common::catcher::stage())
 }

@@ -41,4 +41,8 @@ pub enum InternalError {
     // network
     #[error("error info: {0}")]
     NetworkError(#[from] reqwest::Error),
+
+    // Feed parse Error
+    #[error("error info: {0}")]
+    FeedParseError(#[from] feed_rs::parser::ParseFeedError),
 }
