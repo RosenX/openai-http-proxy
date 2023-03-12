@@ -24,9 +24,7 @@ async fn create_exist_feed(
 ) -> Result<SuccessResponse<UserCustomFeed>, ErrorResponse> {
     let info: FeedReq = info.into_inner();
     
-    let data = FeedParser::fetch_from_url(http, &info.url).await?;
-    let feed = parser::parse(data.as_bytes()).map_err(|e| InternalError::FeedParseError(e))?;
-
+    let feed = FeedParser::fetch_from_url(http, &info.url).await?;
     let mut feed = FeedProfile::new(feed, info, common_config).await?;
     let feed = feed.create_feed(pool.inner()).await?;
     let user_feed = UserCustomFeed::new(feed, user);
