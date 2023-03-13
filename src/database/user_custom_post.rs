@@ -28,7 +28,7 @@ pub struct UserCustomPost {
     pub feed_id: i32,
     pub post_id: i32,
     pub link: Option<String>,
-    pub content: String,
+    pub content: Option<String>,
     pub title: String,
     pub authors: Option<String>,
     pub tags: Option<String>,

@@ -6,13 +6,9 @@ use crate::{
     models::request::feed_req::FeedReq,
 };
 use feed_rs::{
-    model::{Entry, Feed},
-    parser,
+    model::{Feed},
 };
-use futures::SinkExt;
 use rocket::serde::{Deserialize, Serialize};
-
-use super::feed_post::FeedPost;
 
 #[derive(Deserialize, Clone, Serialize)]
 #[serde(crate = "rocket::serde")]
@@ -28,33 +24,33 @@ pub struct FeedProfile {
 }
 
 impl FeedProfile {
-    pub async fn new(feed: Feed, feed_req: FeedReq, config: &CommonConfig) -> Result<Self, InternalError> {
+    pub fn new(feed: &Feed, feed_req: FeedReq, config: &CommonConfig) -> Self {
         let feed_info = Self {
             id: 0,
             url: feed_req.url,
-            name: match feed.title {
+            name: match feed.title.to_owned() {
                 Some(t) => t.content,
                 None => config.default_name.clone(),
             },
-            icon: match feed.icon {
+            icon: match feed.icon.to_owned() {
                 Some(t) => Some(t.uri),
                 None => None,
             },
-            logo: match feed.logo {
+            logo: match feed.logo.to_owned() {
                 Some(t) => t.uri,
                 None => config.default_logo.clone(),
             },
-            description: match feed.description {
+            description: match feed.description.to_owned() {
                 Some(t) => Some(t.content),
                 None => None,
             },
             category: None,
             tags: None,
         };
-        Ok(feed_info)
+        feed_info
     }
 
-    pub async fn create_feed(&mut self, pool: &DatabasePool) -> Result<Self, InternalError> {
+    pub async fn insert(&mut self, pool: &DatabasePool) -> Result<Self, InternalError> {
         let feed_id = sqlx::query!(
             r#"
             INSERT INTO feed_profile 

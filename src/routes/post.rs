@@ -1,10 +1,11 @@
-use rocket::{fairing::AdHoc, get, routes, State};
-use rocket::serde::json::{Json};
 use crate::database::user_custom_post::UserCustomPost;
 use crate::{
     common::responder::{ErrorResponse, SuccessResponse},
-    database::{DatabasePool}, models::request::post_req::PostReq,
+    database::DatabasePool,
+    models::request::post_req::PostReq,
 };
+use rocket::serde::json::Json;
+use rocket::{fairing::AdHoc, get, routes, State};
 
 use super::authorization::AuthorizedUser;
 
@@ -25,14 +26,14 @@ async fn get_lastest_post_by_id(
     pool: &State<DatabasePool>,
     feed_id: i32,
 ) -> Result<SuccessResponse<Vec<UserCustomPost>>, ErrorResponse> {
-    let posts = UserCustomPost::retrieve_lastest_post_by_id(pool, user.id, req.latest_post_id, feed_id).await?;
+    let posts =
+        UserCustomPost::retrieve_lastest_post_by_id(pool, user.id, req.latest_post_id, feed_id)
+            .await?;
     Ok(SuccessResponse::Success(Json(posts)))
 }
 
 pub fn stage() -> AdHoc {
-    AdHoc::on_ignite("Loading Routes About Content", |rocket| async {
-        rocket
-            .mount("/post", routes![get_lastest_post,])
-            .mount("/post", routes![get_lastest_post_by_id,])
+    AdHoc::on_ignite("Loading Routes About Post", |rocket| async {
+        rocket.mount("/post", routes![get_lastest_post, get_lastest_post_by_id])
     })
 }

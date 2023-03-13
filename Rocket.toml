@@ -13,5 +13,7 @@ refresh_secret_key = "refresh_secret_key"
 refresh_expiration_hour =  720 # 30 days
 
 [feed]
-default_name = '未命名'
+default_name = '未命名信息源'
 default_logo = 'https://c-ssl.duitang.com/uploads/blog/202105/09/20210509012315_89541.jpeg'
+default_title = '未命名title'
+default_seq = ','

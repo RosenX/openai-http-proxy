@@ -2,7 +2,8 @@ use crate::common::config::common::CommonConfig;
 use crate::common::responder::{ErrorResponse, SuccessResponse};
 use crate::common::service::feed_parser::FeedParser;
 use crate::common::service::http_service::HttpService;
-use crate::database::feed_profile::FeedProfile;
+use crate::database::feed_post::{FeedPost, self};
+use crate::database::feed_profile::{self, FeedProfile};
 use crate::database::user_custom_feed::UserCustomFeed;
 use crate::database::DatabasePool;
 use crate::models::request::feed_req::FeedReq;
@@ -18,14 +19,22 @@ async fn create_exist_feed(
     info: Json<FeedReq>,
     pool: &State<DatabasePool>,
     common_config: &State<CommonConfig>,
-    http: &State<HttpService>
+    http: &State<HttpService>,
 ) -> Result<SuccessResponse<UserCustomFeed>, ErrorResponse> {
     let info: FeedReq = info.into_inner();
-    
+
     let feed = FeedParser::fetch_from_url(http, &info.url).await?;
-    let mut feed = FeedProfile::new(feed, info, common_config).await?;
-    let feed = feed.create_feed(pool.inner()).await?;
-    let user_feed = UserCustomFeed::new(feed, user);
+    let mut feed_profile = FeedProfile::new(&feed, info, common_config);
+    let feed_profile = feed_profile.insert(pool.inner()).await?;
+    let mut feed_post_list: Vec<FeedPost> = feed
+        .entries
+        .iter()
+        .map(|entry| FeedPost::new(entry, &feed_profile, common_config))
+        .collect();
+    for feed_post in &mut feed_post_list {
+        feed_post.insert(pool).await?;
+    }
+    let user_feed = UserCustomFeed::new(feed_profile, user);
     user_feed.insert(pool).await?;
     Ok(SuccessResponse::Created(Json(user_feed)))
 }

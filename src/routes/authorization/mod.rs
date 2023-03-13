@@ -5,4 +5,3 @@ pub use authorize_user::{AuthorizedUser};
 pub use jwt::{JsonWebTokenTool, JwtToken};
 
 pub type Token = String;
-
