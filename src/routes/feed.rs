@@ -1,5 +1,4 @@
 use crate::common::config::common::CommonConfig;
-use crate::common::errors::InternalError;
 use crate::common::responder::{ErrorResponse, SuccessResponse};
 use crate::common::service::feed_parser::FeedParser;
 use crate::common::service::http_service::HttpService;
@@ -7,7 +6,6 @@ use crate::database::feed_profile::FeedProfile;
 use crate::database::user_custom_feed::UserCustomFeed;
 use crate::database::DatabasePool;
 use crate::models::request::feed_req::FeedReq;
-use feed_rs::parser;
 use rocket::serde::json::Json;
 use rocket::{fairing::AdHoc, post, routes};
 use rocket::{get, State};

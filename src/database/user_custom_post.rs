@@ -105,4 +105,42 @@ impl UserCustomPost {
         .await?;
         Ok(res)
     }
+
+    pub async fn retrieve_lastest_post_by_id(
+        pool: &DatabasePool,
+        user_id: i32,
+        lastest_post_id: i32,
+        feed_id: i32
+    ) -> Result<Vec<UserCustomPost>, InternalError> {
+        let res = sqlx::query_as!(
+            UserCustomPost,
+            r#"
+            SELECT 
+                user_id,
+                feed_id,
+                post_id,
+                link,
+                content,
+                title,
+                authors,
+                IF (up.tags IS NULL, fp.tags_algo, up.tags) as tags,
+                IF (up.category IS NULL, fp.category_algo, up.category) as category,
+                notes,
+                publish_time
+            FROM user_custom_post up
+            JOIN feed_post  fp
+            ON up.post_id = fp.id
+            WHERE 
+                user_id = ? 
+                AND post_id > ? 
+                AND feed_id = ?
+            "#,
+            user_id,
+            lastest_post_id,
+            feed_id
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(res)
+    }
 }
