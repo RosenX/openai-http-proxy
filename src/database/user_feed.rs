@@ -9,7 +9,7 @@ use super::{DatabasePool, feed_profile::FeedProfile};
 
 #[derive(Clone, Debug, FromRow, Serialize)]
 #[serde(crate = "rocket::serde")]
-pub struct UserCustomFeed {
+pub struct UserFeed {
     pub user_id: i32,
     pub feed_id: i32,
     pub url: String,
@@ -21,7 +21,7 @@ pub struct UserCustomFeed {
     pub created_time: DateTime<Utc>,
 }
 
-impl UserCustomFeed {
+impl UserFeed {
     pub fn new(feed_profile: FeedProfile, user: AuthorizedUser) -> Self {
         let now_datetime = Utc::now();
         Self {
@@ -59,9 +59,9 @@ impl UserCustomFeed {
     pub async fn retrieve_feed_by_user(
         user_id: i32,
         pool: &DatabasePool,
-    ) -> Result<Vec<UserCustomFeed>, InternalError> {
+    ) -> Result<Vec<UserFeed>, InternalError> {
         let res = sqlx::query_as!(
-            UserCustomFeed,
+            UserFeed,
             r#"
             SELECT 
                 user_id,

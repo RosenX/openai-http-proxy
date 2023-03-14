@@ -4,7 +4,7 @@ use crate::common::service::feed_parser::FeedParser;
 use crate::common::service::http_service::HttpService;
 use crate::database::feed_post::{FeedPost, self};
 use crate::database::feed_profile::{self, FeedProfile};
-use crate::database::user_custom_feed::UserCustomFeed;
+use crate::database::user_feed::UserFeed;
 use crate::database::DatabasePool;
 use crate::models::request::feed_req::FeedReq;
 use rocket::serde::json::Json;
@@ -20,7 +20,7 @@ async fn create_exist_feed(
     pool: &State<DatabasePool>,
     common_config: &State<CommonConfig>,
     http: &State<HttpService>,
-) -> Result<SuccessResponse<UserCustomFeed>, ErrorResponse> {
+) -> Result<SuccessResponse<UserFeed>, ErrorResponse> {
     let info: FeedReq = info.into_inner();
 
     let feed = FeedParser::fetch_from_url(http, &info.url).await?;
@@ -34,7 +34,7 @@ async fn create_exist_feed(
     for feed_post in &mut feed_post_list {
         feed_post.insert(pool).await?;
     }
-    let user_feed = UserCustomFeed::new(feed_profile, user);
+    let user_feed = UserFeed::new(feed_profile, user);
     user_feed.insert(pool).await?;
     Ok(SuccessResponse::Created(Json(user_feed)))
 }
@@ -43,8 +43,8 @@ async fn create_exist_feed(
 async fn get_feed_list(
     user: AuthorizedUser,
     pool: &State<DatabasePool>,
-) -> Result<SuccessResponse<Vec<UserCustomFeed>>, ErrorResponse> {
-    let user_feed_list = UserCustomFeed::retrieve_feed_by_user(user.id, pool.inner()).await?;
+) -> Result<SuccessResponse<Vec<UserFeed>>, ErrorResponse> {
+    let user_feed_list = UserFeed::retrieve_feed_by_user(user.id, pool.inner()).await?;
     Ok(SuccessResponse::Success(Json(user_feed_list)))
 }
 

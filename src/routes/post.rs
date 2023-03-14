@@ -1,21 +1,23 @@
-use crate::database::user_custom_post::UserCustomPost;
+use crate::database::user_post::UserPost;
 use crate::{
     common::responder::{ErrorResponse, SuccessResponse},
     database::DatabasePool,
     models::request::post_req::PostReq,
 };
+use log::info;
 use rocket::serde::json::Json;
 use rocket::{fairing::AdHoc, get, routes, State};
 
 use super::authorization::AuthorizedUser;
 
-#[get("/pull", data = "<req>")]
+#[get("/pull?<req..>")]
 async fn get_lastest_post(
     user: AuthorizedUser,
-    req: Json<PostReq>,
+    req: PostReq,
     pool: &State<DatabasePool>,
-) -> Result<SuccessResponse<Vec<UserCustomPost>>, ErrorResponse> {
-    let posts = UserCustomPost::retrieve_lastest_post(pool, user.id, req.latest_post_id).await?;
+) -> Result<SuccessResponse<Vec<UserPost>>, ErrorResponse> {
+    info!("{}, {}", user.id, req.latest_post_id);
+    let posts = UserPost::retrieve_lastest_post(pool, user.id, req.latest_post_id).await?;
     Ok(SuccessResponse::Success(Json(posts)))
 }
 
@@ -25,9 +27,9 @@ async fn get_lastest_post_by_id(
     req: Json<PostReq>,
     pool: &State<DatabasePool>,
     feed_id: i32,
-) -> Result<SuccessResponse<Vec<UserCustomPost>>, ErrorResponse> {
+) -> Result<SuccessResponse<Vec<UserPost>>, ErrorResponse> {
     let posts =
-        UserCustomPost::retrieve_lastest_post_by_id(pool, user.id, req.latest_post_id, feed_id)
+        UserPost::retrieve_lastest_post_by_id(pool, user.id, req.latest_post_id, feed_id)
             .await?;
     Ok(SuccessResponse::Success(Json(posts)))
 }

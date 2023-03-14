@@ -14,6 +14,7 @@ pub struct FeedPost {
     pub id: i32,
     pub feed_id: i32,
     pub title: String,
+    pub cover: Option<String>,
     pub publish_time: DateTime<Utc>,
     pub authors: Option<String>,
     pub link: Option<String>,
@@ -62,6 +63,7 @@ impl FeedPost {
                 Some(t) => Some(t.content),
                 None => None,
             },
+            cover: None,
             summary_algo: None,
             category_algo: None,
             tags_algo: None,
@@ -76,6 +78,7 @@ impl FeedPost {
                 feed_id, 
                 title, 
                 publish_time, 
+                cover,
                 authors, 
                 link, 
                 content, 
@@ -84,11 +87,12 @@ impl FeedPost {
                 category_algo, 
                 tags_algo
             ) 
-            VALUES (?,?,?,?,?,?,?,?,?,?)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?)
             "#,
             self.feed_id,
             self.title,
             self.publish_time,
+            self.cover,
             self.authors,
             self.link,
             self.content,
