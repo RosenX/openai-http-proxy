@@ -3,9 +3,10 @@ use chrono::serde::ts_milliseconds;
 use rocket::serde::Serialize;
 use sqlx::FromRow;
 
+use crate::common::service::mysql_service::MySqlService;
 use crate::{common::errors::InternalError, routes::{authorization::AuthorizedUser}};
 
-use super::{DatabasePool, feed_profile::FeedProfile};
+use super::{feed_profile::FeedProfile};
 
 #[derive(Clone, Debug, FromRow, Serialize)]
 #[serde(crate = "rocket::serde")]
@@ -36,7 +37,7 @@ impl UserFeed {
         }
     }
 
-    pub async fn insert(&self, pool: &DatabasePool) -> Result<(), InternalError> {
+    pub async fn insert(&self, pool: &MySqlService) -> Result<(), InternalError> {
         sqlx::query!(
             r#"
             INSERT INTO user_custom_feed (
@@ -58,7 +59,7 @@ impl UserFeed {
 
     pub async fn retrieve_feed_by_user(
         user_id: i32,
-        pool: &DatabasePool,
+        pool: &MySqlService,
     ) -> Result<Vec<UserFeed>, InternalError> {
         let res = sqlx::query_as!(
             UserFeed,

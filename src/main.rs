@@ -3,10 +3,9 @@ mod database;
 mod models;
 mod routes;
 
-use database::setup_database;
+use common::service::{create_mysql_service};
 use env_logger::Env;
 use rocket::{launch, Config};
-use routes::authorization::JsonWebTokenTool;
 
 #[launch]
 async fn rocket_app() -> _ {
@@ -16,25 +15,12 @@ async fn rocket_app() -> _ {
 
     env_logger::init_from_env(env);
 
+    let db_service = create_mysql_service().await;
+
     let rocket = rocket::build();
-    let mysql_config = Config::figment()
-        .select("mysql")
-        .extract()
-        .expect("MySQL配置解析失败");
-
-    let pool = match setup_database(&mysql_config).await {
-        Ok(pool) => pool,
-        Err(e) => panic!("{}", e),
-    };
-
-    let jwt: JsonWebTokenTool = Config::figment()
-        .select("jsonwebtoken")
-        .extract()
-        .expect("jsonwebtoken配置解析失败");
 
     rocket
-        .manage(pool)
-        .manage(jwt)
+        .manage(db_service)
         .attach(common::service::stage())
         .attach(routes::user::stage())
         .attach(routes::feed::stage())

@@ -1,6 +1,5 @@
 use crate::{
-    common::{config::common::CommonConfig, errors::InternalError},
-    database::DatabasePool,
+    common::{config::common::CommonConfig, errors::InternalError, service::mysql_service::MySqlService},
 };
 use chrono::{DateTime, Utc};
 use feed_rs::model::Entry;
@@ -71,7 +70,7 @@ impl FeedPost {
         post
     }
 
-    pub async fn insert(&mut self, pool: &DatabasePool) -> Result<Self, InternalError> {
+    pub async fn insert(&mut self, pool: &MySqlService) -> Result<Self, InternalError> {
         let post_id = sqlx::query!(
             r#"
             INSERT INTO feed_post (

@@ -4,7 +4,7 @@ use rocket::serde::Serialize;
 use sqlx::FromRow;
 
 use crate::common::errors::InternalError;
-use super::DatabasePool;
+use crate::common::service::mysql_service::MySqlService;
 
 #[derive(Clone, Debug, FromRow, Serialize)]
 #[serde(crate = "rocket::serde")]
@@ -13,6 +13,7 @@ pub struct UserPost {
     pub feed_id: i32,
     pub feed_name: Option<String>,
     pub cover: Option<String>,
+    pub stage: Option<i64>,
     pub post_id: i32,
     pub link: Option<String>,
     pub content: Option<String>,
@@ -26,7 +27,7 @@ pub struct UserPost {
 }
 
 impl UserPost {
-    pub async fn insert(&self, pool: &DatabasePool) -> Result<(), InternalError> {
+    pub async fn insert(&self, pool: &MySqlService) -> Result<(), InternalError> {
         sqlx::query!(
             r#"
             INSERT INTO user_custom_post (
@@ -45,7 +46,7 @@ impl UserPost {
     }
 
     pub async fn retrieve_lastest_post(
-        pool: &DatabasePool,
+        pool: &MySqlService,
         user_id: i32,
         lastest_post_id: i32
     ) -> Result<Vec<UserPost>, InternalError> {
@@ -57,6 +58,7 @@ impl UserPost {
                 ucf.feed_id,
                 ucf.name as feed_name,
                 fp.cover,
+                IF (ucp.stage IS NULL, 1, ucp.stage) as stage,
                 fp.id as post_id,
                 fp.link,
                 fp.content,
@@ -80,7 +82,7 @@ impl UserPost {
     }
 
     pub async fn retrieve_lastest_post_by_id(
-        pool: &DatabasePool,
+        pool: &MySqlService,
         user_id: i32,
         lastest_post_id: i32,
         feed_id: i32
@@ -93,6 +95,7 @@ impl UserPost {
                 ucf.feed_id,
                 ucf.name as feed_name,
                 fp.cover,
+                IF (ucp.stage IS NULL, 1, ucp.stage) as stage,
                 fp.id as post_id,
                 fp.link,
                 fp.content,

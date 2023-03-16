@@ -5,11 +5,9 @@ use rocket::{
 };
 
 use crate::{
-    common::{errors::InternalError, responder::ErrorInfo},
+    common::{errors::InternalError, service::jwt_service::JsonWebTokenTool},
     models::response::user_info::BasicUserProfile,
 };
-
-use super::jwt::JsonWebTokenTool;
 
 pub type AuthorizedUser = BasicUserProfile;
 

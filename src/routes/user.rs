@@ -1,11 +1,12 @@
 use crate::common::responder::{ErrorResponse, SuccessResponse};
+use crate::common::service::jwt_service::{JsonWebTokenTool, JwtToken, Token};
+use crate::common::service::mysql_service::MySqlService;
 use crate::common::utils::crypto::PasswordVerify;
 use crate::database::user_profile::UserProfile;
-use crate::database::DatabasePool;
 use crate::models::request::login_req::LoginReq;
 use crate::models::request::register_req::RegisterReq;
 use crate::models::response::user_info::UserInfo;
-use crate::routes::authorization::{AuthorizedUser, JsonWebTokenTool, JwtToken, Token};
+use crate::routes::authorization::{AuthorizedUser};
 
 use crate::common::errors::InternalError;
 use log::info;
@@ -16,7 +17,7 @@ use rocket::{get, post, routes, State};
 #[post("/register", data = "<info>")]
 async fn register_by_email(
     info: Json<RegisterReq>,
-    db: &State<DatabasePool>,
+    db: &State<MySqlService>,
     jwt: &State<JsonWebTokenTool>,
 ) -> Result<SuccessResponse<JwtToken>, ErrorResponse> {
     let info = UserProfile::try_from(info.into_inner())?;
@@ -29,7 +30,7 @@ async fn register_by_email(
 #[post("/login", data = "<info>")]
 async fn login_by_email(
     info: Json<LoginReq>,
-    db: &State<DatabasePool>,
+    db: &State<MySqlService>,
     jwt: &State<JsonWebTokenTool>,
 ) -> Result<SuccessResponse<JwtToken>, ErrorResponse> {
     let req = info.into_inner();

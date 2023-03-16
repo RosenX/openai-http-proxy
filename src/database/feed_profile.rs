@@ -1,8 +1,7 @@
 use crate::{
     common::{
-        config::common::CommonConfig, errors::InternalError
+        config::common::CommonConfig, errors::InternalError, service::mysql_service::MySqlService
     },
-    database::DatabasePool,
     models::request::feed_req::FeedReq,
 };
 use feed_rs::{
@@ -50,7 +49,7 @@ impl FeedProfile {
         feed_info
     }
 
-    pub async fn insert(&mut self, pool: &DatabasePool) -> Result<Self, InternalError> {
+    pub async fn insert(&mut self, pool: &MySqlService) -> Result<Self, InternalError> {
         let feed_id = sqlx::query!(
             r#"
             INSERT INTO feed_profile 

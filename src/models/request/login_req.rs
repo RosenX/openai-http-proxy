@@ -3,9 +3,9 @@ use rocket::serde::Deserialize;
 use crate::{
     common::{
         errors::InternalError,
-        utils::crypto::{EncryptUtil, PasswordVerify},
+        utils::crypto::{EncryptUtil, PasswordVerify}, service::mysql_service::MySqlService,
     },
-    database::{user_profile::UserProfile, DatabasePool},
+    database::{user_profile::UserProfile},
 };
 
 #[derive(Deserialize)]
@@ -25,7 +25,7 @@ impl PasswordVerify for LoginReq {
 impl LoginReq {
     pub async fn find_user_by_email(
         &self,
-        db: &DatabasePool,
+        db: &MySqlService,
     ) -> Result<Option<UserProfile>, InternalError> {
         let res = sqlx::query_as!(
             UserProfile,
