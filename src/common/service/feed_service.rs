@@ -15,7 +15,7 @@ pub struct FeedService {
 }
 
 impl FeedService {
-    pub fn new() {
+    pub fn new() -> Self {
         Config::figment()
         .select("feed")
         .extract()

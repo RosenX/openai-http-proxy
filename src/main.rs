@@ -5,7 +5,7 @@ mod routes;
 
 use common::service::{create_mysql_service};
 use env_logger::Env;
-use rocket::{launch, Config};
+use rocket::{launch};
 
 #[launch]
 async fn rocket_app() -> _ {

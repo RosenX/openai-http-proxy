@@ -3,15 +3,12 @@ pub mod http_service;
 pub mod mysql_service;
 pub mod jwt_service;
 
-use rocket::{fairing::AdHoc, Config};
+use rocket::{fairing::AdHoc};
 
 use self::{http_service::HttpService, mysql_service::{DatabaseConfig, MySqlService, setup_database}, jwt_service::JwtService, feed_service::FeedService};
 
 fn create_feed_service() -> FeedService {
-    Config::figment()
-        .select("feed")
-        .extract()
-        .expect("Feed配置解析失败")
+    FeedService::new()
 }
 
 fn create_http_service() -> HttpService {
