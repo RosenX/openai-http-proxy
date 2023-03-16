@@ -5,7 +5,7 @@ use rocket::{
 };
 
 use crate::{
-    common::{errors::InternalError, service::jwt_service::JsonWebTokenTool},
+    common::{errors::InternalError, service::jwt_service::JwtService},
     models::response::user_info::BasicUserProfile,
 };
 
@@ -27,7 +27,7 @@ impl<'r> FromRequest<'r> for AuthorizedUser {
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let auth_header = request.headers().get_one("Authorization");
-        let jwt = request.rocket().state::<JsonWebTokenTool>().unwrap();
+        let jwt = request.rocket().state::<JwtService>().unwrap();
 
         let auth_token = check_auth_header(auth_header);
 

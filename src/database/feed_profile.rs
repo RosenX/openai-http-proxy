@@ -1,6 +1,6 @@
 use crate::{
     common::{
-        config::common::CommonConfig, errors::InternalError, service::mysql_service::MySqlService
+        errors::InternalError, service::{mysql_service::MySqlService, feed_service::FeedService}
     },
     models::request::feed_req::FeedReq,
 };
@@ -23,7 +23,7 @@ pub struct FeedProfile {
 }
 
 impl FeedProfile {
-    pub fn new(feed: &Feed, feed_req: FeedReq, config: &CommonConfig) -> Self {
+    pub fn new(feed: &Feed, feed_req: FeedReq, config: &FeedService) -> Self {
         let feed_info = Self {
             id: 0,
             url: feed_req.url,

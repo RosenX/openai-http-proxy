@@ -40,14 +40,14 @@ impl Display for JwtToken {
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct JsonWebTokenTool {
+pub struct JwtService {
     access_secret_key: String,
     access_expiration_hour: i64,
     refresh_secret_key: String,
     refresh_expiration_hour: i64,
 }
 
-impl JsonWebTokenTool {
+impl JwtService {
     pub fn new() -> Self {
         Config::figment()
         .select("jsonwebtoken")

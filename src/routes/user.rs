@@ -1,5 +1,5 @@
 use crate::common::responder::{ErrorResponse, SuccessResponse};
-use crate::common::service::jwt_service::{JsonWebTokenTool, JwtToken, Token};
+use crate::common::service::jwt_service::{JwtService, JwtToken, Token};
 use crate::common::service::mysql_service::MySqlService;
 use crate::common::utils::crypto::PasswordVerify;
 use crate::database::user_profile::UserProfile;
@@ -18,7 +18,7 @@ use rocket::{get, post, routes, State};
 async fn register_by_email(
     info: Json<RegisterReq>,
     db: &State<MySqlService>,
-    jwt: &State<JsonWebTokenTool>,
+    jwt: &State<JwtService>,
 ) -> Result<SuccessResponse<JwtToken>, ErrorResponse> {
     let info = UserProfile::try_from(info.into_inner())?;
     info!("{}", info);
@@ -31,7 +31,7 @@ async fn register_by_email(
 async fn login_by_email(
     info: Json<LoginReq>,
     db: &State<MySqlService>,
-    jwt: &State<JsonWebTokenTool>,
+    jwt: &State<JwtService>,
 ) -> Result<SuccessResponse<JwtToken>, ErrorResponse> {
     let req = info.into_inner();
     match req.find_user_by_email(db.inner()).await? {
@@ -50,7 +50,7 @@ async fn login_by_email(
 #[post("/refresh_token", data = "<refresh_token>", format = "json")]
 fn refresh_token(
     refresh_token: Token,
-    jwt: &State<JsonWebTokenTool>,
+    jwt: &State<JwtService>,
 ) -> Result<SuccessResponse<JwtToken>, ErrorResponse> {
     let data = jwt.decode_refresh_token(refresh_token)?;
     let new_token = jwt.encode_tokens(data.data)?;

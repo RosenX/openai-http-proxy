@@ -1,5 +1,5 @@
 use crate::{
-    common::{config::common::CommonConfig, errors::InternalError, service::mysql_service::MySqlService},
+    common::{errors::InternalError, service::{mysql_service::MySqlService, feed_service::FeedService}},
 };
 use chrono::{DateTime, Utc};
 use feed_rs::model::Entry;
@@ -28,7 +28,7 @@ impl FeedPost {
     pub fn new(
         entry: &Entry,
         feed_profile: &FeedProfile,
-        config: &CommonConfig,
+        config: &FeedService,
     ) -> Self {
         let now_datetime = Utc::now();
         let post = Self {

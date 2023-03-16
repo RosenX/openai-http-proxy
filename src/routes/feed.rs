@@ -1,6 +1,5 @@
-use crate::common::config::common::CommonConfig;
 use crate::common::responder::{ErrorResponse, SuccessResponse};
-use crate::common::service::feed_parser::FeedParser;
+use crate::common::service::feed_service::FeedService;
 use crate::common::service::http_service::HttpService;
 use crate::common::service::mysql_service::MySqlService;
 use crate::database::feed_post::{FeedPost};
@@ -18,18 +17,18 @@ async fn create_exist_feed(
     user: AuthorizedUser,
     info: Json<FeedReq>,
     pool: &State<MySqlService>,
-    common_config: &State<CommonConfig>,
+    feed_service: &State<FeedService>,
     http: &State<HttpService>,
 ) -> Result<SuccessResponse<UserFeed>, ErrorResponse> {
     let info: FeedReq = info.into_inner();
 
-    let feed = FeedParser::fetch_from_url(http, &info.url).await?;
-    let mut feed_profile = FeedProfile::new(&feed, info, common_config);
+    let feed = FeedService::fetch_from_url(http, &info.url).await?;
+    let mut feed_profile = FeedProfile::new(&feed, info, feed_service);
     let feed_profile = feed_profile.insert(pool.inner()).await?;
     let mut feed_post_list: Vec<FeedPost> = feed
         .entries
         .iter()
-        .map(|entry| FeedPost::new(entry, &feed_profile, common_config))
+        .map(|entry| FeedPost::new(entry, &feed_profile, feed_service))
         .collect();
     for feed_post in &mut feed_post_list {
         feed_post.insert(pool).await?;
