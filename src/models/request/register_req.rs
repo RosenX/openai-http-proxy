@@ -1,13 +1,16 @@
-use std::fmt::Display;
+use crate::common::{
+    errors::InternalError,
+    utils::crypto::{EncryptUtil, PasswordEncrypt},
+};
 use rocket::serde::Deserialize;
-use crate::{common::{utils::crypto::{PasswordEncrypt, EncryptUtil}, errors::InternalError}};
+use std::fmt::Display;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct RegisterReq {
     pub username: String,
     pub email: String,
-    pub password: String
+    pub password: String,
 }
 
 impl Display for RegisterReq {
@@ -23,7 +26,7 @@ impl PasswordEncrypt for RegisterReq {
         Ok(Self {
             email: self.email,
             username: self.username,
-            password: hash_password
+            password: hash_password,
         })
     }
 }

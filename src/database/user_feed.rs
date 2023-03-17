@@ -1,12 +1,12 @@
-use chrono::{DateTime, Utc};
 use chrono::serde::ts_milliseconds;
+use chrono::{DateTime, Utc};
 use rocket::serde::Serialize;
 use sqlx::FromRow;
 
 use crate::common::service::mysql_service::MySqlService;
-use crate::{common::errors::InternalError, routes::{authorization::AuthorizedUser}};
+use crate::{common::errors::InternalError, routes::authorization::AuthorizedUser};
 
-use super::{feed_profile::FeedProfile};
+use super::feed_profile::FeedProfile;
 
 #[derive(Clone, Debug, FromRow, Serialize)]
 #[serde(crate = "rocket::serde")]
@@ -26,14 +26,14 @@ impl UserFeed {
     pub fn new(feed_profile: FeedProfile, user: AuthorizedUser) -> Self {
         let now_datetime = Utc::now();
         Self {
-            user_id:  user.id,
+            user_id: user.id,
             feed_id: feed_profile.id,
             url: feed_profile.url,
             name: Some(feed_profile.name),
             icon: feed_profile.icon,
             logo: Some(feed_profile.logo),
             description: feed_profile.description,
-            created_time: now_datetime
+            created_time: now_datetime,
         }
     }
 
@@ -64,7 +64,7 @@ impl UserFeed {
         let res = sqlx::query_as!(
             UserFeed,
             r#"
-            SELECT 
+            SELECT
                 user_id,
                 feed_id,
                 url,

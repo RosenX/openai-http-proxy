@@ -1,12 +1,11 @@
 use crate::{
     common::{
-        errors::InternalError, service::{mysql_service::MySqlService, feed_service::FeedService}
+        errors::InternalError,
+        service::{feed_service::FeedService, mysql_service::MySqlService},
     },
     models::request::feed_req::FeedReq,
 };
-use feed_rs::{
-    model::{Feed},
-};
+use feed_rs::model::Feed;
 
 use rocket::serde::{Deserialize, Serialize};
 
@@ -25,7 +24,6 @@ pub struct FeedProfile {
 
 impl FeedProfile {
     pub fn new(feed: &Feed, feed_req: FeedReq, config: &FeedService) -> Self {
-
         Self {
             id: 0,
             url: feed_req.url,

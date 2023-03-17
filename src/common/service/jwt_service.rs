@@ -2,7 +2,10 @@ use std::fmt::Display;
 
 use chrono::Utc;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
-use rocket::{serde::{Deserialize, Serialize}, Config};
+use rocket::{
+    serde::{Deserialize, Serialize},
+    Config,
+};
 
 use crate::{common::errors::InternalError, models::response::user_info::BasicUserProfile};
 
@@ -50,9 +53,9 @@ pub struct JwtService {
 impl JwtService {
     pub fn new() -> Self {
         Config::figment()
-        .select("jsonwebtoken")
-        .extract()
-        .expect("jsonwebtoken配置解析失败")
+            .select("jsonwebtoken")
+            .extract()
+            .expect("jsonwebtoken配置解析失败")
     }
 
     fn encode(&self, data: Claims, key: &str) -> Result<Token, InternalError> {

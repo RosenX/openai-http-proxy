@@ -1,4 +1,4 @@
-pub mod user;
-pub mod feed;
 pub mod authorization;
+pub mod feed;
 pub mod post;
+pub mod user;

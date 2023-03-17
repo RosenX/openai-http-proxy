@@ -10,8 +10,10 @@ impl EncryptUtil {
         Ok(hashed_password)
     }
 
-    pub fn verify_password(input_password: &str,
-        database_password: &str) -> Result<bool, InternalError> {
+    pub fn verify_password(
+        input_password: &str,
+        database_password: &str,
+    ) -> Result<bool, InternalError> {
         let res = verify(input_password, database_password)?;
         Ok(res)
     }
@@ -20,9 +22,9 @@ impl EncryptUtil {
 pub trait PasswordEncrypt {
     type Error;
     fn hash(self) -> Result<Self, Self::Error>
-    where Self: Sized;
+    where
+        Self: Sized;
 }
-
 
 pub trait PasswordVerify {
     type Error;

@@ -1,4 +1,4 @@
-use rocket::{catch, fairing::AdHoc, catchers};
+use rocket::{catch, catchers, fairing::AdHoc};
 
 use super::responder::{ErrorInfo, ErrorResponse};
 
@@ -17,13 +17,11 @@ fn general_badrequest() -> ErrorResponse {
     ErrorResponse::Unauthorized(ErrorInfo::new(None, "请求错误".to_string()).into())
 }
 
-
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("Loading Cachers", |rocket| async {
-        rocket.register("/", catchers![
-            general_unauthorized,
-            general_unfound,
-            general_badrequest
-        ])
+        rocket.register(
+            "/",
+            catchers![general_unauthorized, general_unfound, general_badrequest],
+        )
     })
 }

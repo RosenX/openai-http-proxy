@@ -1,4 +1,4 @@
-use reqwest::{Client};
+use reqwest::Client;
 
 use crate::common::errors::InternalError;
 
@@ -8,7 +8,9 @@ pub struct HttpService {
 
 impl HttpService {
     pub fn new() -> Self {
-        Self { client: Client::new() }
+        Self {
+            client: Client::new(),
+        }
     }
     pub async fn get(&self, url: &String) -> Result<String, InternalError> {
         let resp = self.client.get(url).send().await?;

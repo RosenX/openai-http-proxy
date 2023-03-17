@@ -3,9 +3,10 @@ use rocket::serde::Deserialize;
 use crate::{
     common::{
         errors::InternalError,
-        utils::crypto::{EncryptUtil, PasswordVerify}, service::mysql_service::MySqlService,
+        service::mysql_service::MySqlService,
+        utils::crypto::{EncryptUtil, PasswordVerify},
     },
-    database::{user_profile::UserProfile},
+    database::user_profile::UserProfile,
 };
 
 #[derive(Deserialize)]

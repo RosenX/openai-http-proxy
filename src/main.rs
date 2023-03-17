@@ -4,7 +4,7 @@ mod models;
 mod routes;
 
 use env_logger::Env;
-use rocket::{launch};
+use rocket::launch;
 
 #[launch]
 async fn rocket_app() -> _ {

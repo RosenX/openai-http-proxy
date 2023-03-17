@@ -6,7 +6,6 @@ pub enum InternalError {
     // user
     // #[error("email is already in use, error info: {0}")]
     // DuplicateEmail(String),
-
     #[error("token is expired, error info: {0}")]
     TokenExpired(String),
 

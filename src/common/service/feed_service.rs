@@ -1,7 +1,6 @@
 use feed_rs::{model::Feed, parser};
 use rocket::{serde::Deserialize, Config};
 
-
 use crate::{common::errors::InternalError, database::feed_profile::FeedProfile};
 
 use super::{http_service::HttpService, mysql_service::MySqlService};

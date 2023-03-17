@@ -76,9 +76,8 @@ impl UserProfile {
             self.password,
             self.pro_level,
             self.pro_end_time,
-            self.created_time
-            // format!("{}", self.pro_end_time.format("%Y-%m-%d %H:%M:%S")),
-            // format!("{}", self.created_time.format("%Y-%m-%d %H:%M:%S")),
+            self.created_time // format!("{}", self.pro_end_time.format("%Y-%m-%d %H:%M:%S")),
+                              // format!("{}", self.created_time.format("%Y-%m-%d %H:%M:%S")),
         )
         .execute(pool)
         .await?

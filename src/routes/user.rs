@@ -6,7 +6,7 @@ use crate::database::user_profile::UserProfile;
 use crate::models::request::login_req::LoginReq;
 use crate::models::request::register_req::RegisterReq;
 use crate::models::response::user_info::UserInfo;
-use crate::routes::authorization::{AuthorizedUser};
+use crate::routes::authorization::AuthorizedUser;
 
 use crate::common::errors::InternalError;
 use log::info;

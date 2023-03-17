@@ -1,5 +1,5 @@
-use chrono::{DateTime, Utc};
 use chrono::serde::ts_milliseconds;
+use chrono::{DateTime, Utc};
 use rocket::serde::Serialize;
 use sqlx::FromRow;
 
@@ -48,7 +48,7 @@ impl UserPost {
     pub async fn retrieve_latest_post(
         pool: &MySqlService,
         user_id: i32,
-        latest_post_id: i32
+        latest_post_id: i32,
     ) -> Result<Vec<UserPost>, InternalError> {
         let res = sqlx::query_as!(
             UserPost,

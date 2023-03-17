@@ -1,5 +1,6 @@
-use crate::{
-    common::{errors::InternalError, service::{mysql_service::MySqlService, feed_service::FeedService}},
+use crate::common::{
+    errors::InternalError,
+    service::{feed_service::FeedService, mysql_service::MySqlService},
 };
 use chrono::{DateTime, Utc};
 use feed_rs::model::Entry;
@@ -25,11 +26,7 @@ pub struct FeedPost {
 }
 
 impl FeedPost {
-    pub fn new(
-        entry: &Entry,
-        feed_profile: &FeedProfile,
-        config: &FeedService,
-    ) -> Self {
+    pub fn new(entry: &Entry, feed_profile: &FeedProfile, config: &FeedService) -> Self {
         let now_datetime = Utc::now();
         let post = Self {
             id: 0,
@@ -42,18 +39,22 @@ impl FeedPost {
                 Some(t) => t,
                 None => now_datetime,
             },
-            authors: Some(entry
-                .authors
-                .iter()
-                .map(|p| p.to_owned().name)
-                .collect::<Vec<String>>()
-                .join(config.default_seq.as_ref())),
-            link: Some(entry
-                .links
-                .iter()
-                .map(|link| link.to_owned().href)
-                .collect::<Vec<String>>()
-                .join(config.default_seq.as_str())),
+            authors: Some(
+                entry
+                    .authors
+                    .iter()
+                    .map(|p| p.to_owned().name)
+                    .collect::<Vec<String>>()
+                    .join(config.default_seq.as_ref()),
+            ),
+            link: Some(
+                entry
+                    .links
+                    .iter()
+                    .map(|link| link.to_owned().href)
+                    .collect::<Vec<String>>()
+                    .join(config.default_seq.as_str()),
+            ),
             content: match entry.content.to_owned() {
                 Some(t) => t.body,
                 None => None,
