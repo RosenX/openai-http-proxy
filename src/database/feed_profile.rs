@@ -7,6 +7,7 @@ use crate::{
 use feed_rs::{
     model::{Feed},
 };
+use log::info;
 use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Clone, Serialize)]
@@ -69,5 +70,17 @@ impl FeedProfile {
         .last_insert_id();
         self.id = feed_id as i32;
         Ok(self.to_owned())
+    }
+
+    pub async fn find_all(pool: &MySqlService) -> Result<Vec<Self>, InternalError> {
+        let feeds = sqlx::query_as!(
+            FeedProfile,
+            r#"
+            SELECT * FROM feed_profile
+            "#,
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(feeds)
     }
 }

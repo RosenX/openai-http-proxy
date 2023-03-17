@@ -10,7 +10,9 @@ pub struct DatabaseConfig {
 
 use crate::common::errors::InternalError;
 use sqlx::{mysql::MySqlPoolOptions, MySql};
+
 pub type MySqlService = sqlx::Pool<MySql>;
+
 
 impl DatabaseConfig {
     pub fn new() -> Self {

@@ -3,7 +3,6 @@ mod database;
 mod models;
 mod routes;
 
-use common::service::{create_mysql_service};
 use env_logger::Env;
 use rocket::{launch};
 
@@ -15,15 +14,11 @@ async fn rocket_app() -> _ {
 
     env_logger::init_from_env(env);
 
-    let db_service = create_mysql_service().await;
-
-    let rocket = rocket::build();
-
-    rocket
-        .manage(db_service)
+    rocket::build()
         .attach(common::service::stage())
         .attach(routes::user::stage())
         .attach(routes::feed::stage())
         .attach(routes::post::stage())
         .attach(common::catcher::stage())
+        .attach(common::service::backgroupd_job())
 }
