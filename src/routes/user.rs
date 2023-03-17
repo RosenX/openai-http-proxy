@@ -21,7 +21,6 @@ async fn register_by_email(
     jwt: &State<JwtService>,
 ) -> Result<SuccessResponse<JwtToken>, ErrorResponse> {
     let info = UserProfile::try_from(info.into_inner())?;
-    info!("{}", info);
     info.create_user(db.inner()).await?;
     let tokens = jwt.encode_tokens(info.into())?;
     Ok(SuccessResponse::Created(Json(tokens)))

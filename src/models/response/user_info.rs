@@ -45,7 +45,7 @@ pub struct UserInfo {
 impl UserInfo {
     pub fn new(basic_profile: BasicUserProfile) -> Self {
         Self {
-            basic_profile: basic_profile,
+            basic_profile,
         }
     }
 }

@@ -18,7 +18,7 @@ fn check_auth_header(auth_header: Option<&str>) -> Result<String, InternalError>
             return Ok(vec_header[1].to_string());
         }
     }
-    return Err(InternalError::InvalidAuthToken("Token错误".to_string()));
+    Err(InternalError::InvalidAuthToken("Token错误".to_string()))
 }
 
 #[rocket::async_trait]
@@ -32,7 +32,7 @@ impl<'r> FromRequest<'r> for AuthorizedUser {
         let auth_token = check_auth_header(auth_header);
 
         match auth_token {
-            Ok(token) => match jwt.decode_access_token(token.into()) {
+            Ok(token) => match jwt.decode_access_token(token) {
                 Ok(data) => Outcome::Success(data.data),
                 Err(err) => Outcome::Failure((
                     Status::Unauthorized,

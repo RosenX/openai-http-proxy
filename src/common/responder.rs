@@ -11,18 +11,18 @@ pub enum SuccessResponse<T> {
     #[response(status = 201)]
     Created(Json<T>),
 
-    #[response(status = 204)]
-    Deleted(Json<T>),
+    // #[response(status = 204)]
+    // Deleted(Json<T>),
 
     #[response(status = 200)]
     Success(Json<T>),
 }
 
-impl SuccessResponse<String> {
-    pub fn default_success_response() -> SuccessResponse<String> {
-        SuccessResponse::Success("Success".to_string().into())
-    }
-}
+// impl SuccessResponse<String> {
+//     pub fn default_success_response() -> SuccessResponse<String> {
+//         SuccessResponse::Success("Success".to_string().into())
+//     }
+// }
 
 ////////////////////////////////
 
@@ -46,9 +46,9 @@ pub enum ErrorResponse {
 
     #[response(status = 500)]
     Default(Json<ErrorInfo>),
-    
-    #[response(status = 400)]
-    BadRequest(Json<ErrorInfo>),
+
+    // #[response(status = 400)]
+    // BadRequest(Json<ErrorInfo>),
 }
 
 impl From<InternalError> for ErrorResponse {

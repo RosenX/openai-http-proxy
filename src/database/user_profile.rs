@@ -1,5 +1,3 @@
-use std::fmt::{self, Display};
-
 use chrono::{DateTime, Utc};
 use sqlx::FromRow;
 
@@ -19,26 +17,26 @@ pub struct UserProfile {
     pub created_time: DateTime<Utc>,
 }
 
-impl Display for UserProfile {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "
-            username: {}, 
-            email: {}, 
-            password: {}, 
-            pro_level: {}, 
-            pro_end_time: {}, 
-            created_time: {}",
-            self.username,
-            self.email,
-            self.password,
-            self.pro_level,
-            format!("{}", self.pro_end_time.format("%Y-%m-%d %H:%M:%S")),
-            format!("{}", self.created_time.format("%Y-%m-%d %H:%M:%S")),
-        )
-    }
-}
+// impl Display for UserProfile {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         write!(
+//             f,
+//             "
+//             username: {},
+//             email: {},
+//             password: {},
+//             pro_level: {},
+//             pro_end_time: {},
+//             created_time: {}",
+//             self.username,
+//             self.email,
+//             self.password,
+//             self.pro_level,
+//             format!("{}", self.pro_end_time.format("%Y-%m-%d %H:%M:%S")),
+//             format!("{}", self.created_time.format("%Y-%m-%d %H:%M:%S")),
+//         )
+//     }
+// }
 
 impl TryFrom<RegisterReq> for UserProfile {
     type Error = InternalError;
@@ -65,11 +63,11 @@ impl UserProfile {
             UserProfile,
             r#"
             INSERT INTO user_profile (
-                username, 
-                email, 
-                password, 
-                pro_level, 
-                pro_end_time, 
+                username,
+                email,
+                password,
+                pro_level,
+                pro_end_time,
                 created_time
             ) VALUES (?,?,?,?,?,?)
             "#,

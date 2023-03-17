@@ -1,7 +1,6 @@
 use feed_rs::{model::Feed, parser};
 use rocket::{serde::Deserialize, Config};
-use tokio::time::sleep;
-use std::time;
+
 
 use crate::{common::errors::InternalError, database::feed_profile::FeedProfile};
 
@@ -31,15 +30,6 @@ impl FeedService {
         let data = http_service.get(url).await?;
         let feed = parser::parse(data.as_bytes())?;
         Ok(feed)
-    }
-
-    pub async fn create_cron_job(&self, pool: &MySqlService) -> Result<(), InternalError> {
-        loop {
-            let mut interval = tokio::time::interval(time::Duration::from_secs(60));
-            let feed_list = self.fetch_all_feed(&pool).await?;
-            println!("feed length {}", feed_list.len());
-            interval.tick().await;
-        }
     }
 
     pub async fn fetch_all_feed(

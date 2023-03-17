@@ -47,7 +47,7 @@ impl FeedPost {
                 .iter()
                 .map(|p| p.to_owned().name)
                 .collect::<Vec<String>>()
-                .join(&config.default_seq.as_ref())),
+                .join(config.default_seq.as_ref())),
             link: Some(entry
                 .links
                 .iter()
@@ -74,18 +74,18 @@ impl FeedPost {
         let post_id = sqlx::query!(
             r#"
             INSERT INTO feed_post (
-                feed_id, 
-                title, 
-                publish_time, 
+                feed_id,
+                title,
+                publish_time,
                 cover,
-                authors, 
-                link, 
-                content, 
-                summary, 
-                summary_algo, 
-                category_algo, 
+                authors,
+                link,
+                content,
+                summary,
+                summary_algo,
+                category_algo,
                 tags_algo
-            ) 
+            )
             VALUES (?,?,?,?,?,?,?,?,?,?,?)
             "#,
             self.feed_id,

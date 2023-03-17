@@ -62,7 +62,7 @@ impl JwtService {
             &EncodingKey::from_secret(key.as_bytes()),
         )
         .map_err(|err| InternalError::JsonWebTokenError(err.to_string()))?;
-        Ok(token.into())
+        Ok(token)
     }
 
     fn decode(&self, token: Token, key: &str) -> Result<Claims, InternalError> {
@@ -80,11 +80,11 @@ impl JwtService {
             .checked_add_signed(chrono::Duration::hours(expiration_time))
             .unwrap()
             .timestamp_millis();
-        let my_claims = Claims {
+
+        Claims {
             data: data.clone(),
             exp: expiration as usize,
-        };
-        my_claims
+        }
     }
 
     pub fn encode_access_token(&self, data: &BasicUserProfile) -> Result<Token, InternalError> {

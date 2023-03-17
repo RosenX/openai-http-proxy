@@ -17,8 +17,8 @@ pub struct LoginReq {
 
 impl PasswordVerify for LoginReq {
     type Error = InternalError;
-    fn verify(self, target: &String) -> Result<bool, Self::Error> {
-        EncryptUtil::verify_password(&self.password, &target)
+    fn verify(self, target: &str) -> Result<bool, Self::Error> {
+        EncryptUtil::verify_password(&self.password, target)
     }
 }
 

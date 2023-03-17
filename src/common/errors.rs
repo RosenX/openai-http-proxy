@@ -3,9 +3,9 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum InternalError {
-    // user 
-    #[error("email is already in use, error info: {0}")]
-    DuplicateEmail(String),
+    // user
+    // #[error("email is already in use, error info: {0}")]
+    // DuplicateEmail(String),
 
     #[error("token is expired, error info: {0}")]
     TokenExpired(String),
@@ -23,12 +23,12 @@ pub enum InternalError {
     WrongPassword,
 
     // source
-    #[error("rss source not exists: {0}")]
-    SourceNotExist(String),
+    // #[error("rss source not exists: {0}")]
+    // SourceNotExist(String),
 
     // content
-    #[error("error info: {0}")]
-    InvalidUrl(String),
+    // #[error("error info: {0}")]
+    // InvalidUrl(String),
 
     // database
     #[error("error info: {0}")]

@@ -3,7 +3,7 @@ pub mod http_service;
 pub mod jwt_service;
 pub mod mysql_service;
 
-use std::time::{self, Duration};
+use std::time::{self};
 
 use rocket::fairing::AdHoc;
 

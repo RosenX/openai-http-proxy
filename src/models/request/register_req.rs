@@ -19,7 +19,7 @@ impl Display for RegisterReq {
 impl PasswordEncrypt for RegisterReq {
     type Error = InternalError;
     fn hash(self) -> Result<Self, Self::Error> {
-        let hash_password = EncryptUtil::hash_password(self.password)?;
+        let hash_password = EncryptUtil::hash_password(self.password.as_str())?;
         Ok(Self {
             email: self.email,
             username: self.username,

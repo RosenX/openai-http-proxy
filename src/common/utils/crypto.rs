@@ -5,13 +5,13 @@ use crate::common::errors::InternalError;
 pub struct EncryptUtil;
 
 impl EncryptUtil {
-    pub fn hash_password(origin_passwod: String) -> Result<String, InternalError> {
+    pub fn hash_password(origin_passwod: &str) -> Result<String, InternalError> {
         let hashed_password = hash(origin_passwod, 4)?;
         Ok(hashed_password)
     }
 
-    pub fn verify_password(input_password: &String,
-        database_password: &String) -> Result<bool, InternalError> {
+    pub fn verify_password(input_password: &str,
+        database_password: &str) -> Result<bool, InternalError> {
         let res = verify(input_password, database_password)?;
         Ok(res)
     }
@@ -26,5 +26,5 @@ pub trait PasswordEncrypt {
 
 pub trait PasswordVerify {
     type Error;
-    fn verify(self, target: &String) -> Result<bool, Self::Error>;
+    fn verify(self, target: &str) -> Result<bool, Self::Error>;
 }

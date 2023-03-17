@@ -7,7 +7,7 @@ use crate::{
 use feed_rs::{
     model::{Feed},
 };
-use log::info;
+
 use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Clone, Serialize)]
@@ -25,7 +25,8 @@ pub struct FeedProfile {
 
 impl FeedProfile {
     pub fn new(feed: &Feed, feed_req: FeedReq, config: &FeedService) -> Self {
-        let feed_info = Self {
+
+        Self {
             id: 0,
             url: feed_req.url,
             name: match feed.title.to_owned() {
@@ -46,15 +47,14 @@ impl FeedProfile {
             },
             category: None,
             tags: None,
-        };
-        feed_info
+        }
     }
 
     pub async fn insert(&mut self, pool: &MySqlService) -> Result<Self, InternalError> {
         let feed_id = sqlx::query!(
             r#"
-            INSERT INTO feed_profile 
-                (url, name, logo, icon, description, category, tags) 
+            INSERT INTO feed_profile
+                (url, name, logo, icon, description, category, tags)
             VALUES (?,?,?,?,?,?,?)
             "#,
             self.url,
