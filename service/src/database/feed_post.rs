@@ -1,7 +1,5 @@
-use crate::common::{
-    errors::InternalError,
-    service::{feed_service::FeedService, mysql_service::MySqlService},
-};
+use crate::common::{errors::InternalError, service::feed_service::FeedService};
+use abi::DbPool;
 use chrono::{DateTime, Utc};
 use feed_rs::model::Entry;
 use rocket::serde::{Deserialize, Serialize};
@@ -71,7 +69,7 @@ impl FeedPost {
         post
     }
 
-    pub async fn insert(&mut self, pool: &MySqlService) -> Result<Self, InternalError> {
+    pub async fn insert(&mut self, pool: &DbPool) -> Result<Self, InternalError> {
         let post_id = sqlx::query!(
             r#"
             INSERT INTO feed_post (

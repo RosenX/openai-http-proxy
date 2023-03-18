@@ -1,10 +1,9 @@
+use crate::{common::errors::InternalError, routes::authorization::AuthorizedUser};
+use abi::DbPool;
 use chrono::serde::ts_milliseconds;
 use chrono::{DateTime, Utc};
 use rocket::serde::Serialize;
 use sqlx::FromRow;
-
-use crate::common::service::mysql_service::MySqlService;
-use crate::{common::errors::InternalError, routes::authorization::AuthorizedUser};
 
 use super::feed_profile::FeedProfile;
 
@@ -37,7 +36,7 @@ impl UserFeed {
         }
     }
 
-    pub async fn insert(&self, pool: &MySqlService) -> Result<(), InternalError> {
+    pub async fn insert(&self, pool: &DbPool) -> Result<(), InternalError> {
         sqlx::query!(
             r#"
             INSERT INTO user_custom_feed (
@@ -59,7 +58,7 @@ impl UserFeed {
 
     pub async fn retrieve_feed_by_user(
         user_id: i32,
-        pool: &MySqlService,
+        pool: &DbPool,
     ) -> Result<Vec<UserFeed>, InternalError> {
         let res = sqlx::query_as!(
             UserFeed,

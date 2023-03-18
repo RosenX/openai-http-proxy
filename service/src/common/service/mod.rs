@@ -3,6 +3,7 @@ pub mod http_service;
 pub mod jwt_service;
 pub mod mysql_service;
 
+use abi::DbPool;
 use std::time::{self};
 
 use rocket::fairing::AdHoc;
@@ -11,7 +12,7 @@ use self::{
     feed_service::FeedService,
     http_service::HttpService,
     jwt_service::JwtService,
-    mysql_service::{setup_database, DatabaseConfig, MySqlService},
+    mysql_service::{setup_database, DatabaseConfig},
 };
 
 pub fn create_feed_service() -> FeedService {
@@ -22,7 +23,7 @@ fn create_http_service() -> HttpService {
     HttpService::new()
 }
 
-pub async fn create_mysql_service() -> MySqlService {
+pub async fn create_mysql_service() -> DbPool {
     let config = DatabaseConfig::new();
     setup_database(&config).await.expect("数据库服务启动失败")
 }

@@ -1,7 +1,7 @@
+use abi::DbPool;
 use chrono::{DateTime, Utc};
 use sqlx::FromRow;
 
-use crate::common::service::mysql_service::MySqlService;
 use crate::common::utils::crypto::PasswordEncrypt;
 use crate::{common::errors::InternalError, models::request::register_req::RegisterReq};
 
@@ -58,7 +58,7 @@ impl TryFrom<RegisterReq> for UserProfile {
 }
 
 impl UserProfile {
-    pub async fn create_user(&self, pool: &MySqlService) -> Result<u64, InternalError> {
+    pub async fn create_user(&self, pool: &DbPool) -> Result<u64, InternalError> {
         let res = sqlx::query_as!(
             UserProfile,
             r#"

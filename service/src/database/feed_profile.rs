@@ -1,10 +1,8 @@
 use crate::{
-    common::{
-        errors::InternalError,
-        service::{feed_service::FeedService, mysql_service::MySqlService},
-    },
+    common::{errors::InternalError, service::feed_service::FeedService},
     models::request::feed_req::FeedReq,
 };
+use abi::DbPool;
 use feed_rs::model::Feed;
 
 use rocket::serde::{Deserialize, Serialize};
@@ -48,7 +46,7 @@ impl FeedProfile {
         }
     }
 
-    pub async fn insert(&mut self, pool: &MySqlService) -> Result<Self, InternalError> {
+    pub async fn insert(&mut self, pool: &DbPool) -> Result<Self, InternalError> {
         let feed_id = sqlx::query!(
             r#"
             INSERT INTO feed_profile
@@ -70,7 +68,7 @@ impl FeedProfile {
         Ok(self.to_owned())
     }
 
-    pub async fn find_all(pool: &MySqlService) -> Result<Vec<Self>, InternalError> {
+    pub async fn find_all(pool: &DbPool) -> Result<Vec<Self>, InternalError> {
         let feeds = sqlx::query_as!(
             FeedProfile,
             r#"

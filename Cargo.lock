@@ -3,6 +3,13 @@
 version = 3
 
 [[package]]
+name = "abi"
+version = "0.1.0"
+dependencies = [
+ "sqlx",
+]
+
+[[package]]
 name = "aead"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -272,6 +279,10 @@ name = "const-oid"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4c78c047431fee22c1a7bb92e00ad095a02a983affe4d8a72e2a2c62c1b94f3"
+
+[[package]]
+name = "content"
+version = "0.1.0"
 
 [[package]]
 name = "cookie"
@@ -571,9 +582,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "feed_inbox"
+name = "feedbox"
 version = "0.1.0"
 dependencies = [
+ "abi",
  "bcrypt",
  "chrono",
  "env_logger",

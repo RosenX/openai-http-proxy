@@ -1,9 +1,9 @@
-use crate::common::service::mysql_service::MySqlService;
 use crate::database::user_post::UserPost;
 use crate::{
     common::responder::{ErrorResponse, SuccessResponse},
     models::request::post_req::PostReq,
 };
+use abi::DbPool;
 use log::info;
 use rocket::serde::json::Json;
 use rocket::{fairing::AdHoc, get, routes, State};
@@ -14,7 +14,7 @@ use super::authorization::AuthorizedUser;
 async fn get_latest_post(
     user: AuthorizedUser,
     req: PostReq,
-    pool: &State<MySqlService>,
+    pool: &State<DbPool>,
 ) -> Result<SuccessResponse<Vec<UserPost>>, ErrorResponse> {
     info!("{}, {}", user.id, req.latest_post_id);
     let posts = UserPost::retrieve_latest_post(pool, user.id, req.latest_post_id).await?;

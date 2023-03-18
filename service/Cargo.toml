@@ -1,5 +1,5 @@
 [package]
-name = "feed_inbox"
+name = "feedbox"
 version = "0.1.0"
 edition = "2021"
 
@@ -21,3 +21,4 @@ tokio = "1.26.0"
 feed-rs = "1.3.0"
 serde_repr = "0.1.11"
 serde = "1.0.154"
+abi = { version = "0.1.0", path = "../abi" }

@@ -1,3 +1,4 @@
+use abi::DbPool;
 use rocket::Config;
 use serde::Deserialize;
 
@@ -9,9 +10,7 @@ pub struct DatabaseConfig {
 }
 
 use crate::common::errors::InternalError;
-use sqlx::{mysql::MySqlPoolOptions, MySql};
-
-pub type MySqlService = sqlx::Pool<MySql>;
+use sqlx::mysql::MySqlPoolOptions;
 
 impl DatabaseConfig {
     pub fn new() -> Self {
@@ -22,7 +21,7 @@ impl DatabaseConfig {
     }
 }
 
-pub async fn setup_database(config: &DatabaseConfig) -> Result<MySqlService, InternalError> {
+pub async fn setup_database(config: &DatabaseConfig) -> Result<DbPool, InternalError> {
     let url = format!("{}/{}", config.url, config.database);
     let pool = MySqlPoolOptions::new()
         .max_connections(5) //todo

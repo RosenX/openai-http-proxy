@@ -1,9 +1,9 @@
+use crate::{common::errors::InternalError, database::feed_profile::FeedProfile};
+use abi::DbPool;
 use feed_rs::{model::Feed, parser};
 use rocket::{serde::Deserialize, Config};
 
-use crate::{common::errors::InternalError, database::feed_profile::FeedProfile};
-
-use super::{http_service::HttpService, mysql_service::MySqlService};
+use super::http_service::HttpService;
 
 #[derive(Debug, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -31,10 +31,7 @@ impl FeedService {
         Ok(feed)
     }
 
-    pub async fn fetch_all_feed(
-        &self,
-        pool: &MySqlService,
-    ) -> Result<Vec<FeedProfile>, InternalError> {
+    pub async fn fetch_all_feed(&self, pool: &DbPool) -> Result<Vec<FeedProfile>, InternalError> {
         let feed_list = FeedProfile::find_all(pool).await?;
         Ok(feed_list)
     }

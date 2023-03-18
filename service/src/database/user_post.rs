@@ -1,10 +1,10 @@
+use abi::DbPool;
 use chrono::serde::ts_milliseconds;
 use chrono::{DateTime, Utc};
 use rocket::serde::Serialize;
 use sqlx::FromRow;
 
 use crate::common::errors::InternalError;
-use crate::common::service::mysql_service::MySqlService;
 
 #[derive(Clone, Debug, FromRow, Serialize)]
 #[serde(crate = "rocket::serde")]
@@ -46,7 +46,7 @@ impl UserPost {
     // }
 
     pub async fn retrieve_latest_post(
-        pool: &MySqlService,
+        pool: &DbPool,
         user_id: i32,
         latest_post_id: i32,
     ) -> Result<Vec<UserPost>, InternalError> {
