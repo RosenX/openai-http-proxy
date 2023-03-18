@@ -1,4 +1,4 @@
-use abi::DbPool;
+use abi::{DbPool, InternalError};
 use rocket::Config;
 use serde::Deserialize;
 
@@ -9,7 +9,6 @@ pub struct DatabaseConfig {
     pub database: String,
 }
 
-use crate::common::errors::InternalError;
 use sqlx::mysql::MySqlPoolOptions;
 
 impl DatabaseConfig {

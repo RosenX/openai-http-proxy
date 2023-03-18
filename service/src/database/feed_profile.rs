@@ -1,8 +1,5 @@
-use crate::{
-    common::{errors::InternalError, service::feed_service::FeedService},
-    models::request::feed_req::FeedReq,
-};
-use abi::DbPool;
+use crate::{common::service::feed_service::FeedService, models::request::feed_req::FeedReq};
+use abi::{DbPool, InternalError};
 use feed_rs::model::Feed;
 
 use rocket::serde::{Deserialize, Serialize};

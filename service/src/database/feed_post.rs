@@ -1,5 +1,5 @@
-use crate::common::{errors::InternalError, service::feed_service::FeedService};
-use abi::DbPool;
+use crate::common::service::feed_service::FeedService;
+use abi::{DbPool, InternalError};
 use chrono::{DateTime, Utc};
 use feed_rs::model::Entry;
 use rocket::serde::{Deserialize, Serialize};

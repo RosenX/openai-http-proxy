@@ -1,6 +1,6 @@
 use bcrypt::{hash, verify};
 
-use crate::common::errors::InternalError;
+use crate::InternalError;
 
 pub struct EncryptUtil;
 

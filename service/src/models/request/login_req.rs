@@ -1,13 +1,7 @@
-use abi::DbPool;
+use abi::{DbPool, EncryptUtil, InternalError, PasswordVerify};
 use rocket::serde::Deserialize;
 
-use crate::{
-    common::{
-        errors::InternalError,
-        utils::crypto::{EncryptUtil, PasswordVerify},
-    },
-    database::user_profile::UserProfile,
-};
+use crate::database::user_profile::UserProfile;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]

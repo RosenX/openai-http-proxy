@@ -1,6 +1,5 @@
+use abi::InternalError;
 use reqwest::Client;
-
-use crate::common::errors::InternalError;
 
 pub struct HttpService {
     client: Client,

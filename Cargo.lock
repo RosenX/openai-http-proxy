@@ -6,7 +6,13 @@ version = 3
 name = "abi"
 version = "0.1.0"
 dependencies = [
+ "bcrypt 0.14.0",
+ "chrono",
+ "feed-rs",
+ "reqwest",
+ "serde",
  "sqlx",
+ "thiserror",
 ]
 
 [[package]]
@@ -178,6 +184,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "bcrypt"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9df288bec72232f78c1ec5fe4e8f1d108aa0265476e93097593c803c8c02062a"
+dependencies = [
+ "base64 0.21.0",
+ "blowfish",
+ "getrandom",
+ "subtle",
+ "zeroize",
+]
+
+[[package]]
 name = "binascii"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -283,6 +302,10 @@ checksum = "e4c78c047431fee22c1a7bb92e00ad095a02a983affe4d8a72e2a2c62c1b94f3"
 [[package]]
 name = "content"
 version = "0.1.0"
+dependencies = [
+ "abi",
+ "async-trait",
+]
 
 [[package]]
 name = "cookie"
@@ -586,7 +609,7 @@ name = "feedbox"
 version = "0.1.0"
 dependencies = [
  "abi",
- "bcrypt",
+ "bcrypt 0.13.0",
  "chrono",
  "env_logger",
  "feed-rs",

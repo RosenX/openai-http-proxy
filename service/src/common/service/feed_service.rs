@@ -1,5 +1,5 @@
-use crate::{common::errors::InternalError, database::feed_profile::FeedProfile};
-use abi::DbPool;
+use crate::database::feed_profile::FeedProfile;
+use abi::{DbPool, InternalError};
 use feed_rs::{model::Feed, parser};
 use rocket::{serde::Deserialize, Config};
 

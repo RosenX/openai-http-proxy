@@ -1,5 +1,5 @@
-use crate::{common::errors::InternalError, routes::authorization::AuthorizedUser};
-use abi::DbPool;
+use crate::routes::authorization::AuthorizedUser;
+use abi::{DbPool, InternalError};
 use chrono::serde::ts_milliseconds;
 use chrono::{DateTime, Utc};
 use rocket::serde::Serialize;

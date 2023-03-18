@@ -1,14 +1,12 @@
 use crate::common::responder::{ErrorResponse, SuccessResponse};
 use crate::common::service::jwt_service::{JwtService, JwtToken, Token};
-use crate::common::utils::crypto::PasswordVerify;
 use crate::database::user_profile::UserProfile;
 use crate::models::request::login_req::LoginReq;
 use crate::models::request::register_req::RegisterReq;
 use crate::models::response::user_info::UserInfo;
 use crate::routes::authorization::AuthorizedUser;
 
-use crate::common::errors::InternalError;
-use abi::DbPool;
+use abi::{DbPool, InternalError, PasswordVerify};
 use log::info;
 use rocket::fairing::AdHoc;
 use rocket::serde::json::Json;

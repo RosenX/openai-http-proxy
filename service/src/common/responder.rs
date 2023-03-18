@@ -1,10 +1,9 @@
+use abi::InternalError;
 use log::error;
 use rocket::{
     serde::{json::Json, Serialize},
     Responder,
 };
-
-use super::errors::InternalError;
 
 #[derive(Responder)]
 pub enum SuccessResponse<T> {

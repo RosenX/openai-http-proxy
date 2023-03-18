@@ -1,14 +1,6 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+use async_trait::async_trait;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[async_trait]
+pub trait ContentOp {
+    async fn create(&self, content: abi::Content) -> Result<abi::Content, abi::InternalError>;
 }

@@ -1,9 +1,8 @@
-use abi::DbPool;
+use abi::{DbPool, InternalError, PasswordEncrypt};
 use chrono::{DateTime, Utc};
 use sqlx::FromRow;
 
-use crate::common::utils::crypto::PasswordEncrypt;
-use crate::{common::errors::InternalError, models::request::register_req::RegisterReq};
+use crate::models::request::register_req::RegisterReq;
 
 #[derive(Clone, Debug, FromRow)]
 pub struct UserProfile {

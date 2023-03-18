@@ -1,10 +1,8 @@
-use abi::DbPool;
+use abi::{DbPool, InternalError};
 use chrono::serde::ts_milliseconds;
 use chrono::{DateTime, Utc};
 use rocket::serde::Serialize;
 use sqlx::FromRow;
-
-use crate::common::errors::InternalError;
 
 #[derive(Clone, Debug, FromRow, Serialize)]
 #[serde(crate = "rocket::serde")]

@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use abi::InternalError;
 use chrono::Utc;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use rocket::{
@@ -7,7 +8,7 @@ use rocket::{
     Config,
 };
 
-use crate::{common::errors::InternalError, models::response::user_info::BasicUserProfile};
+use crate::models::response::user_info::BasicUserProfile;
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]

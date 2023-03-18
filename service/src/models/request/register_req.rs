@@ -1,7 +1,4 @@
-use crate::common::{
-    errors::InternalError,
-    utils::crypto::{EncryptUtil, PasswordEncrypt},
-};
+use abi::{EncryptUtil, InternalError, PasswordEncrypt};
 use rocket::serde::Deserialize;
 use std::fmt::Display;
 

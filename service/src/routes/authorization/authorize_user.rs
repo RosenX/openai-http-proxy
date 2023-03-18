@@ -1,3 +1,4 @@
+use abi::InternalError;
 use rocket::{
     http::Status,
     request::{FromRequest, Outcome},
@@ -5,8 +6,7 @@ use rocket::{
 };
 
 use crate::{
-    common::{errors::InternalError, service::jwt_service::JwtService},
-    models::response::user_info::BasicUserProfile,
+    common::service::jwt_service::JwtService, models::response::user_info::BasicUserProfile,
 };
 
 pub type AuthorizedUser = BasicUserProfile;
