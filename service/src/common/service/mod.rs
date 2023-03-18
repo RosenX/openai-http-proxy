@@ -4,6 +4,7 @@ pub mod jwt_service;
 pub mod mysql_service;
 
 use abi::DbPool;
+use content::ContentManager;
 use std::time::{self};
 
 use rocket::fairing::AdHoc;
@@ -39,6 +40,7 @@ pub fn stage() -> AdHoc {
             .manage(create_feed_service())
             .manage(create_http_service())
             .manage(create_jwt_service())
+            .manage(ContentManager::new(mysql_service.clone()))
             .manage(mysql_service)
     })
 }

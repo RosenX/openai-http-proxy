@@ -305,6 +305,7 @@ version = "0.1.0"
 dependencies = [
  "abi",
  "async-trait",
+ "sqlx",
 ]
 
 [[package]]
@@ -611,6 +612,7 @@ dependencies = [
  "abi",
  "bcrypt 0.13.0",
  "chrono",
+ "content",
  "env_logger",
  "feed-rs",
  "futures",
