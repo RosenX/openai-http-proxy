@@ -300,12 +300,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4c78c047431fee22c1a7bb92e00ad095a02a983affe4d8a72e2a2c62c1b94f3"
 
 [[package]]
-name = "content"
+name = "content_service"
 version = "0.1.0"
 dependencies = [
  "abi",
  "async-trait",
+ "feed-rs",
  "sqlx",
+ "tokio",
 ]
 
 [[package]]
@@ -612,7 +614,7 @@ dependencies = [
  "abi",
  "bcrypt 0.13.0",
  "chrono",
- "content",
+ "content_service",
  "env_logger",
  "feed-rs",
  "futures",

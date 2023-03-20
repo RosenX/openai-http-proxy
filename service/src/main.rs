@@ -20,5 +20,5 @@ async fn rocket_app() -> _ {
         .attach(routes::feed::stage())
         .attach(routes::post::stage())
         .attach(common::catcher::stage())
-        .attach(common::service::backgroupd_job())
+    // .attach(common::service::backgroupd_job())
 }

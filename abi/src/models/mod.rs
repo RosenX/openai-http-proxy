@@ -1,3 +1,5 @@
-mod feed_content;
+mod content;
+mod feed;
 
-pub use feed_content::*;
+pub use content::Content;
+pub use feed::FeedProfile;

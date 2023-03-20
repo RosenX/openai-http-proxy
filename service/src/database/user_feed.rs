@@ -1,11 +1,8 @@
-use crate::routes::authorization::AuthorizedUser;
 use abi::{DbPool, InternalError};
 use chrono::serde::ts_milliseconds;
 use chrono::{DateTime, Utc};
 use rocket::serde::Serialize;
 use sqlx::FromRow;
-
-use super::feed_profile::FeedProfile;
 
 #[derive(Clone, Debug, FromRow, Serialize)]
 #[serde(crate = "rocket::serde")]
@@ -22,39 +19,39 @@ pub struct UserFeed {
 }
 
 impl UserFeed {
-    pub fn new(feed_profile: FeedProfile, user: AuthorizedUser) -> Self {
-        let now_datetime = Utc::now();
-        Self {
-            user_id: user.id,
-            feed_id: feed_profile.id,
-            url: feed_profile.url,
-            name: Some(feed_profile.name),
-            icon: feed_profile.icon,
-            logo: Some(feed_profile.logo),
-            description: feed_profile.description,
-            created_time: now_datetime,
-        }
-    }
+    // pub fn new(feed_profile: FeedProfile, user: AuthorizedUser) -> Self {
+    //     let now_datetime = Utc::now();
+    //     Self {
+    //         user_id: user.id,
+    //         feed_id: feed_profile.id,
+    //         url: feed_profile.url,
+    //         name: Some(feed_profile.name),
+    //         icon: feed_profile.icon,
+    //         logo: Some(feed_profile.logo),
+    //         description: feed_profile.description,
+    //         created_time: now_datetime,
+    //     }
+    // }
 
-    pub async fn insert(&self, pool: &DbPool) -> Result<(), InternalError> {
-        sqlx::query!(
-            r#"
-            INSERT INTO user_custom_feed (
-                user_id, feed_id, name, icon, logo, description, created_time
-            ) VALUES (?,?,?,?,?,?,?)
-            "#,
-            self.user_id,
-            self.feed_id,
-            self.name,
-            self.icon,
-            self.logo,
-            self.description,
-            self.created_time,
-        )
-        .execute(pool)
-        .await?;
-        Ok(())
-    }
+    // pub async fn insert(&self, pool: &DbPool) -> Result<(), InternalError> {
+    //     sqlx::query!(
+    //         r#"
+    //         INSERT INTO user_custom_feed (
+    //             user_id, feed_id, name, icon, logo, description, created_time
+    //         ) VALUES (?,?,?,?,?,?,?)
+    //         "#,
+    //         self.user_id,
+    //         self.feed_id,
+    //         self.name,
+    //         self.icon,
+    //         self.logo,
+    //         self.description,
+    //         self.created_time,
+    //     )
+    //     .execute(pool)
+    //     .await?;
+    //     Ok(())
+    // }
 
     pub async fn retrieve_feed_by_user(
         user_id: i32,

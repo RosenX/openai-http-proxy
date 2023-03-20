@@ -1,41 +1,21 @@
 use crate::common::responder::{ErrorResponse, SuccessResponse};
-use crate::common::service::feed_service::FeedService;
-use crate::common::service::http_service::HttpService;
-use crate::database::feed_post::FeedPost;
-use crate::database::feed_profile::FeedProfile;
 use crate::database::user_feed::UserFeed;
-use crate::models::request::feed_req::FeedReq;
-use abi::DbPool;
+use abi::{CreateFeedRequest, CreateFeedResponse, DbPool};
+use content_service::{ContentService, ContentServiceApi};
 use rocket::serde::json::Json;
 use rocket::{fairing::AdHoc, post, routes};
 use rocket::{get, State};
 
 use super::authorization::AuthorizedUser;
 
-#[post("/add/exist", data = "<info>")]
+#[post("/add/exist", data = "<request>")]
 async fn create_exist_feed(
-    user: AuthorizedUser,
-    info: Json<FeedReq>,
-    pool: &State<DbPool>,
-    feed_service: &State<FeedService>,
-    http: &State<HttpService>,
-) -> Result<SuccessResponse<UserFeed>, ErrorResponse> {
-    let info: FeedReq = info.into_inner();
-
-    let feed = FeedService::fetch_from_url(http, &info.url).await?;
-    let mut feed_profile = FeedProfile::new(&feed, info, feed_service);
-    let feed_profile = feed_profile.insert(pool.inner()).await?;
-    let mut feed_post_list: Vec<FeedPost> = feed
-        .entries
-        .iter()
-        .map(|entry| FeedPost::new(entry, &feed_profile, feed_service))
-        .collect();
-    for feed_post in &mut feed_post_list {
-        feed_post.insert(pool).await?;
-    }
-    let user_feed = UserFeed::new(feed_profile, user);
-    user_feed.insert(pool).await?;
-    Ok(SuccessResponse::Created(Json(user_feed)))
+    _user: AuthorizedUser,
+    request: Json<CreateFeedRequest>,
+    content_service: &State<ContentService>,
+) -> Result<SuccessResponse<CreateFeedResponse>, ErrorResponse> {
+    let response = content_service.create_feed(request.into_inner()).await?;
+    Ok(SuccessResponse::Created(Json(response)))
 }
 
 #[get("/")]

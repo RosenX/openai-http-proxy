@@ -1,14 +1,11 @@
-use crate::common::service::feed_service::FeedService;
-use abi::{DbPool, InternalError};
 use chrono::{DateTime, Utc};
 use feed_rs::model::Entry;
-use rocket::serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
-use super::feed_profile::FeedProfile;
+use crate::{DEFAULT_ID, SEP, UNKNOWN};
 
 #[derive(Deserialize, Clone, Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct FeedPost {
+pub struct Content {
     pub id: i32,
     pub feed_id: i32,
     pub title: String,
@@ -23,15 +20,15 @@ pub struct FeedPost {
     pub tags_algo: Option<String>,
 }
 
-impl FeedPost {
-    pub fn new(entry: &Entry, feed_profile: &FeedProfile, config: &FeedService) -> Self {
+impl From<Entry> for Content {
+    fn from(entry: Entry) -> Self {
         let now_datetime = Utc::now();
-        let post = Self {
-            id: 0,
-            feed_id: feed_profile.id,
+        Self {
+            id: DEFAULT_ID,
+            feed_id: DEFAULT_ID,
             title: match entry.title.to_owned() {
                 Some(t) => t.content,
-                None => config.default_title.clone(),
+                None => UNKNOWN.to_owned(),
             },
             publish_time: match entry.published {
                 Some(t) => t,
@@ -43,7 +40,7 @@ impl FeedPost {
                     .iter()
                     .map(|p| p.to_owned().name)
                     .collect::<Vec<String>>()
-                    .join(config.default_seq.as_ref()),
+                    .join(SEP),
             ),
             link: Some(
                 entry
@@ -51,7 +48,7 @@ impl FeedPost {
                     .iter()
                     .map(|link| link.to_owned().href)
                     .collect::<Vec<String>>()
-                    .join(config.default_seq.as_str()),
+                    .join(SEP),
             ),
             content: match entry.content.to_owned() {
                 Some(t) => t.body,
@@ -65,44 +62,6 @@ impl FeedPost {
             summary_algo: None,
             category_algo: None,
             tags_algo: None,
-        };
-        post
-    }
-
-    pub async fn insert(&mut self, pool: &DbPool) -> Result<Self, InternalError> {
-        let post_id = sqlx::query!(
-            r#"
-            INSERT INTO feed_post (
-                feed_id,
-                title,
-                publish_time,
-                cover,
-                authors,
-                link,
-                content,
-                summary,
-                summary_algo,
-                category_algo,
-                tags_algo
-            )
-            VALUES (?,?,?,?,?,?,?,?,?,?,?)
-            "#,
-            self.feed_id,
-            self.title,
-            self.publish_time,
-            self.cover,
-            self.authors,
-            self.link,
-            self.content,
-            self.summary,
-            self.summary_algo,
-            self.category_algo,
-            self.tags_algo
-        )
-        .execute(pool)
-        .await?
-        .last_insert_id();
-        self.id = post_id as i32;
-        Ok(self.to_owned())
+        }
     }
 }

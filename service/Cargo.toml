@@ -22,4 +22,4 @@ feed-rs = "1.3.0"
 serde_repr = "0.1.11"
 serde = "1.0.154"
 abi = { version = "0.1.0", path = "../abi" }
-content = { version = "0.1.0", path = "../content" }
+content_service = { version = "0.1.0", path = "../content_service" }
