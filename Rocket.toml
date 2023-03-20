@@ -6,14 +6,8 @@ port = 8000
 url = "mysql://root:1234@localhost:3306"
 database = "feedbox_dev"
 
-[jsonwebtoken]
-access_secret_key = "access_secret_key"
+[auth_service.jwt]
+access_key = "access_secret_key"
 access_expiration_hour = 168 # 7 days
-refresh_secret_key = "refresh_secret_key"
+refresh_key = "refresh_secret_key"
 refresh_expiration_hour =  720 # 30 days
-
-[feed]
-default_name = '未命名信息源'
-default_logo = 'https://c-ssl.duitang.com/uploads/blog/202105/09/20210509012315_89541.jpeg'
-default_title = '未命名title'
-default_seq = ','

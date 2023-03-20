@@ -16,14 +16,6 @@ pub enum SuccessResponse<T> {
     Success(Json<T>),
 }
 
-// impl SuccessResponse<String> {
-//     pub fn default_success_response() -> SuccessResponse<String> {
-//         SuccessResponse::Success("Success".to_string().into())
-//     }
-// }
-
-////////////////////////////////
-
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct ErrorInfo {
@@ -44,8 +36,6 @@ pub enum ErrorResponse {
 
     #[response(status = 500)]
     Default(Json<ErrorInfo>),
-    // #[response(status = 400)]
-    // BadRequest(Json<ErrorInfo>),
 }
 
 impl From<InternalError> for ErrorResponse {

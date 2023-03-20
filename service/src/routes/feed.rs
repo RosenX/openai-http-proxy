@@ -6,7 +6,7 @@ use rocket::serde::json::Json;
 use rocket::{fairing::AdHoc, post, routes};
 use rocket::{get, State};
 
-use super::authorization::AuthorizedUser;
+use super::auth_service::AuthorizedUser;
 
 #[post("/add/exist", data = "<request>")]
 async fn create_exist_feed(

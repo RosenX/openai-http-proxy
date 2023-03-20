@@ -9,6 +9,7 @@ dependencies = [
  "bcrypt 0.14.0",
  "chrono",
  "feed-rs",
+ "jsonwebtoken",
  "reqwest",
  "serde",
  "sqlx",
@@ -628,6 +629,7 @@ dependencies = [
  "sqlx",
  "thiserror",
  "tokio",
+ "user_service",
 ]
 
 [[package]]
@@ -2655,6 +2657,16 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
+]
+
+[[package]]
+name = "user_service"
+version = "0.1.0"
+dependencies = [
+ "abi",
+ "async-trait",
+ "serde",
+ "sqlx",
 ]
 
 [[package]]

@@ -4,22 +4,20 @@ use crate::{
     models::request::post_req::PostReq,
 };
 use abi::DbPool;
-use log::info;
 use rocket::serde::json::Json;
 use rocket::{fairing::AdHoc, get, routes, State};
 
-use super::authorization::AuthorizedUser;
+use super::auth_service::AuthorizedUser;
 
-#[get("/pull?<req..>")]
-async fn get_latest_post(
-    user: AuthorizedUser,
-    req: PostReq,
-    pool: &State<DbPool>,
-) -> Result<SuccessResponse<Vec<UserPost>>, ErrorResponse> {
-    info!("{}, {}", user.id, req.latest_post_id);
-    let posts = UserPost::retrieve_latest_post(pool, user.id, req.latest_post_id).await?;
-    Ok(SuccessResponse::Success(Json(posts)))
-}
+// #[get("/pull?<req..>")]
+// async fn get_latest_post(
+//     user: AuthorizedUser,
+//     req: PostReq,
+//     pool: &State<DbPool>,
+// ) -> Result<SuccessResponse<Vec<UserPost>>, ErrorResponse> {
+//     let posts = UserPost::retrieve_latest_post(pool, user.id, req.latest_post_id).await?;
+//     Ok(SuccessResponse::Success(Json(posts)))
+// }
 
 // #[get("/pull/<feed_id>", data = "<req>")]
 // async fn get_latest_post_by_id(
@@ -34,8 +32,8 @@ async fn get_latest_post(
 //     Ok(SuccessResponse::Success(Json(posts)))
 // }
 
-pub fn stage() -> AdHoc {
-    AdHoc::on_ignite("Loading Routes About Post", |rocket| async {
-        rocket.mount("/post", routes![get_latest_post])
-    })
-}
+// pub fn stage() -> AdHoc {
+//     AdHoc::on_ignite("Loading Routes About Post", |rocket| async {
+//         rocket.mount("/post", routes![get_latest_post])
+//     })
+// }

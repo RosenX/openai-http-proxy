@@ -1,32 +1,37 @@
-pub mod jwt_service;
 pub mod mysql_service;
 
 use abi::DbPool;
 use content_service::ContentService;
 
-use rocket::fairing::AdHoc;
+use rocket::{fairing::AdHoc, Config};
+use user_service::UserService;
 
-use self::{
-    jwt_service::JwtService,
-    mysql_service::{setup_database, DatabaseConfig},
-};
+use crate::routes::AuthService;
+
+use self::mysql_service::{setup_database, DatabaseConfig};
 
 pub async fn create_mysql_service() -> DbPool {
     let config = DatabaseConfig::new();
     setup_database(&config).await.expect("数据库服务启动失败")
 }
 
-fn create_jwt_service() -> JwtService {
-    JwtService::new()
-}
-
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("Loading Service", |rocket| async {
         let mysql_service = create_mysql_service().await;
+        let auth_config = Config::figment()
+            .select("auth_service")
+            .extract()
+            .expect("auth配置解析失败");
+
+        let user_service_config = Config::figment()
+            .select("user_service")
+            .extract()
+            .expect("auth配置解析失败");
+
         rocket
-            .manage(create_jwt_service())
             .manage(ContentService::new(mysql_service.clone()))
-            .manage(mysql_service)
+            .manage(UserService::new(mysql_service.clone(), user_service_config))
+            .manage(AuthService::new(auth_config))
     })
 }
 

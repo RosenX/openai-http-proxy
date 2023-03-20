@@ -9,7 +9,7 @@ pub enum InternalError {
     TokenExpired(String),
 
     #[error("error info: {0}")]
-    JsonWebTokenError(String),
+    JsonWebTokenError(#[from] jsonwebtoken::errors::Error),
 
     #[error("error info: {0}")]
     InvalidAuthToken(String),

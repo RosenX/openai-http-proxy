@@ -2,5 +2,6 @@
 members = [
     "service",
     "abi",
-    "content_service"
+    "content_service",
+    "user_service"
 ]
