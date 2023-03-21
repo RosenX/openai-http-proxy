@@ -47,7 +47,7 @@ pub trait ContentServiceApi {
     async fn create_feed(
         &self,
         feed_request: abi::CreateFeedRequest,
-    ) -> Result<abi::CreateFeedResponse, abi::InternalError>;
+    ) -> Result<abi::FeedContentResponse, abi::InternalError>;
 }
 
 #[async_trait]

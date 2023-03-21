@@ -3,7 +3,9 @@ use std::fmt::Display;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::{DecodeJwt, EncodeJwt, InternalError, JwtConfig, Token, Tokens, UserInformation};
+use crate::{
+    DecodeJwt, Email, EncodeJwt, InternalError, JwtConfig, Token, Tokens, UserId, UserInformation,
+};
 
 #[derive(Serialize)]
 pub struct TokenResponse {
@@ -23,21 +25,21 @@ pub type RefreshTokenResponse = TokenResponse;
 // todo，挪个位置
 #[derive(Serialize, Deserialize, Clone)]
 pub struct UserProfile {
-    id: i32,
-    email: String,
-    username: String,
-    pro_level: i32,
-    pro_end_time: DateTime<Utc>,
+    pub id: UserId,
+    pub email: Email,
+    pub username: String,
+    pub pro_level: i32,
+    pub pro_end_time: DateTime<Utc>,
 }
 
 impl From<UserInformation> for UserProfile {
-    fn from(user_profile: UserInformation) -> Self {
+    fn from(user_info: UserInformation) -> Self {
         Self {
-            id: user_profile.id,
-            email: user_profile.email,
-            username: user_profile.username,
-            pro_level: user_profile.pro_level,
-            pro_end_time: user_profile.pro_end_time,
+            id: user_info.id,
+            email: user_info.email,
+            username: user_info.username,
+            pro_level: user_info.pro_level,
+            pro_end_time: user_info.pro_end_time,
         }
     }
 }

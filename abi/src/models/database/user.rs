@@ -1,14 +1,15 @@
 use chrono::{serde::ts_milliseconds, DateTime, Utc};
-use serde::Serialize;
-use sqlx::FromRow;
+use serde::{Deserialize, Serialize};
 
-use crate::{InternalError, PasswordEncrypt, RegisterReq};
+use crate::{
+    Content, Email, FeedProfile, InternalError, PasswordEncrypt, RegisterReq, UserId, UserProfile,
+};
 
 #[derive(Clone, Debug)]
 pub struct UserInformation {
-    pub id: i32,
+    pub id: UserId,
     pub username: String,
-    pub email: String,
+    pub email: Email,
     pub password: String,
     // 0-普通用户；1-VIP；2-SVIP
     pub pro_level: i32,
@@ -16,11 +17,10 @@ pub struct UserInformation {
     pub created_time: DateTime<Utc>,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Deserialize, Clone, Serialize)]
 pub struct UserFeed {
-    pub user_id: i32,
+    pub user_id: UserId,
     pub feed_id: i32,
-    pub url: String,
     pub name: Option<String>,
     pub icon: Option<String>,
     pub logo: Option<String>,
@@ -29,23 +29,42 @@ pub struct UserFeed {
     pub created_time: DateTime<Utc>,
 }
 
-#[derive(Clone, Debug, FromRow, Serialize)]
+impl UserFeed {
+    pub fn new(user: UserProfile, feed: FeedProfile) -> Self {
+        let now_datetime = Utc::now();
+        Self {
+            user_id: user.id,
+            feed_id: feed.id,
+            name: None,
+            icon: None,
+            logo: None,
+            description: None,
+            created_time: now_datetime,
+        }
+    }
+}
+
+#[derive(Deserialize, Clone, Serialize)]
 pub struct UserPost {
-    pub user_id: i32,
-    pub feed_id: i32,
-    pub feed_name: Option<String>,
-    pub cover: Option<String>,
-    pub stage: Option<i64>,
+    pub user_id: UserId,
     pub post_id: i32,
-    pub link: Option<String>,
-    pub content: Option<String>,
-    pub title: String,
-    pub authors: Option<String>,
+    pub stage: i32,
     pub tags: Option<String>,
     pub category: Option<String>,
     pub notes: Option<String>,
-    #[serde(with = "ts_milliseconds")]
-    pub publish_time: DateTime<Utc>,
+}
+
+impl UserPost {
+    pub fn new(user: UserProfile, content: Content) -> Self {
+        Self {
+            user_id: user.id,
+            post_id: content.id,
+            stage: 0,
+            tags: None,
+            category: None,
+            notes: None,
+        }
+    }
 }
 
 impl TryFrom<RegisterReq> for UserInformation {

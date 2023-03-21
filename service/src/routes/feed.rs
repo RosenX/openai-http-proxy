@@ -1,30 +1,44 @@
+use crate::auth_service::AuthorizedUser;
 use crate::common::responder::{ErrorResponse, SuccessResponse};
-use crate::database::user_feed::UserFeed;
-use abi::{CreateFeedRequest, CreateFeedResponse, DbPool};
+use abi::{CreateFeedRequest, CreateFeedResponse, UserFeedResponse, UserProfile};
 use content_service::{ContentService, ContentServiceApi};
 use rocket::serde::json::Json;
 use rocket::{fairing::AdHoc, post, routes};
 use rocket::{get, State};
-
-use super::auth_service::AuthorizedUser;
+use user_service::{UserService, UserServiceApi};
 
 #[post("/add/exist", data = "<request>")]
 async fn create_exist_feed(
-    _user: AuthorizedUser,
+    user: AuthorizedUser,
     request: Json<CreateFeedRequest>,
     content_service: &State<ContentService>,
+    user_service: &State<UserService>,
 ) -> Result<SuccessResponse<CreateFeedResponse>, ErrorResponse> {
-    let response = content_service.create_feed(request.into_inner()).await?;
-    Ok(SuccessResponse::Created(Json(response)))
+    let user_profile: UserProfile = user.into();
+    let feed_response = content_service.create_feed(request.into_inner()).await?;
+    let user_feed =
+        user_service.create_user_feed(user_profile.clone(), feed_response.feed_profile.clone());
+    let user_content =
+        user_service.create_user_content_multiple(user_profile, feed_response.content.clone());
+
+    Ok(SuccessResponse::Created(Json(CreateFeedResponse {
+        feed_profile: feed_response.feed_profile,
+        content: feed_response.content,
+        user_content: user_content.await?,
+        user_feed: user_feed.await?,
+    })))
 }
 
 #[get("/")]
 async fn get_feed_list(
     user: AuthorizedUser,
-    pool: &State<DbPool>,
-) -> Result<SuccessResponse<Vec<UserFeed>>, ErrorResponse> {
-    let user_feed_list = UserFeed::retrieve_feed_by_user(user.id, pool.inner()).await?;
-    Ok(SuccessResponse::Success(Json(user_feed_list)))
+    user_service: &State<UserService>,
+) -> Result<SuccessResponse<UserFeedResponse>, ErrorResponse> {
+    let user_profile: UserProfile = user.into();
+    let feed_list = user_service.query_user_feed(user_profile.id).await?;
+    Ok(SuccessResponse::Success(Json(UserFeedResponse {
+        feed_list,
+    })))
 }
 
 pub fn stage() -> AdHoc {

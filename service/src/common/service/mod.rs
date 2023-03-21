@@ -6,7 +6,7 @@ use content_service::ContentService;
 use rocket::{fairing::AdHoc, Config};
 use user_service::UserService;
 
-use crate::routes::AuthService;
+use crate::auth_service::AuthService;
 
 use self::mysql_service::{setup_database, DatabaseConfig};
 
@@ -24,15 +24,10 @@ pub fn stage() -> AdHoc {
             .extract()
             .expect("auth配置解析失败");
 
-        let user_service_config = Config::figment()
-            .select("user_service")
-            .extract()
-            .expect("auth配置解析失败");
-
         rocket
             .manage(ContentService::new(mysql_service.clone()))
-            .manage(UserService::new(mysql_service.clone(), user_service_config))
-            .manage(AuthService::new(mysql_service.clone(), auth_config))
+            .manage(UserService::new(mysql_service.clone()))
+            .manage(AuthService::new(mysql_service, auth_config))
     })
 }
 

@@ -54,9 +54,9 @@ impl AuthServiceApi for AuthService {
                     info!("{}", tokens);
                     Ok(tokens)
                 }
-                _ => Err(InternalError::WrongPassword.into()),
+                _ => Err(InternalError::WrongPassword),
             },
-            None => Err(InternalError::UserNotExist.into()),
+            None => Err(InternalError::UserNotExist),
         }
     }
 

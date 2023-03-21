@@ -10,6 +10,12 @@ pub struct AuthorizedUser {
     user_profile: UserProfile,
 }
 
+impl From<AuthorizedUser> for UserProfile {
+    fn from(val: AuthorizedUser) -> UserProfile {
+        val.user_profile
+    }
+}
+
 struct UserManager {
     pool: DbPool,
 }

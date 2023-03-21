@@ -1,4 +1,4 @@
-use abi::{Content, CreateFeedResponse, DbPool};
+use abi::{Content, DbPool, FeedContentResponse};
 use async_trait::async_trait;
 
 use crate::{
@@ -21,7 +21,7 @@ impl ContentServiceApi for ContentService {
     async fn create_feed(
         &self,
         feed_request: abi::CreateFeedRequest,
-    ) -> Result<abi::CreateFeedResponse, abi::InternalError> {
+    ) -> Result<abi::FeedContentResponse, abi::InternalError> {
         let feed = self.feed_parser.fetch_feed(feed_request.url).await?;
 
         let feed_profile = feed.clone().into();
@@ -35,7 +35,7 @@ impl ContentServiceApi for ContentService {
 
         let content = self.content_manager.create_multiple(content).await?;
 
-        Ok(CreateFeedResponse {
+        Ok(FeedContentResponse {
             feed_profile,
             content,
         })

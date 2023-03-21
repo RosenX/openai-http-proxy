@@ -23,3 +23,9 @@ pub type Hour = i64;
 pub type TimestampMillis = i64;
 
 pub type Email = String;
+
+pub type UserId = i32;
+
+pub type ContentId = i32;
+
+pub type FeedId = i32;
