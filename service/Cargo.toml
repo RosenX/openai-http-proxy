@@ -24,3 +24,4 @@ serde = "1.0.154"
 abi = { version = "0.1.0", path = "../abi" }
 content_service = { version = "0.1.0", path = "../content_service" }
 user_service = { version = "0.1.0", path = "../user_service" }
+async-trait = "0.1.67"

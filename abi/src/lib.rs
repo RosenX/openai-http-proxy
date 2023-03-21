@@ -21,3 +21,5 @@ pub type Url = String;
 pub type Hour = i64;
 
 pub type TimestampMillis = i64;
+
+pub type Email = String;

@@ -1,18 +1,24 @@
+use std::fmt::Display;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::{DecodeJwt, EncodeJwt, InternalError, JwtConfig, Token, Tokens, UserInformation};
 
 #[derive(Serialize)]
-pub struct RegisterResponse {
+pub struct TokenResponse {
     tokens: Tokens,
 }
 
-impl From<Tokens> for RegisterResponse {
+impl From<Tokens> for TokenResponse {
     fn from(tokens: Tokens) -> Self {
         Self { tokens }
     }
 }
+
+pub type LoginResponse = TokenResponse;
+pub type RegisterResponse = TokenResponse;
+pub type RefreshTokenResponse = TokenResponse;
 
 // todo，挪个位置
 #[derive(Serialize, Deserialize, Clone)]
@@ -33,6 +39,16 @@ impl From<UserInformation> for UserProfile {
             pro_level: user_profile.pro_level,
             pro_end_time: user_profile.pro_end_time,
         }
+    }
+}
+
+impl Display for UserProfile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "user_id: {}, email: {}, username: {}, pro_level: {}, pro_end_time: {}",
+            self.id, self.email, self.username, self.pro_level, self.pro_end_time
+        )
     }
 }
 

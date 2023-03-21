@@ -1,4 +1,9 @@
-use abi::{DecodeJwt, InternalError, JwtConfig};
+use abi::{
+    DbPool, DecodeJwt, EncodeJwt, InternalError, JwtConfig, LoginReq, PasswordVerify, RegisterReq,
+    Token, Tokens, UserInformation, UserProfile,
+};
+use async_trait::async_trait;
+use log::info;
 use rocket::{
     http::Status,
     request::{FromRequest, Outcome},
@@ -6,7 +11,7 @@ use rocket::{
 };
 use serde::Deserialize;
 
-use super::{AuthService, AuthorizedUser, Authurize};
+use super::{AuthService, AuthServiceApi, AuthorizedUser, UserManager, UserManagerOp};
 
 #[derive(Deserialize)]
 pub struct AuthConfig {
@@ -14,20 +19,52 @@ pub struct AuthConfig {
 }
 
 impl AuthService {
-    pub fn new(auth_config: AuthConfig) -> Self {
+    pub fn new(pool: DbPool, auth_config: AuthConfig) -> Self {
         AuthService {
             config: auth_config,
+            user_manager: UserManager::new(pool),
         }
     }
 }
 
-impl Authurize for AuthService {
+#[async_trait]
+impl AuthServiceApi for AuthService {
     type Error = InternalError;
-    fn authurize_user(&self, token: abi::Token) -> Result<AuthorizedUser, Self::Error> {
+    fn authurize(&self, token: abi::Token) -> Result<AuthorizedUser, Self::Error> {
         let profile = token.decode_access_token(&self.config.jwt)?;
         Ok(AuthorizedUser {
             user_profile: profile,
         })
+    }
+
+    async fn register_by_email(&self, request: RegisterReq) -> Result<abi::Tokens, Self::Error> {
+        let user_info = UserInformation::try_from(request)?;
+        let user_info = self.user_manager.create(user_info).await?;
+        let user_profile = UserProfile::from(user_info);
+        let tokens = user_profile.encode_tokens(&self.config.jwt)?;
+        Ok(tokens)
+    }
+
+    async fn login_by_email(&self, request: LoginReq) -> Result<abi::Tokens, Self::Error> {
+        let user_info = self.user_manager.find_user_by_email(&request.email).await?;
+        match user_info {
+            Some(user) => match request.verify(&user.password) {
+                Ok(true) => {
+                    let tokens = UserProfile::from(user).encode_tokens(&self.config.jwt)?;
+                    info!("{}", tokens);
+                    Ok(tokens)
+                }
+                _ => Err(InternalError::WrongPassword.into()),
+            },
+            None => Err(InternalError::UserNotExist.into()),
+        }
+    }
+
+    fn refresh_token(&self, refresh_token: Token) -> Result<Tokens, Self::Error> {
+        let user_profile = refresh_token.decode_refresh_token(&self.config.jwt)?;
+        let tokens = user_profile.encode_tokens(&self.config.jwt)?;
+        info!("Refresh {}", tokens);
+        Ok(tokens)
     }
 }
 
@@ -52,7 +89,7 @@ impl<'r> FromRequest<'r> for AuthorizedUser {
         let auth_service = request.rocket().state::<AuthService>().unwrap();
 
         match access_token {
-            Ok(token) => match auth_service.authurize_user(token) {
+            Ok(token) => match auth_service.authurize(token) {
                 Ok(user) => Outcome::Success(user),
                 Err(err) => Outcome::Failure((Status::Unauthorized, err)),
             },

@@ -613,6 +613,7 @@ name = "feedbox"
 version = "0.1.0"
 dependencies = [
  "abi",
+ "async-trait",
  "bcrypt 0.13.0",
  "chrono",
  "content_service",

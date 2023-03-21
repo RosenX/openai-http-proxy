@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use serde::Deserialize;
 
-use crate::{EncryptUtil, InternalError, PasswordEncrypt};
+use crate::{EncryptUtil, InternalError, PasswordEncrypt, PasswordVerify};
 
 #[derive(Deserialize)]
 pub struct RegisterReq {
@@ -27,5 +27,18 @@ impl PasswordEncrypt for RegisterReq {
             username: self.username,
             password: hash_password,
         })
+    }
+}
+
+#[derive(Deserialize)]
+pub struct LoginReq {
+    pub email: String,
+    pub password: String,
+}
+
+impl PasswordVerify for LoginReq {
+    type Error = InternalError;
+    fn verify(self, target: &str) -> Result<bool, Self::Error> {
+        EncryptUtil::verify_password(&self.password, target)
     }
 }

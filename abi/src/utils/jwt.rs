@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use chrono::Utc;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -10,6 +12,16 @@ pub type Token = String;
 pub struct Tokens {
     pub access_token: Token,
     pub refresh_token: Token,
+}
+
+impl Display for Tokens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "access token: {}, refresh token: {}",
+            self.access_token, self.refresh_token
+        )
+    }
 }
 
 #[derive(Serialize, Deserialize)]

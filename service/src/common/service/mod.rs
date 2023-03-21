@@ -18,6 +18,7 @@ pub async fn create_mysql_service() -> DbPool {
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("Loading Service", |rocket| async {
         let mysql_service = create_mysql_service().await;
+
         let auth_config = Config::figment()
             .select("auth_service")
             .extract()
@@ -31,7 +32,7 @@ pub fn stage() -> AdHoc {
         rocket
             .manage(ContentService::new(mysql_service.clone()))
             .manage(UserService::new(mysql_service.clone(), user_service_config))
-            .manage(AuthService::new(auth_config))
+            .manage(AuthService::new(mysql_service.clone(), auth_config))
     })
 }
 
