@@ -9,20 +9,20 @@ pub struct DatabaseConfig {
     pub database: String,
 }
 
-use sqlx::mysql::MySqlPoolOptions;
+use sqlx::postgres::PgPoolOptions;
 
 impl DatabaseConfig {
     pub fn new() -> Self {
         Config::figment()
             .select("mysql")
             .extract()
-            .expect("MySQL配置解析失败")
+            .expect("数据库配置解析失败")
     }
 }
 
 pub async fn setup_database(config: &DatabaseConfig) -> Result<DbPool, InternalError> {
     let url = format!("{}/{}", config.url, config.database);
-    let pool = MySqlPoolOptions::new()
+    let pool = PgPoolOptions::new()
         .max_connections(5) //todo
         .connect(&url)
         .await?;

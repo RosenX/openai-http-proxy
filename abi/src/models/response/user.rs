@@ -21,14 +21,13 @@ impl From<Tokens> for TokenResponse {
 pub type LoginResponse = TokenResponse;
 pub type RegisterResponse = TokenResponse;
 pub type RefreshTokenResponse = TokenResponse;
-
 // todo，挪个位置
 #[derive(Serialize, Deserialize, Clone)]
 pub struct UserProfile {
     pub id: UserId,
     pub email: Email,
     pub username: String,
-    pub pro_level: i32,
+    pub pro_level: i16,
     pub pro_end_time: DateTime<Utc>,
 }
 

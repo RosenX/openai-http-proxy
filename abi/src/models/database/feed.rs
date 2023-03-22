@@ -1,18 +1,18 @@
 use feed_rs::model::Feed;
 use serde::{Deserialize, Serialize};
 
-use crate::{DEFAULT_ID, UNKNOWN};
+use crate::DEFAULT_ID;
 
 #[derive(Deserialize, Clone, Serialize)]
 pub struct FeedProfile {
     pub id: i32,
     pub url: String,
-    pub name: String,
+    pub name: Option<String>,
     pub icon: Option<String>,
-    pub logo: String,
+    pub logo: Option<String>,
     pub description: Option<String>,
-    pub category: Option<String>,
-    pub tags: Option<String>,
+    pub category_algo: Option<String>,
+    pub tags_algo: Option<String>,
 }
 
 impl From<Feed> for FeedProfile {
@@ -21,23 +21,23 @@ impl From<Feed> for FeedProfile {
             id: DEFAULT_ID,
             url: feed.links[0].clone().href,
             name: match feed.title {
-                Some(t) => t.content,
-                None => UNKNOWN.to_owned(),
+                Some(t) => Some(t.content),
+                None => None,
             },
             icon: match feed.icon {
                 Some(t) => Some(t.uri),
                 None => None,
             },
             logo: match feed.logo {
-                Some(t) => t.uri,
-                None => UNKNOWN.to_owned(),
+                Some(t) => Some(t.uri),
+                None => None,
             },
             description: match feed.description {
                 Some(t) => Some(t.content),
                 None => None,
             },
-            category: None,
-            tags: None,
+            category_algo: None,
+            tags_algo: None,
         }
     }
 }

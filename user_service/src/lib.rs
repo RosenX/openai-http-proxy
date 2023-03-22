@@ -4,7 +4,7 @@ mod user_feed_manager;
 mod user_service;
 
 use abi::{
-    Content, ContentId, DbPool, FeedProfile, UserFeed, UserId, UserInformation, UserPost,
+    Content, ContentId, DbPool, FeedProfile, UserContent, UserFeed, UserId, UserInformation,
     UserProfile,
 };
 use async_trait::async_trait;
@@ -33,12 +33,12 @@ struct UserContentManager {
 #[async_trait]
 pub trait UserContentManagerOp {
     type Error;
-    async fn create(&self, user_content: UserPost) -> Result<UserPost, Self::Error>;
+    async fn create(&self, user_content: UserContent) -> Result<UserContent, Self::Error>;
     async fn query_latest(
         &self,
         user_id: UserId,
         content_id: ContentId,
-    ) -> Result<Vec<UserPost>, Self::Error>;
+    ) -> Result<Vec<UserContent>, Self::Error>;
 }
 
 pub struct UserService {
@@ -58,16 +58,16 @@ pub trait UserServiceApi {
         &self,
         user: UserProfile,
         content: Content,
-    ) -> Result<UserPost, Self::Error>;
+    ) -> Result<UserContent, Self::Error>;
     async fn create_user_content_multiple(
         &self,
         user: UserProfile,
         content_list: Vec<Content>,
-    ) -> Result<Vec<UserPost>, Self::Error>;
+    ) -> Result<Vec<UserContent>, Self::Error>;
     async fn query_user_feed(&self, user_id: UserId) -> Result<Vec<UserFeed>, Self::Error>;
     async fn query_latest_content(
         &self,
         user_id: UserId,
         content_id: ContentId,
-    ) -> Result<Vec<UserPost>, Self::Error>;
+    ) -> Result<Vec<UserContent>, Self::Error>;
 }

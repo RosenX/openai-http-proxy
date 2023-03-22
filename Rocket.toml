@@ -3,7 +3,7 @@ address = "127.0.0.1"
 port = 8000
 
 [mysql]
-url = "mysql://root:1234@localhost:3306"
+url = "postgres://postgres:1234@localhost:5432"
 database = "feedbox_dev"
 
 [auth_service.jwt]

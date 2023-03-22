@@ -1,5 +1,6 @@
 use abi::{
-    Content, ContentId, DbPool, FeedProfile, InternalError, UserFeed, UserId, UserPost, UserProfile,
+    Content, ContentId, DbPool, FeedProfile, InternalError, UserContent, UserFeed, UserId,
+    UserProfile,
 };
 use async_trait::async_trait;
 
@@ -35,8 +36,8 @@ impl UserServiceApi for UserService {
         &self,
         user: UserProfile,
         content: Content,
-    ) -> Result<UserPost, Self::Error> {
-        let user_content = UserPost::new(user, content);
+    ) -> Result<UserContent, Self::Error> {
+        let user_content = UserContent::new(user, content);
         let user_content = self.user_content_manager.create(user_content).await?;
         Ok(user_content)
     }
@@ -45,7 +46,7 @@ impl UserServiceApi for UserService {
         &self,
         user: UserProfile,
         content_list: Vec<Content>,
-    ) -> Result<Vec<UserPost>, Self::Error> {
+    ) -> Result<Vec<UserContent>, Self::Error> {
         let mut user_content_list = Vec::with_capacity(content_list.len());
         for content in content_list {
             let user_content = self.create_user_content(user.clone(), content).await?;
@@ -63,7 +64,7 @@ impl UserServiceApi for UserService {
         &self,
         user_id: UserId,
         content_id: ContentId,
-    ) -> Result<Vec<UserPost>, Self::Error> {
+    ) -> Result<Vec<UserContent>, Self::Error> {
         let content_list = self
             .user_content_manager
             .query_latest(user_id, content_id)

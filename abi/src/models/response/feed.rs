@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{Content, FeedProfile, UserFeed, UserPost};
+use crate::{Content, FeedProfile, UserContent, UserFeed};
 
 #[derive(Deserialize, Clone, Serialize)]
 pub struct FeedContentResponse {
@@ -12,7 +12,7 @@ pub struct FeedContentResponse {
 pub struct CreateFeedResponse {
     pub feed_profile: FeedProfile,
     pub content: Vec<Content>,
-    pub user_content: Vec<UserPost>,
+    pub user_content: Vec<UserContent>,
     pub user_feed: UserFeed,
 }
 
@@ -23,5 +23,5 @@ pub struct UserFeedResponse {
 
 #[derive(Deserialize, Clone, Serialize)]
 pub struct UserContentResponse {
-    pub content_list: Vec<UserPost>,
+    pub content_list: Vec<UserContent>,
 }

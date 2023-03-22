@@ -1,4 +1,4 @@
-use abi::DbPool;
+use abi::{Content, DbPool};
 use async_trait::async_trait;
 
 use crate::{ContentManageOp, ContentManager};
@@ -11,13 +11,15 @@ impl ContentManager {
 
 #[async_trait]
 impl ContentManageOp for ContentManager {
-    async fn create(&self, mut content: abi::Content) -> Result<abi::Content, abi::InternalError> {
-        let id = sqlx::query!(
+    async fn create(&self, mut content: abi::Content) -> Result<Content, abi::InternalError> {
+        let id = sqlx::query_as!(
+            Content,
             r#"
-            INSERT INTO feed_post (
+            INSERT INTO content (
                 feed_id,
                 title,
                 publish_time,
+                create_time,
                 cover,
                 authors,
                 link,
@@ -27,11 +29,13 @@ impl ContentManageOp for ContentManager {
                 category_algo,
                 tags_algo
             )
-            VALUES (?,?,?,?,?,?,?,?,?,?,?)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+            RETURNING *
             "#,
             content.feed_id,
             content.title,
             content.publish_time,
+            content.create_time,
             content.cover,
             content.authors,
             content.link,
@@ -41,10 +45,9 @@ impl ContentManageOp for ContentManager {
             content.category_algo,
             content.tags_algo
         )
-        .execute(&self.pool)
-        .await?
-        .last_insert_id();
-        content.id = id as i32;
+        .fetch_one(&self.pool)
+        .await?;
+        content.id = id.id;
         Ok(content)
     }
 
