@@ -1,4 +1,4 @@
-use abi::{Content, DbService};
+use abi::{Content, DbService, MD5Wapper};
 use async_trait::async_trait;
 
 use crate::{ContentManageOp, ContentManager};
@@ -11,8 +11,8 @@ impl ContentManager {
 
 #[async_trait]
 impl ContentManageOp for ContentManager {
-    async fn create(&self, mut content: abi::Content) -> Result<Content, abi::InternalError> {
-        let id = sqlx::query_as!(
+    async fn create(&self, content: abi::Content) -> Result<Content, abi::InternalError> {
+        let content = sqlx::query_as!(
             Content,
             r#"
             INSERT INTO content (
@@ -43,11 +43,10 @@ impl ContentManageOp for ContentManager {
             content.summary,
             content.summary_algo,
             content.category_algo,
-            content.tags_algo
+            content.tags_algo,
         )
         .fetch_one(self.db_service.as_ref())
         .await?;
-        content.id = id.id;
         Ok(content)
     }
 
@@ -63,5 +62,12 @@ impl ContentManageOp for ContentManager {
             return_content_list.push(content);
         }
         Ok(return_content_list)
+    }
+
+    async fn query_all_md5(&self) -> Result<Vec<MD5Wapper>, abi::InternalError> {
+        let content = sqlx::query_as!(MD5Wapper, "SELECT md5 FROM content")
+            .fetch_all(self.db_service.as_ref())
+            .await?;
+        Ok(content)
     }
 }

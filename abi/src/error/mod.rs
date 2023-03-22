@@ -1,3 +1,5 @@
+use std::string::FromUtf8Error;
+
 use bcrypt::BcryptError;
 
 #[derive(Debug, thiserror::Error)]
@@ -43,6 +45,9 @@ pub enum InternalError {
     // Feed parse Error
     #[error("error info: {0}")]
     FeedParseError(#[from] feed_rs::parser::ParseFeedError),
+
+    #[error("error info: md5 error")]
+    MD5Error(#[from] FromUtf8Error),
 }
 
 impl From<BcryptError> for InternalError {

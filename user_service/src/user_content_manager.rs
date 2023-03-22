@@ -38,12 +38,14 @@ impl UserContentManagerOp for UserContentManager {
         user_id: UserId,
         content_id: ContentId,
     ) -> Result<Vec<UserContent>, Self::Error> {
-        let user_content =
-            sqlx::query_as("SELECT * FROM user_content WHERE user_id = $1 AND content_id > $2")
-                .bind(user_id)
-                .bind(content_id)
-                .fetch_all(self.db_service.as_ref())
-                .await?;
+        let user_content = sqlx::query_as!(
+            UserContent,
+            "SELECT * FROM user_content WHERE user_id = $1 AND content_id > $2",
+            user_id,
+            content_id
+        )
+        .fetch_all(self.db_service.as_ref())
+        .await?;
         Ok(user_content)
     }
 }

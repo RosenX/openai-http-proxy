@@ -6,7 +6,7 @@ CREATE TABLE user_content (
     id SERIAL,
     content_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
-    stage SMALLINT NOT NULL,
+    stage SMALLINT NOT NULL DEFAULT 0,
     tags VARCHAR(500),
     category VARCHAR(50),
     notes TEXT,

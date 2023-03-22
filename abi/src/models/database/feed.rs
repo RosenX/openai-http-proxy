@@ -1,7 +1,7 @@
 use feed_rs::model::Feed;
 use serde::{Deserialize, Serialize};
 
-use crate::DEFAULT_ID;
+use crate::{Url, DEFAULT_ID};
 
 #[derive(Deserialize, Clone, Serialize)]
 pub struct FeedProfile {
@@ -15,24 +15,24 @@ pub struct FeedProfile {
     pub tags_algo: Option<String>,
 }
 
-impl From<Feed> for FeedProfile {
-    fn from(feed: Feed) -> Self {
+impl FeedProfile {
+    pub fn new(feed: &Feed, url: Url) -> Self {
         Self {
             id: DEFAULT_ID,
-            url: feed.links[0].clone().href,
-            name: match feed.title {
+            url,
+            name: match feed.title.to_owned() {
                 Some(t) => Some(t.content),
                 None => None,
             },
-            icon: match feed.icon {
+            icon: match feed.icon.to_owned() {
                 Some(t) => Some(t.uri),
                 None => None,
             },
-            logo: match feed.logo {
+            logo: match feed.logo.to_owned() {
                 Some(t) => Some(t.uri),
                 None => None,
             },
-            description: match feed.description {
+            description: match feed.description.to_owned() {
                 Some(t) => Some(t.content),
                 None => None,
             },

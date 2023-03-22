@@ -19,11 +19,11 @@ async fn create_exist_feed(
     let user_feed =
         user_service.create_user_feed(user_profile.clone(), feed_response.feed_profile.clone());
     let user_content =
-        user_service.create_user_content_multiple(user_profile, feed_response.content.clone());
+        user_service.create_user_content_multiple(user_profile, feed_response.contents.clone());
 
     Ok(SuccessResponse::Created(Json(CreateFeedResponse {
         feed_profile: feed_response.feed_profile,
-        content: feed_response.content,
+        content: feed_response.contents,
         user_content: user_content.await?,
         user_feed: user_feed.await?,
     })))

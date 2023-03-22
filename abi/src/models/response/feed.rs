@@ -5,7 +5,7 @@ use crate::{Content, FeedProfile, UserContent, UserFeed};
 #[derive(Deserialize, Clone, Serialize)]
 pub struct FeedContentResponse {
     pub feed_profile: FeedProfile,
-    pub content: Vec<Content>,
+    pub contents: Vec<Content>,
 }
 
 #[derive(Deserialize, Clone, Serialize)]

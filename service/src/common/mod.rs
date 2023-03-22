@@ -34,8 +34,8 @@ pub fn create_content_service(db_service: DbService) -> ContentService {
     ContentService::new(db_service)
 }
 
-pub fn create_backgroup_job() -> AdHoc {
-    AdHoc::on_liftoff("Background Fetch Feed", |_| {
+pub fn start_service() -> AdHoc {
+    AdHoc::on_liftoff("Starting Service", |_| {
         Box::pin(async move {
             let db_service = create_mysql_service().await;
             let content_service = create_content_service(db_service);
@@ -52,6 +52,5 @@ pub fn init_service() -> AdHoc {
             .manage(create_content_service(db_service.clone()))
             .manage(create_user_service(db_service.clone()))
             .manage(create_auth_service(db_service))
-            .attach(create_backgroup_job())
     })
 }
