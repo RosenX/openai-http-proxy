@@ -40,6 +40,7 @@ pub trait FeedManageOp {
         &self,
         feed_profile: abi::FeedProfile,
     ) -> Result<abi::FeedProfile, abi::InternalError>;
+    async fn query_all(&self) -> Result<Vec<abi::FeedProfile>, abi::InternalError>;
 }
 
 #[async_trait]

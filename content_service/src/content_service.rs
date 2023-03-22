@@ -1,5 +1,6 @@
 use abi::{Content, DbService, FeedContentResponse};
 use async_trait::async_trait;
+use tokio::time;
 
 use crate::{
     ContentManageOp, ContentManager, ContentService, ContentServiceApi, FeedManageOp, FeedManager,
@@ -13,6 +14,17 @@ impl ContentService {
             content_manager: ContentManager::new(db_service),
             feed_parser: FeedParser::new(),
         }
+    }
+
+    pub fn start_fetch_content(self) {
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(time::Duration::from_secs(60));
+            loop {
+                let feed_list = self.feed_manager.query_all().await.unwrap();
+                println!("feed length {}", feed_list.len());
+                interval.tick().await;
+            }
+        });
     }
 }
 

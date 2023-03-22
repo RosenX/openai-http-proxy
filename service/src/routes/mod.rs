@@ -1,8 +1,8 @@
 use rocket::fairing::AdHoc;
 
 pub mod catcher;
+pub mod content;
 pub mod feed;
-pub mod post;
 pub mod user;
 
 pub fn api() -> AdHoc {
@@ -10,7 +10,7 @@ pub fn api() -> AdHoc {
         rocket
             .attach(user::stage())
             .attach(feed::stage())
-            .attach(post::stage())
+            .attach(content::stage())
             .attach(catcher::stage())
     })
 }

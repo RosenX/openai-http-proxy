@@ -32,4 +32,11 @@ impl FeedManageOp for FeedManager {
         .await?;
         Ok(fp)
     }
+
+    async fn query_all(&self) -> Result<Vec<abi::FeedProfile>, abi::InternalError> {
+        let feed_list = sqlx::query_as!(FeedProfile, "SELECT * FROM feed_profile")
+            .fetch_all(self.db_service.as_ref())
+            .await?;
+        Ok(feed_list)
+    }
 }
