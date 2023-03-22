@@ -1,11 +1,11 @@
-use abi::{ContentId, DbPool, InternalError, UserContent, UserId};
+use abi::{ContentId, DbService, InternalError, UserContent, UserId};
 use async_trait::async_trait;
 
 use crate::{UserContentManager, UserContentManagerOp};
 
 impl UserContentManager {
-    pub fn new(pool: DbPool) -> Self {
-        UserContentManager { pool }
+    pub fn new(db_service: DbService) -> Self {
+        UserContentManager { db_service }
     }
 }
 
@@ -28,7 +28,7 @@ impl UserContentManagerOp for UserContentManager {
             user_content.notes,
             user_content.stage
         )
-        .fetch_one(&self.pool)
+        .fetch_one(self.db_service.as_ref())
         .await?;
         Ok(uc)
     }
@@ -42,7 +42,7 @@ impl UserContentManagerOp for UserContentManager {
             sqlx::query_as("SELECT * FROM user_content WHERE user_id = $1 AND content_id > $2")
                 .bind(user_id)
                 .bind(content_id)
-                .fetch_all(&self.pool)
+                .fetch_all(self.db_service.as_ref())
                 .await?;
         Ok(user_content)
     }

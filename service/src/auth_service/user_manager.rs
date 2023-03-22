@@ -1,11 +1,11 @@
-use abi::{DbPool, Email, InternalError, UserInformation};
+use abi::{DbService, Email, InternalError, UserInformation};
 use async_trait::async_trait;
 
 use super::{UserManager, UserManagerOp};
 
 impl UserManager {
-    pub fn new(pool: DbPool) -> Self {
-        UserManager { pool }
+    pub fn new(db_service: DbService) -> Self {
+        UserManager { db_service }
     }
 }
 
@@ -33,7 +33,7 @@ impl UserManagerOp for UserManager {
             user_profile.pro_end_time,
             user_profile.created_time
         )
-        .fetch_one(&self.pool)
+        .fetch_one(self.db_service.as_ref())
         .await?;
         Ok(user_info)
     }
@@ -47,7 +47,7 @@ impl UserManagerOp for UserManager {
             "SELECT * FROM user_information WHERE email = $1",
             email
         )
-        .fetch_optional(&self.pool)
+        .fetch_optional(self.db_service.as_ref())
         .await?;
         Ok(res)
     }

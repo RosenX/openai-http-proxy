@@ -4,7 +4,7 @@ mod user_feed_manager;
 mod user_service;
 
 use abi::{
-    Content, ContentId, DbPool, FeedProfile, UserContent, UserFeed, UserId, UserInformation,
+    Content, ContentId, DbService, FeedProfile, UserContent, UserFeed, UserId, UserInformation,
     UserProfile,
 };
 use async_trait::async_trait;
@@ -16,7 +16,7 @@ pub trait UserManagerOp {
 }
 
 struct UserFeedManager {
-    pool: DbPool,
+    db_service: DbService,
 }
 
 #[async_trait]
@@ -27,7 +27,7 @@ pub trait UserFeedManagerOp {
 }
 
 struct UserContentManager {
-    pool: DbPool,
+    db_service: DbService,
 }
 
 #[async_trait]

@@ -3,16 +3,16 @@ mod content_service;
 mod feed_manager;
 mod feed_parser;
 
-use abi::{DbPool, HttpService, Url};
+use abi::{DbService, HttpService, Url};
 use async_trait::async_trait;
 use feed_rs::model::Feed;
 
 struct ContentManager {
-    pool: DbPool,
+    db_service: DbService,
 }
 
 struct FeedManager {
-    pool: DbPool,
+    db_service: DbService,
 }
 
 struct FeedParser {

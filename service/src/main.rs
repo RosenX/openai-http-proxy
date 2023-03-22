@@ -14,10 +14,6 @@ async fn rocket_app() -> _ {
     env_logger::init_from_env(env);
 
     rocket::build()
-        .attach(common::service::stage())
-        .attach(routes::user::stage())
-        .attach(routes::feed::stage())
-        .attach(routes::post::stage())
-        .attach(common::catcher::stage())
-    // .attach(common::service::backgroupd_job())
+        .attach(common::init_service())
+        .attach(routes::api())
 }

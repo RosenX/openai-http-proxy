@@ -2,9 +2,10 @@
 address = "127.0.0.1"
 port = 8000
 
-[mysql]
+[database]
 url = "postgres://postgres:1234@localhost:5432"
 database = "feedbox_dev"
+max_connection = 8
 
 [auth_service.jwt]
 access_key = "access_secret_key"

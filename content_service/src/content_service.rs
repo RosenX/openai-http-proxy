@@ -1,4 +1,4 @@
-use abi::{Content, DbPool, FeedContentResponse};
+use abi::{Content, DbService, FeedContentResponse};
 use async_trait::async_trait;
 
 use crate::{
@@ -7,10 +7,10 @@ use crate::{
 };
 
 impl ContentService {
-    pub fn new(pool: DbPool) -> Self {
+    pub fn new(db_service: DbService) -> Self {
         Self {
-            feed_manager: FeedManager::new(pool.clone()),
-            content_manager: ContentManager::new(pool),
+            feed_manager: FeedManager::new(db_service.clone()),
+            content_manager: ContentManager::new(db_service),
             feed_parser: FeedParser::new(),
         }
     }

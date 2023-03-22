@@ -1,6 +1,6 @@
 use abi::{
-    DbPool, DecodeJwt, EncodeJwt, InternalError, JwtConfig, LoginReq, PasswordVerify, RegisterReq,
-    Token, Tokens, UserInformation, UserProfile,
+    DbService, DecodeJwt, EncodeJwt, InternalError, JwtConfig, LoginReq, PasswordVerify,
+    RegisterReq, Token, Tokens, UserInformation, UserProfile,
 };
 use async_trait::async_trait;
 use log::info;
@@ -19,10 +19,10 @@ pub struct AuthConfig {
 }
 
 impl AuthService {
-    pub fn new(pool: DbPool, auth_config: AuthConfig) -> Self {
+    pub fn new(db_service: DbService, auth_config: AuthConfig) -> Self {
         AuthService {
             config: auth_config,
-            user_manager: UserManager::new(pool),
+            user_manager: UserManager::new(db_service),
         }
     }
 }

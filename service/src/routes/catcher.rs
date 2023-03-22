@@ -1,6 +1,6 @@
 use rocket::{catch, catchers, fairing::AdHoc};
 
-use super::responder::{ErrorInfo, ErrorResponse};
+use crate::common::{ErrorInfo, ErrorResponse};
 
 #[catch(401)]
 fn general_unauthorized() -> ErrorResponse {

@@ -10,8 +10,6 @@ const DEFAULT_ID: i32 = -1;
 const UNKNOWN: &str = "unknown"; // todo，database schema change
 const SEP: &str = ",";
 
-pub type DbPool = sqlx::PgPool;
-
 pub type HttpClient = reqwest::Client;
 
 pub type Url = String;

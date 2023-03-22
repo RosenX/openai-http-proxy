@@ -1,11 +1,11 @@
-use abi::{DbPool, InternalError, UserFeed, UserId};
+use abi::{DbService, InternalError, UserFeed, UserId};
 use async_trait::async_trait;
 
 use crate::{UserFeedManager, UserFeedManagerOp};
 
 impl UserFeedManager {
-    pub fn new(pool: DbPool) -> Self {
-        UserFeedManager { pool }
+    pub fn new(db_service: DbService) -> Self {
+        UserFeedManager { db_service }
     }
 }
 
@@ -28,7 +28,7 @@ impl UserFeedManagerOp for UserFeedManager {
             user_feed.description,
             user_feed.created_time,
         )
-        .fetch_one(&self.pool)
+        .fetch_one(self.db_service.as_ref())
         .await?;
         Ok(uf)
     }
@@ -40,7 +40,7 @@ impl UserFeedManagerOp for UserFeedManager {
             "#,
             user_id,
         )
-        .fetch_all(&self.pool)
+        .fetch_all(self.db_service.as_ref())
         .await?;
         Ok(user_feeds)
     }

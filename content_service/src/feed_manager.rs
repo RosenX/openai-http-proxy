@@ -1,11 +1,11 @@
-use abi::{DbPool, FeedProfile, InternalError};
+use abi::{DbService, FeedProfile, InternalError};
 use async_trait::async_trait;
 
 use crate::{FeedManageOp, FeedManager};
 
 impl FeedManager {
-    pub fn new(pool: DbPool) -> Self {
-        Self { pool }
+    pub fn new(db_service: DbService) -> Self {
+        Self { db_service }
     }
 }
 
@@ -28,7 +28,7 @@ impl FeedManageOp for FeedManager {
             feed_profile.category_algo,
             feed_profile.tags_algo
         )
-        .fetch_one(&self.pool)
+        .fetch_one(self.db_service.as_ref())
         .await?;
         Ok(fp)
     }

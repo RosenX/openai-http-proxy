@@ -1,7 +1,7 @@
 mod authorization;
 mod user_manager;
 
-use abi::{DbPool, Email, LoginReq, RegisterReq, Token, Tokens, UserInformation, UserProfile};
+use abi::{DbService, Email, LoginReq, RegisterReq, Token, Tokens, UserInformation, UserProfile};
 
 use authorization::AuthConfig;
 use rocket::async_trait;
@@ -17,7 +17,7 @@ impl From<AuthorizedUser> for UserProfile {
 }
 
 struct UserManager {
-    pool: DbPool,
+    db_service: DbService,
 }
 
 #[async_trait]

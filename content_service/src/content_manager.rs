@@ -1,11 +1,11 @@
-use abi::{Content, DbPool};
+use abi::{Content, DbService};
 use async_trait::async_trait;
 
 use crate::{ContentManageOp, ContentManager};
 
 impl ContentManager {
-    pub fn new(pool: DbPool) -> Self {
-        ContentManager { pool }
+    pub fn new(db_service: DbService) -> Self {
+        ContentManager { db_service }
     }
 }
 
@@ -45,7 +45,7 @@ impl ContentManageOp for ContentManager {
             content.category_algo,
             content.tags_algo
         )
-        .fetch_one(&self.pool)
+        .fetch_one(self.db_service.as_ref())
         .await?;
         content.id = id.id;
         Ok(content)

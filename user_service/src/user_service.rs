@@ -1,5 +1,5 @@
 use abi::{
-    Content, ContentId, DbPool, FeedProfile, InternalError, UserContent, UserFeed, UserId,
+    Content, ContentId, DbService, FeedProfile, InternalError, UserContent, UserFeed, UserId,
     UserProfile,
 };
 use async_trait::async_trait;
@@ -10,10 +10,10 @@ use crate::{
 };
 
 impl UserService {
-    pub fn new(pool: DbPool) -> Self {
+    pub fn new(db_service: DbService) -> Self {
         Self {
-            user_feed_manager: UserFeedManager::new(pool.clone()),
-            user_content_manager: UserContentManager::new(pool),
+            user_feed_manager: UserFeedManager::new(db_service.clone()),
+            user_content_manager: UserContentManager::new(db_service),
         }
     }
 }
