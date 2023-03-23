@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
 use crate::{
-    Content, Email, FeedProfile, InternalError, PasswordEncrypt, RegisterReq, UserId, UserProfile,
+    Content, Email, FeedProfile, InternalError, PasswordEncrypt, RegisterInfo, UserId, UserProfile,
     DEFAULT_ID,
 };
 
@@ -109,12 +109,12 @@ impl UserContent {
     }
 }
 
-impl TryFrom<RegisterReq> for UserInformation {
+impl TryFrom<RegisterInfo> for UserInformation {
     type Error = InternalError;
-    fn try_from(value: RegisterReq) -> Result<Self, Self::Error> {
+    fn try_from(value: RegisterInfo) -> Result<Self, Self::Error> {
         // let now_datetime = Utc::now().with_timezone(&FixedOffset::east_opt(28800).unwrap());
         let now_datetime = Utc::now();
-        let info: RegisterReq = value.hash()?;
+        let info: RegisterInfo = value.hash()?;
         let user = UserInformation {
             id: 0, // todo!有没有更好的方法？
             username: info.username,

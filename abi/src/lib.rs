@@ -1,9 +1,11 @@
 mod error;
 mod models;
+mod pb;
 mod utils;
 
 pub use error::*;
 pub use models::*;
+pub use pb::*;
 pub use utils::*;
 
 const DEFAULT_ID: i32 = -1;

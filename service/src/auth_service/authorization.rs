@@ -1,6 +1,6 @@
 use abi::{
     DbService, DecodeJwt, EncodeJwt, InternalError, JwtConfig, LoginReq, PasswordVerify,
-    RegisterReq, Token, Tokens, UserInformation, UserProfile,
+    RegisterInfo, Token, Tokens, UserInformation, UserProfile,
 };
 use async_trait::async_trait;
 use log::info;
@@ -37,7 +37,7 @@ impl AuthServiceApi for AuthService {
         })
     }
 
-    async fn register_by_email(&self, request: RegisterReq) -> Result<abi::Tokens, Self::Error> {
+    async fn register_by_email(&self, request: RegisterInfo) -> Result<abi::Tokens, Self::Error> {
         let user_info = UserInformation::try_from(request)?;
         let user_info = self.user_manager.create(user_info).await?;
         let user_profile = UserProfile::from(user_info);

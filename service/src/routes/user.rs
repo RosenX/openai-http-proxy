@@ -1,14 +1,14 @@
 use crate::auth_service::{AuthService, AuthServiceApi};
 use crate::common::responder::{ErrorResponse, SuccessResponse};
 
-use abi::{LoginReq, LoginResponse, RefreshTokenResponse, RegisterReq, RegisterResponse, Token};
+use abi::{LoginReq, LoginResponse, RefreshTokenResponse, RegisterInfo, RegisterResponse, Token};
 use rocket::fairing::AdHoc;
 use rocket::serde::json::Json;
 use rocket::{post, routes, State};
 
 #[post("/register", data = "<request>")]
 async fn register_by_email(
-    request: Json<RegisterReq>,
+    request: Json<RegisterInfo>,
     auth_service: &State<AuthService>,
 ) -> Result<SuccessResponse<RegisterResponse>, ErrorResponse> {
     let response = auth_service.register_by_email(request.into_inner()).await?;

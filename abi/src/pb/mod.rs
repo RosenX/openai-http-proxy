@@ -1,3 +1,3 @@
-mod content_service;
+mod request;
 
-pub use content_service::FeedProfile;
+pub use request::*;

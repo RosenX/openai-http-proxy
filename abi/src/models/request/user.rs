@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use serde::Deserialize;
 
-use crate::{EncryptUtil, InternalError, PasswordEncrypt, PasswordVerify};
+use crate::{EncryptUtil, InternalError, PasswordEncrypt, PasswordVerify, RegisterInfo};
 
 #[derive(Deserialize)]
 pub struct RegisterReq {
@@ -18,7 +18,7 @@ impl Display for RegisterReq {
 }
 
 // todo，优化一下
-impl PasswordEncrypt for RegisterReq {
+impl PasswordEncrypt for RegisterInfo {
     type Error = InternalError;
     fn hash(self) -> Result<Self, Self::Error> {
         let hash_password = EncryptUtil::hash_password(self.password.as_str())?;
