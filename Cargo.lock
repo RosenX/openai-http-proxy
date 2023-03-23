@@ -9,6 +9,7 @@ dependencies = [
  "bcrypt 0.14.0",
  "chrono",
  "feed-rs",
+ "hex",
  "jsonwebtoken",
  "md-5",
  "prost",

@@ -27,9 +27,10 @@ impl ContentManageOp for ContentManager {
                 summary,
                 summary_algo,
                 category_algo,
-                tags_algo
+                tags_algo,
+                md5
             )
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
             RETURNING *
             "#,
             content.feed_id,
@@ -44,6 +45,7 @@ impl ContentManageOp for ContentManager {
             content.summary_algo,
             content.category_algo,
             content.tags_algo,
+            content.md5
         )
         .fetch_one(self.db_service.as_ref())
         .await?;

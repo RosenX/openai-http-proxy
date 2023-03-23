@@ -47,7 +47,7 @@ impl Content {
                 + summary.clone().unwrap_or("".to_string()).as_ref()
                 + link.clone().unwrap_or("".to_string()).as_ref(),
         );
-        let md5 = String::from_utf8(md5.finalize().to_vec())?;
+        let md5 = hex::encode(md5.finalize());
         let content = Self {
             id: DEFAULT_ID,
             feed_id: None,
