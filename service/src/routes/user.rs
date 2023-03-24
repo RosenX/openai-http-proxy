@@ -1,35 +1,47 @@
 use crate::auth_service::{AuthService, AuthServiceApi};
 use crate::common::responder::{ErrorResponse, SuccessResponse};
+use abi::{AuthResponse, LoginRequest, RefreshTokenRequest, RegisterRequest};
 
-use abi::{LoginReq, LoginResponse, RefreshTokenResponse, RegisterInfo, RegisterResponse, Token};
 use rocket::fairing::AdHoc;
 use rocket::serde::json::Json;
 use rocket::{post, routes, State};
 
 #[post("/register", data = "<request>")]
 async fn register_by_email(
-    request: Json<RegisterInfo>,
+    request: Json<RegisterRequest>,
     auth_service: &State<AuthService>,
-) -> Result<SuccessResponse<RegisterResponse>, ErrorResponse> {
-    let response = auth_service.register_by_email(request.into_inner()).await?;
+) -> Result<SuccessResponse<AuthResponse>, ErrorResponse> {
+    let register_info = match request.into_inner().register_info {
+        Some(info) => info,
+        None => return Err(ErrorResponse::default()),
+    };
+    let response = auth_service.register_by_email(register_info).await?;
     Ok(SuccessResponse::Success(Json(response.into())))
 }
 
 #[post("/login", data = "<request>")]
 async fn login_by_email(
-    request: Json<LoginReq>,
+    request: Json<LoginRequest>,
     auth_service: &State<AuthService>,
-) -> Result<SuccessResponse<LoginResponse>, ErrorResponse> {
-    let response = auth_service.login_by_email(request.into_inner()).await?;
+) -> Result<SuccessResponse<AuthResponse>, ErrorResponse> {
+    let login_info = match request.into_inner().login_info {
+        Some(info) => info,
+        None => return Err(ErrorResponse::default()),
+    };
+    let response = auth_service.login_by_email(login_info).await?;
     Ok(SuccessResponse::Success(Json(response.into())))
 }
 
-#[post("/refresh_token", data = "<refresh_token>", format = "json")]
+#[post("/refresh_token", data = "<request>")]
 fn refresh_token(
-    refresh_token: Token,
+    request: Json<RefreshTokenRequest>,
     auth_service: &State<AuthService>,
-) -> Result<SuccessResponse<RefreshTokenResponse>, ErrorResponse> {
-    let response = auth_service.refresh_token(refresh_token)?;
+) -> Result<SuccessResponse<AuthResponse>, ErrorResponse> {
+    let refresh_token = match request.into_inner().refresh_token {
+        Some(token) => token,
+        None => return Err(ErrorResponse::default()),
+    };
+    let response = auth_service.refresh_token(refresh_token.token)?;
     Ok(SuccessResponse::Created(Json(response.into())))
 }
 

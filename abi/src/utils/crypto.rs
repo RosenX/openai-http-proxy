@@ -1,6 +1,6 @@
 use bcrypt::{hash, verify};
 
-use crate::InternalError;
+use crate::{InternalError, LoginInfo, RegisterInfo};
 
 pub struct EncryptUtil;
 
@@ -29,4 +29,23 @@ pub trait PasswordEncrypt {
 pub trait PasswordVerify {
     type Error;
     fn verify(self, target: &str) -> Result<bool, Self::Error>;
+}
+
+impl PasswordEncrypt for RegisterInfo {
+    type Error = InternalError;
+    fn hash(self) -> Result<Self, Self::Error> {
+        let hash_password = EncryptUtil::hash_password(self.password.as_str())?;
+        Ok(Self {
+            email: self.email,
+            username: self.username,
+            password: hash_password,
+        })
+    }
+}
+
+impl PasswordVerify for LoginInfo {
+    type Error = InternalError;
+    fn verify(self, target: &str) -> Result<bool, Self::Error> {
+        EncryptUtil::verify_password(&self.password, target)
+    }
 }

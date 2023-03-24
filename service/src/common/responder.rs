@@ -34,8 +34,9 @@ pub enum ErrorResponse {
     #[response(status = 401)]
     Unauthorized(Json<ErrorInfo>),
 
-    #[response(status = 500)]
     Default(Json<ErrorInfo>),
+    // #[response(status = 400)]
+    // BadRequest(Json<ErrorInfo>),
 }
 
 impl From<InternalError> for ErrorResponse {

@@ -9,6 +9,7 @@ pub struct RegisterInfo {
     #[prost(string, tag = "3")]
     pub password: ::prost::alloc::string::String,
 }
+#[derive(serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LoginInfo {
@@ -17,28 +18,44 @@ pub struct LoginInfo {
     #[prost(string, tag = "2")]
     pub password: ::prost::alloc::string::String,
 }
+#[derive(serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RefreshToken {
+    #[prost(string, tag = "1")]
+    pub token: ::prost::alloc::string::String,
+}
+#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ClientInfo {
     #[prost(string, tag = "1")]
     pub client_name: ::prost::alloc::string::String,
 }
+#[derive(serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct AuthRequest {
+pub struct LoginRequest {
     #[prost(message, optional, tag = "1")]
     pub client_info: ::core::option::Option<ClientInfo>,
-    #[prost(oneof = "auth_request::Request", tags = "2, 3")]
-    pub request: ::core::option::Option<auth_request::Request>,
+    #[prost(message, optional, tag = "2")]
+    pub login_info: ::core::option::Option<LoginInfo>,
 }
-/// Nested message and enum types in `AuthRequest`.
-pub mod auth_request {
-    #[allow(clippy::derive_partial_eq_without_eq)]
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
-    pub enum Request {
-        #[prost(message, tag = "2")]
-        RegisterInfo(super::RegisterInfo),
-        #[prost(message, tag = "3")]
-        LoginInfo(super::LoginInfo),
-    }
+#[derive(serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RegisterRequest {
+    #[prost(message, optional, tag = "1")]
+    pub client_info: ::core::option::Option<ClientInfo>,
+    #[prost(message, optional, tag = "2")]
+    pub register_info: ::core::option::Option<RegisterInfo>,
+}
+#[derive(serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RefreshTokenRequest {
+    #[prost(message, optional, tag = "1")]
+    pub client_info: ::core::option::Option<ClientInfo>,
+    #[prost(message, optional, tag = "2")]
+    pub refresh_token: ::core::option::Option<RefreshToken>,
 }

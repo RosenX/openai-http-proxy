@@ -4,15 +4,7 @@ use chrono::Utc;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::{Hour, TimestampMillis};
-
-pub type Token = String;
-
-#[derive(Serialize)]
-pub struct Tokens {
-    pub access_token: Token,
-    pub refresh_token: Token,
-}
+use crate::{Hour, TimestampMillis, Token, Tokens};
 
 impl Display for Tokens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

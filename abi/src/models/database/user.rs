@@ -3,34 +3,16 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
 use crate::{
-    Content, Email, FeedProfile, InternalError, PasswordEncrypt, RegisterInfo, UserId, UserProfile,
-    DEFAULT_ID,
+    Content, Email, FeedProfile, InternalError, PasswordEncrypt, ProLevel, RegisterInfo, UserId,
+    UserProfile, DEFAULT_ID,
 };
 
-enum ProLevel {
-    Normal,
-    _Pro,
-    _SPro,
-}
-
-impl From<ProLevel> for i16 {
-    fn from(value: ProLevel) -> Self {
-        match value {
-            ProLevel::Normal => 0,
-            ProLevel::_Pro => 1,
-            ProLevel::_SPro => 2,
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
 pub struct UserInformation {
     pub id: UserId,
     pub username: String,
     pub email: Email,
     pub password: String,
-    // 0-普通用户；1-VIP；2-SVIP
-    pub pro_level: i16,
+    pub pro_level: i16, // todo
     pub pro_end_time: DateTime<Utc>,
     pub created_time: DateTime<Utc>,
 }
@@ -120,7 +102,7 @@ impl TryFrom<RegisterInfo> for UserInformation {
             username: info.username,
             email: info.email,
             password: info.password,
-            pro_level: ProLevel::Normal.into(),
+            pro_level: ProLevel::Free as i16,
             pro_end_time: now_datetime,
             created_time: now_datetime,
         };

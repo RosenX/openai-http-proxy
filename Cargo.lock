@@ -13,6 +13,7 @@ dependencies = [
  "jsonwebtoken",
  "md-5",
  "prost",
+ "prost-types",
  "proto-builder-trait",
  "reqwest",
  "serde",

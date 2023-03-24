@@ -1,7 +1,7 @@
 mod authorization;
 mod user_manager;
 
-use abi::{DbService, Email, LoginReq, RegisterInfo, Token, Tokens, UserInformation, UserProfile};
+use abi::{DbService, Email, LoginInfo, RegisterInfo, Token, Tokens, UserInformation, UserProfile};
 
 use authorization::AuthConfig;
 use rocket::async_trait;
@@ -40,6 +40,6 @@ pub trait AuthServiceApi {
     type Error;
     fn authurize(&self, token: Token) -> Result<AuthorizedUser, Self::Error>;
     async fn register_by_email(&self, request: RegisterInfo) -> Result<Tokens, Self::Error>;
-    async fn login_by_email(&self, request: LoginReq) -> Result<Tokens, Self::Error>;
+    async fn login_by_email(&self, request: LoginInfo) -> Result<Tokens, Self::Error>;
     fn refresh_token(&self, refresh_token: Token) -> Result<Tokens, Self::Error>;
 }

@@ -27,3 +27,5 @@ pub type UserId = i32;
 pub type ContentId = i32;
 
 pub type FeedId = i32;
+
+pub type Token = String;

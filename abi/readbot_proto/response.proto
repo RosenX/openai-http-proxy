@@ -1,0 +1,24 @@
+syntax = "proto3";
+package response;
+
+message Tokens {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+enum ProLevel {
+    PRO_LEVEL_FREE = 0;
+    PRO_LEVEL_PRO = 1;
+}
+
+message UserProfile {
+    int32 id = 1;
+    string username = 2;
+    string email = 3;
+    ProLevel pro_level = 4;
+    int64 pro_end_time = 5;
+}
+
+message AuthResponse {
+    Tokens tokens = 1;
+}

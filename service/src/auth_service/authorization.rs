@@ -1,5 +1,5 @@
 use abi::{
-    DbService, DecodeJwt, EncodeJwt, InternalError, JwtConfig, LoginReq, PasswordVerify,
+    DbService, DecodeJwt, EncodeJwt, InternalError, JwtConfig, LoginInfo, PasswordVerify,
     RegisterInfo, Token, Tokens, UserInformation, UserProfile,
 };
 use async_trait::async_trait;
@@ -45,7 +45,7 @@ impl AuthServiceApi for AuthService {
         Ok(tokens)
     }
 
-    async fn login_by_email(&self, request: LoginReq) -> Result<abi::Tokens, Self::Error> {
+    async fn login_by_email(&self, request: LoginInfo) -> Result<abi::Tokens, Self::Error> {
         let user_info = self.user_manager.find_user_by_email(&request.email).await?;
         match user_info {
             Some(user) => match request.verify(&user.password) {

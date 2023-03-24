@@ -1,35 +1,7 @@
-use std::fmt::Display;
-
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-
 use crate::{
-    DecodeJwt, Email, EncodeJwt, InternalError, JwtConfig, Token, Tokens, UserId, UserInformation,
+    AuthResponse, DecodeJwt, EncodeJwt, InternalError, JwtConfig, Token, Tokens, UserInformation,
+    UserProfile,
 };
-
-#[derive(Serialize)]
-pub struct TokenResponse {
-    tokens: Tokens,
-}
-
-impl From<Tokens> for TokenResponse {
-    fn from(tokens: Tokens) -> Self {
-        Self { tokens }
-    }
-}
-
-pub type LoginResponse = TokenResponse;
-pub type RegisterResponse = TokenResponse;
-pub type RefreshTokenResponse = TokenResponse;
-// todo，挪个位置
-#[derive(Serialize, Deserialize, Clone)]
-pub struct UserProfile {
-    pub id: UserId,
-    pub email: Email,
-    pub username: String,
-    pub pro_level: i16,
-    pub pro_end_time: DateTime<Utc>,
-}
 
 impl From<UserInformation> for UserProfile {
     fn from(user_info: UserInformation) -> Self {
@@ -37,21 +9,29 @@ impl From<UserInformation> for UserProfile {
             id: user_info.id,
             email: user_info.email,
             username: user_info.username,
-            pro_level: user_info.pro_level,
-            pro_end_time: user_info.pro_end_time,
+            pro_level: user_info.pro_level as i32,
+            pro_end_time: user_info.pro_end_time.timestamp(),
         }
     }
 }
 
-impl Display for UserProfile {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "user_id: {}, email: {}, username: {}, pro_level: {}, pro_end_time: {}",
-            self.id, self.email, self.username, self.pro_level, self.pro_end_time
-        )
+impl From<Tokens> for AuthResponse {
+    fn from(value: Tokens) -> Self {
+        Self {
+            tokens: Some(value),
+        }
     }
 }
+
+// impl Display for UserProfile {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         write!(
+//             f,
+//             "user_id: {}, email: {}, username: {}, pro_level: {}, pro_end_time: {}",
+//             self.id, self.email, self.username, self.pro_level, self.pro_end_time
+//         )
+//     }
+// }
 
 impl EncodeJwt for UserProfile {
     type Error = InternalError;
