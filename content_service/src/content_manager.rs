@@ -1,4 +1,4 @@
-use abi::{Content, DbService, MD5Wapper};
+use abi::{timestamp_to_datetime, Content, DbService, Id, MD5Wapper};
 use async_trait::async_trait;
 
 use crate::{ContentManageOp, ContentManager};
@@ -11,9 +11,8 @@ impl ContentManager {
 
 #[async_trait]
 impl ContentManageOp for ContentManager {
-    async fn create(&self, content: abi::Content) -> Result<Content, abi::InternalError> {
-        let content = sqlx::query_as!(
-            Content,
+    async fn create(&self, mut content: abi::Content) -> Result<Content, abi::InternalError> {
+        let id = sqlx::query_scalar!(
             r#"
             INSERT INTO content (
                 feed_id,
@@ -31,12 +30,15 @@ impl ContentManageOp for ContentManager {
                 md5
             )
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
-            RETURNING *
+            RETURNING id
             "#,
             content.feed_id,
             content.title,
-            content.publish_time,
-            content.create_time,
+            match content.publish_time {
+                Some(t) => Some(timestamp_to_datetime(t)),
+                None => None,
+            },
+            timestamp_to_datetime(content.create_time),
             content.cover,
             content.authors,
             content.link,
@@ -49,6 +51,7 @@ impl ContentManageOp for ContentManager {
         )
         .fetch_one(self.db_service.as_ref())
         .await?;
+        content.id = id;
         Ok(content)
     }
 
@@ -68,6 +71,17 @@ impl ContentManageOp for ContentManager {
 
     async fn query_all_md5(&self) -> Result<Vec<MD5Wapper>, abi::InternalError> {
         let content = sqlx::query_as!(MD5Wapper, "SELECT md5 FROM content")
+            .fetch_all(self.db_service.as_ref())
+            .await?;
+        Ok(content)
+    }
+
+    async fn query_contents(
+        &self,
+        content_ids: Vec<Id>,
+    ) -> Result<Vec<Content>, abi::InternalError> {
+        let content = sqlx::query_as("SELECT * FROM content WHERE id = ANY($1)")
+            .bind(&content_ids)
             .fetch_all(self.db_service.as_ref())
             .await?;
         Ok(content)

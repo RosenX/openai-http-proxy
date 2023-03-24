@@ -1,19 +1,17 @@
-use abi::{
-    Content, ContentId, DbService, FeedProfile, InternalError, UserContent, UserFeed, UserId,
-    UserProfile,
-};
+use abi::{Content, DbService, FeedProfile, Id, InternalError, UserContent, UserFeed, UserProfile};
 use async_trait::async_trait;
 
 use crate::{
     UserContentManager, UserContentManagerOp, UserFeedManager, UserFeedManagerOp, UserService,
-    UserServiceApi,
+    UserServiceApi, UserServiceConfig,
 };
 
 impl UserService {
-    pub fn new(db_service: DbService) -> Self {
+    pub fn new(db_service: DbService, config: UserServiceConfig) -> Self {
         Self {
             user_feed_manager: UserFeedManager::new(db_service.clone()),
             user_content_manager: UserContentManager::new(db_service),
+            config,
         }
     }
 }
@@ -55,19 +53,35 @@ impl UserServiceApi for UserService {
         Ok(user_content_list)
     }
 
-    async fn query_user_feed(&self, user_id: UserId) -> Result<Vec<UserFeed>, Self::Error> {
+    async fn query_user_feed(&self, user_id: Id) -> Result<Vec<UserFeed>, Self::Error> {
         let user_feed_list = self.user_feed_manager.query(user_id).await?;
         Ok(user_feed_list)
     }
 
     async fn query_latest_content(
         &self,
-        user_id: UserId,
-        content_id: ContentId,
+        user_id: Id,
+        content_id: Id,
+        size: i32,
     ) -> Result<Vec<UserContent>, Self::Error> {
+        let size = std::cmp::min(size, self.config.max_page_size);
         let content_list = self
             .user_content_manager
-            .query_latest(user_id, content_id)
+            .query_latest(user_id, content_id, size)
+            .await?;
+        Ok(content_list)
+    }
+
+    async fn query_old_content(
+        &self,
+        user_id: Id,
+        content_id: Id,
+        size: i32,
+    ) -> Result<Vec<UserContent>, Self::Error> {
+        let size = std::cmp::min(size, self.config.max_page_size);
+        let content_list = self
+            .user_content_manager
+            .query_old(user_id, content_id, size)
             .await?;
         Ok(content_list)
     }

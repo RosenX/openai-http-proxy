@@ -13,9 +13,25 @@ fn main() {
                 "request.LoginInfo",
                 "request.RefreshTokenRequest",
                 "request.RefreshToken",
+                "request.CreateFeedRequest",
+                "request.FeedInfo",
             ],
             false,
             true,
+            None,
+        )
+        .with_serde(
+            &[
+                "response.CreateFeedResponse",
+                "response.UserFeed",
+                "response.FeedProfile",
+                "response.UserContent",
+                "response.Content",
+                "response.FetchContentResponse",
+                "response.FecthFeedResponse",
+            ],
+            true,
+            false,
             None,
         )
         .with_serde(
@@ -29,13 +45,11 @@ fn main() {
             None,
         )
         .with_serde(&["response.AuthResponse"], true, false, None)
-        .compile(
-            &[
-                "readbot_proto/request.proto",
-                "readbot_proto/response.proto",
-            ],
-            &["readbot_proto"],
+        .with_type_attributes(
+            &["request.FetchContentRequest"],
+            &[r#"#[derive(FromForm)]"#],
         )
+        .compile(&["proto/request.proto", "proto/response.proto"], &["proto"])
         .unwrap();
 
     Command::new("cargo").args(["fmt"]).output().unwrap();

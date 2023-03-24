@@ -1,19 +1,6 @@
 use feed_rs::model::Feed;
-use serde::{Deserialize, Serialize};
 
-use crate::{Url, DEFAULT_ID};
-
-#[derive(Deserialize, Clone, Serialize)]
-pub struct FeedProfile {
-    pub id: i32,
-    pub url: String,
-    pub name: Option<String>,
-    pub icon: Option<String>,
-    pub logo: Option<String>,
-    pub description: Option<String>,
-    pub category_algo: Option<String>,
-    pub tags_algo: Option<String>,
-}
+use crate::{FeedProfile, Url, DEFAULT_ID};
 
 impl FeedProfile {
     pub fn new(feed: &Feed, url: Url) -> Self {

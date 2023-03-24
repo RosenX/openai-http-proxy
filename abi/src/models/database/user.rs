@@ -1,32 +1,17 @@
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 
 use crate::{
-    Content, Email, FeedProfile, InternalError, PasswordEncrypt, ProLevel, RegisterInfo, UserId,
-    UserProfile, DEFAULT_ID,
+    Content, Email, FeedProfile, Id, InternalError, PasswordEncrypt, ProLevel, ReadStage,
+    RegisterInfo, UserContent, UserFeed, UserProfile, DEFAULT_ID,
 };
 
 pub struct UserInformation {
-    pub id: UserId,
+    pub id: Id,
     pub username: String,
     pub email: Email,
     pub password: String,
     pub pro_level: i16, // todo
     pub pro_end_time: DateTime<Utc>,
-    pub created_time: DateTime<Utc>,
-}
-
-#[derive(Deserialize, Clone, Serialize)]
-pub struct UserFeed {
-    pub id: i32,
-    pub user_id: UserId,
-    pub feed_id: i32,
-    pub name: Option<String>,
-    pub logo: Option<String>,
-    pub description: Option<String>,
-    pub folder: Option<String>,
-    pub tags: Option<String>,
     pub created_time: DateTime<Utc>,
 }
 
@@ -40,41 +25,11 @@ impl UserFeed {
             name: None,
             logo: None,
             description: None,
-            created_time: now_datetime,
+            created_time: now_datetime.timestamp(),
             tags: None,
             folder: None,
         }
     }
-}
-
-#[derive(Deserialize, Clone, Serialize)]
-pub enum ReadStage {
-    Explore = 0,
-    Focus = 1,
-    Seen = 2,
-    Archive = 3,
-}
-
-impl From<ReadStage> for i16 {
-    fn from(value: ReadStage) -> Self {
-        match value {
-            ReadStage::Explore => 0,
-            ReadStage::Focus => 1,
-            ReadStage::Seen => 2,
-            ReadStage::Archive => 3,
-        }
-    }
-}
-
-#[derive(Deserialize, Clone, Serialize, FromRow)]
-pub struct UserContent {
-    pub id: i32,
-    pub user_id: UserId,
-    pub content_id: i32,
-    pub stage: i16,
-    pub tags: Option<String>,
-    pub category: Option<String>,
-    pub notes: Option<String>,
 }
 
 impl UserContent {
@@ -83,7 +38,7 @@ impl UserContent {
             id: DEFAULT_ID,
             user_id: user.id,
             content_id: content.id,
-            stage: ReadStage::Explore.into(),
+            stage: ReadStage::Explore as i32, // todo
             tags: None,
             category: None,
             notes: None,

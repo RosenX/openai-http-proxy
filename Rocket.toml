@@ -15,3 +15,6 @@ refresh_expiration_hour =  720 # 30 days
 
 [content_service]
 fetch_interval_hour = 2
+
+[user_content_service]
+default_page_size = 20

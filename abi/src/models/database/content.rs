@@ -1,28 +1,10 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use feed_rs::model::Entry;
 use md5::{Digest, Md5};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-use crate::{InternalError, DEFAULT_ID, SEP, UNKNOWN};
-
-#[derive(Deserialize, Clone, Serialize, FromRow)]
-pub struct Content {
-    pub id: i32,
-    pub feed_id: Option<i32>,
-    pub title: String,
-    pub cover: Option<String>,
-    pub publish_time: Option<DateTime<Utc>>,
-    pub authors: Option<String>,
-    pub link: Option<String>,
-    pub content: Option<String>,
-    pub summary: Option<String>,
-    pub summary_algo: Option<String>,
-    pub category_algo: Option<String>,
-    pub tags_algo: Option<String>,
-    pub create_time: DateTime<Utc>,
-    pub md5: String,
-}
+use crate::{Content, InternalError, DEFAULT_ID, SEP, UNKNOWN};
 
 impl Content {
     pub fn from_entry(entry: Entry) -> Result<Self, InternalError> {
@@ -52,7 +34,7 @@ impl Content {
             id: DEFAULT_ID,
             feed_id: None,
             title,
-            publish_time: entry.published,
+            publish_time: entry.published.map(|t| t.timestamp()),
             authors: Some(
                 entry
                     .authors
@@ -68,7 +50,7 @@ impl Content {
             summary_algo: None,
             category_algo: None,
             tags_algo: None,
-            create_time: now_datetime,
+            create_time: now_datetime.timestamp(),
             md5,
         };
         Ok(content)

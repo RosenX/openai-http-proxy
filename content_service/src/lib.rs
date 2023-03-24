@@ -3,7 +3,9 @@ mod content_service;
 mod feed_manager;
 mod feed_parser;
 
-use abi::{Content, DbService, FeedProfile, HttpService, InternalError, MD5Wapper, Url};
+use abi::{
+    Content, DbService, FeedContent, FeedProfile, HttpService, Id, InternalError, MD5Wapper, Url,
+};
 use async_trait::async_trait;
 use feed_rs::model::Feed;
 use serde::Deserialize;
@@ -40,6 +42,11 @@ pub trait ContentManageOp {
         mut content_list: Vec<abi::Content>,
     ) -> Result<Vec<abi::Content>, abi::InternalError>;
     async fn query_all_md5(&self) -> Result<Vec<MD5Wapper>, abi::InternalError>;
+
+    async fn query_contents(
+        &self,
+        content_ids: Vec<Id>,
+    ) -> Result<Vec<Content>, abi::InternalError>;
 }
 
 #[async_trait]
@@ -55,8 +62,12 @@ pub trait FeedManageOp {
 pub trait ContentServiceApi {
     async fn create_feed(
         &self,
-        feed_request: abi::CreateFeedRequest,
-    ) -> Result<abi::FeedContentResponse, abi::InternalError>;
+        feed_info: abi::FeedInfo,
+    ) -> Result<FeedContent, abi::InternalError>;
+    async fn query_contents(
+        &self,
+        content_ids: Vec<Id>,
+    ) -> Result<Vec<Content>, abi::InternalError>;
 }
 
 #[async_trait]

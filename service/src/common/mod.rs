@@ -27,7 +27,11 @@ pub fn create_auth_service(db_service: DbService) -> AuthService {
 }
 
 pub fn create_user_service(db_service: DbService) -> UserService {
-    UserService::new(db_service)
+    let config = Config::figment()
+        .select("user_content_service")
+        .extract()
+        .expect("user_content_service配置解析失败");
+    UserService::new(db_service, config)
 }
 
 pub fn create_content_service(db_service: DbService) -> ContentService {

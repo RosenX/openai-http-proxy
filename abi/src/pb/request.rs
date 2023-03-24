@@ -59,3 +59,21 @@ pub struct RefreshTokenRequest {
     #[prost(message, optional, tag = "2")]
     pub refresh_token: ::core::option::Option<RefreshToken>,
 }
+#[derive(serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct FeedInfo {
+    #[prost(string, tag = "1")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub url: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub icon: ::prost::alloc::string::String,
+}
+#[derive(serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CreateFeedRequest {
+    #[prost(message, optional, tag = "2")]
+    pub feed_info: ::core::option::Option<FeedInfo>,
+}

@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use abi::{Content, DbService, FeedContentResponse, FeedProfile};
+use abi::{Content, DbService, FeedContent, FeedInfo, FeedProfile, Id};
 use async_trait::async_trait;
 use tokio::time;
 
@@ -74,11 +74,8 @@ impl ContentService {
 
 #[async_trait]
 impl ContentServiceApi for ContentService {
-    async fn create_feed(
-        &self,
-        feed_request: abi::CreateFeedRequest,
-    ) -> Result<abi::FeedContentResponse, abi::InternalError> {
-        let url = feed_request.url;
+    async fn create_feed(&self, feed_info: FeedInfo) -> Result<FeedContent, abi::InternalError> {
+        let url = feed_info.url;
         let feed = self.feed_parser.fetch_feed_from_url(&url).await?;
 
         let feed_profile = FeedProfile::new(&feed, url);
@@ -91,9 +88,15 @@ impl ContentServiceApi for ContentService {
 
         let contents = self.content_manager.create_multiple(content_list).await?;
 
-        Ok(FeedContentResponse {
-            feed_profile,
+        Ok(FeedContent {
+            feed_profile: Some(feed_profile),
             contents,
         })
+    }
+    async fn query_contents(
+        &self,
+        content_ids: Vec<Id>,
+    ) -> Result<Vec<Content>, abi::InternalError> {
+        self.content_manager.query_contents(content_ids).await
     }
 }
