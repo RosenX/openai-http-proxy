@@ -13,3 +13,4 @@ sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "postgres", "macr
 tokio = "1.26.0"
 log = "0.4.17"
 env_logger = "0.10.0"
+serde = "1.0.158"

@@ -12,3 +12,6 @@ access_key = "access_secret_key"
 access_expiration_hour = 168 # 7 days
 refresh_key = "refresh_secret_key"
 refresh_expiration_hour =  720 # 30 days
+
+[content_service]
+fetch_interval_hour = 2

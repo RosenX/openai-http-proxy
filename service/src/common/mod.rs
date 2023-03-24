@@ -31,7 +31,12 @@ pub fn create_user_service(db_service: DbService) -> UserService {
 }
 
 pub fn create_content_service(db_service: DbService) -> ContentService {
-    ContentService::new(db_service)
+    let config = Config::figment()
+        .select("content_service")
+        .extract()
+        .expect("content_service配置解析失败");
+
+    ContentService::new(db_service, config)
 }
 
 pub fn start_service() -> AdHoc {

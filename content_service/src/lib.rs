@@ -6,6 +6,7 @@ mod feed_parser;
 use abi::{Content, DbService, FeedProfile, HttpService, InternalError, MD5Wapper, Url};
 use async_trait::async_trait;
 use feed_rs::model::Feed;
+use serde::Deserialize;
 
 struct ContentManager {
     db_service: DbService,
@@ -23,6 +24,12 @@ pub struct ContentService {
     content_manager: ContentManager,
     feed_manager: FeedManager,
     feed_parser: FeedParser,
+    config: ContentServiceConfig,
+}
+
+#[derive(Clone, Deserialize, Debug)]
+pub struct ContentServiceConfig {
+    pub fetch_interval_hour: u64,
 }
 
 #[async_trait]

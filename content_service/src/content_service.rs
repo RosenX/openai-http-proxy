@@ -5,23 +5,26 @@ use async_trait::async_trait;
 use tokio::time;
 
 use crate::{
-    ContentManageOp, ContentManager, ContentService, ContentServiceApi, FeedManageOp, FeedManager,
-    FeedParser, FeedParserOp,
+    ContentManageOp, ContentManager, ContentService, ContentServiceApi, ContentServiceConfig,
+    FeedManageOp, FeedManager, FeedParser, FeedParserOp,
 };
 
 impl ContentService {
-    pub fn new(db_service: DbService) -> Self {
+    pub fn new(db_service: DbService, config: ContentServiceConfig) -> Self {
         Self {
             feed_manager: FeedManager::new(db_service.clone()),
             content_manager: ContentManager::new(db_service),
             feed_parser: FeedParser::new(),
+            config,
         }
     }
 
     pub fn start_fetch_content(self) {
         tokio::spawn(async move {
             //todo 增加异常处理
-            let mut interval = tokio::time::interval(time::Duration::from_secs(60));
+            let mut interval = tokio::time::interval(time::Duration::from_secs(
+                60 * 60 * self.config.fetch_interval_hour,
+            ));
             loop {
                 let exist_content = self
                     .content_manager
