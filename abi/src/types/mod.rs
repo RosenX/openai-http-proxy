@@ -1,39 +1,12 @@
 mod content;
+mod user;
+mod user_content;
 
-use crate::{
-    AuthResponse, DecodeJwt, EncodeJwt, InternalError, JwtConfig, Token, Tokens, UserInformation,
-    UserProfile,
-};
+pub use content::*;
+pub use user::*;
+pub use user_content::*;
 
-impl From<UserInformation> for UserProfile {
-    fn from(user_info: UserInformation) -> Self {
-        Self {
-            id: user_info.id,
-            email: user_info.email,
-            username: user_info.username,
-            pro_level: user_info.pro_level as i32,
-            pro_end_time: user_info.pro_end_time.timestamp(),
-        }
-    }
-}
-
-impl From<Tokens> for AuthResponse {
-    fn from(value: Tokens) -> Self {
-        Self {
-            tokens: Some(value),
-        }
-    }
-}
-
-// impl Display for UserProfile {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         write!(
-//             f,
-//             "user_id: {}, email: {}, username: {}, pro_level: {}, pro_end_time: {}",
-//             self.id, self.email, self.username, self.pro_level, self.pro_end_time
-//         )
-//     }
-// }
+use crate::{DecodeJwt, EncodeJwt, InternalError, JwtConfig, Token, Tokens, UserProfile};
 
 impl EncodeJwt for UserProfile {
     type Error = InternalError;

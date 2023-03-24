@@ -1,8 +1,8 @@
 use chrono::{DateTime, Utc};
 
 use crate::{
-    Content, Email, FeedProfile, Id, InternalError, PasswordEncrypt, ProLevel, ReadStage,
-    RegisterInfo, UserContent, UserFeed, UserProfile, DEFAULT_ID,
+    AuthResponse, Email, Id, InternalError, PasswordEncrypt, ProLevel, RegisterInfo, Tokens,
+    UserProfile,
 };
 
 pub struct UserInformation {
@@ -13,37 +13,6 @@ pub struct UserInformation {
     pub pro_level: i16, // todo
     pub pro_end_time: DateTime<Utc>,
     pub created_time: DateTime<Utc>,
-}
-
-impl UserFeed {
-    pub fn new(user: UserProfile, feed: FeedProfile) -> Self {
-        let now_datetime = Utc::now();
-        Self {
-            id: DEFAULT_ID,
-            user_id: user.id,
-            feed_id: feed.id,
-            name: None,
-            logo: None,
-            description: None,
-            created_time: now_datetime.timestamp(),
-            tags: None,
-            folder: None,
-        }
-    }
-}
-
-impl UserContent {
-    pub fn new(user: UserProfile, content: Content) -> Self {
-        Self {
-            id: DEFAULT_ID,
-            user_id: user.id,
-            content_id: content.id,
-            stage: ReadStage::Explore as i32, // todo
-            tags: None,
-            category: None,
-            notes: None,
-        }
-    }
 }
 
 impl TryFrom<RegisterInfo> for UserInformation {
@@ -62,5 +31,35 @@ impl TryFrom<RegisterInfo> for UserInformation {
             created_time: now_datetime,
         };
         Ok(user)
+    }
+}
+
+// impl Display for UserProfile {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         write!(
+//             f,
+//             "user_id: {}, email: {}, username: {}, pro_level: {}, pro_end_time: {}",
+//             self.id, self.email, self.username, self.pro_level, self.pro_end_time
+//         )
+//     }
+// }
+
+impl From<UserInformation> for UserProfile {
+    fn from(user_info: UserInformation) -> Self {
+        Self {
+            id: user_info.id,
+            email: user_info.email,
+            username: user_info.username,
+            pro_level: user_info.pro_level as i32,
+            pro_end_time: user_info.pro_end_time.timestamp(),
+        }
+    }
+}
+
+impl From<Tokens> for AuthResponse {
+    fn from(value: Tokens) -> Self {
+        Self {
+            tokens: Some(value),
+        }
     }
 }

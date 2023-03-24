@@ -1,11 +1,9 @@
 mod error;
-mod models;
 mod pb;
 mod types;
 mod utils;
 
 pub use error::*;
-pub use models::*;
 pub use pb::*;
 pub use types::*;
 pub use utils::*;
