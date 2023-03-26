@@ -13,7 +13,7 @@ use user_service::{UserService, UserServiceApi};
 struct FetchContentParam {
     is_latest: bool,
     latest_id: i32,
-    page_size: i32,
+    nums: i32,
 }
 
 // if is_latest is true, return content those id is bigger than latest_content_id else return content those id is smaller than latest_content_id
@@ -28,12 +28,12 @@ async fn get_latest_post(
     let user_contents = match param.is_latest {
         true => {
             user_service
-                .query_latest_content(user_profile.id, param.latest_id, param.page_size)
+                .query_latest_content(user_profile.id, param.latest_id, param.nums)
                 .await?
         }
         false => {
             user_service
-                .query_old_content(user_profile.id, param.latest_id, param.page_size)
+                .query_old_content(user_profile.id, param.latest_id, param.nums)
                 .await?
         }
     };

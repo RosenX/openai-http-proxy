@@ -47,6 +47,7 @@ async fn get_feed_list(
     let user_feeds = user_service.query_user_feed(user_profile.id).await?;
     Ok(SuccessResponse::Success(Json(FecthFeedResponse {
         user_feeds,
+        feed_profiles: vec![], // todo
     })))
 }
 

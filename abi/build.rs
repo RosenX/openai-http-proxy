@@ -45,10 +45,6 @@ fn main() {
             None,
         )
         .with_serde(&["response.AuthResponse"], true, false, None)
-        .with_type_attributes(
-            &["request.FetchContentRequest"],
-            &[r#"#[derive(FromForm)]"#],
-        )
         .compile(&["proto/request.proto", "proto/response.proto"], &["proto"])
         .unwrap();
 

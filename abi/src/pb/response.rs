@@ -152,6 +152,8 @@ pub struct CreateFeedResponse {
 pub struct FecthFeedResponse {
     #[prost(message, repeated, tag = "1")]
     pub user_feeds: ::prost::alloc::vec::Vec<UserFeed>,
+    #[prost(message, repeated, tag = "2")]
+    pub feed_profiles: ::prost::alloc::vec::Vec<FeedProfile>,
 }
 #[derive(serde::Serialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
