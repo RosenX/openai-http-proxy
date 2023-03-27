@@ -1,4 +1,5 @@
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Tokens {
@@ -8,6 +9,7 @@ pub struct Tokens {
     pub refresh_token: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserProfile {
@@ -23,6 +25,7 @@ pub struct UserProfile {
     pub pro_end_time: i64,
 }
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedProfile {
@@ -44,6 +47,7 @@ pub struct FeedProfile {
     pub tags_algo: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserFeed {
@@ -67,6 +71,7 @@ pub struct UserFeed {
     pub created_time: i64,
 }
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserContent {
@@ -86,6 +91,7 @@ pub struct UserContent {
     pub notes: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Content {
@@ -134,6 +140,7 @@ pub struct AuthResponse {
     pub tokens: ::core::option::Option<Tokens>,
 }
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CreateFeedResponse {
@@ -147,6 +154,7 @@ pub struct CreateFeedResponse {
     pub content: ::prost::alloc::vec::Vec<Content>,
 }
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FecthFeedResponse {
@@ -156,6 +164,7 @@ pub struct FecthFeedResponse {
     pub feed_profiles: ::prost::alloc::vec::Vec<FeedProfile>,
 }
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FetchContentResponse {

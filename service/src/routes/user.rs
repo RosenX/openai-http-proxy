@@ -11,6 +11,7 @@ async fn register_by_email(
     request: Json<RegisterRequest>,
     auth_service: &State<AuthService>,
 ) -> Result<SuccessResponse<AuthResponse>, ErrorResponse> {
+    println!("register_info: {:?}", request);
     let register_info = match request.into_inner().register_info {
         Some(info) => info,
         None => return Err(ErrorResponse::default()),

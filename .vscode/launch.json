@@ -1,5 +1,5 @@
 {
-    // 使用 IntelliSense 了解相关属性。 
+    // 使用 IntelliSense 了解相关属性。
     // 悬停以查看现有属性的描述。
     // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
@@ -7,15 +7,28 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'feed_inbox'",
+            "name": "Debug FeedBox",
             "cargo": {
                 "args": [
-                    "build",
-                    "--bin=feed_inbox",
-                    "--package=feed_inbox"
+                    "run",
+                ],
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'feedbox'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=feedbox",
+                    "--package=feedbox"
                 ],
                 "filter": {
-                    "name": "feed_inbox",
+                    "name": "feedbox",
                     "kind": "bin"
                 }
             },
@@ -25,17 +38,55 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'feed_inbox'",
+            "name": "Debug unit tests in library 'abi'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=feed_inbox",
-                    "--package=feed_inbox"
+                    "--lib",
+                    "--package=abi"
                 ],
                 "filter": {
-                    "name": "feed_inbox",
-                    "kind": "bin"
+                    "name": "abi",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'content_service'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=content_service"
+                ],
+                "filter": {
+                    "name": "content_service",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'user_service'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=user_service"
+                ],
+                "filter": {
+                    "name": "user_service",
+                    "kind": "lib"
                 }
             },
             "args": [],

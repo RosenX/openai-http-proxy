@@ -18,7 +18,7 @@ fn main() {
             ],
             false,
             true,
-            None,
+            Some(&[r#"#[serde(rename_all = "camelCase")]"#]),
         )
         .with_serde(
             &[
@@ -32,7 +32,7 @@ fn main() {
             ],
             true,
             false,
-            None,
+            Some(&[r#"#[serde(rename_all = "camelCase")]"#]),
         )
         .with_serde(
             &[
@@ -42,7 +42,7 @@ fn main() {
             ],
             true,
             true,
-            None,
+            Some(&[r#"#[serde(rename_all = "camelCase")]"#]),
         )
         .with_serde(&["response.AuthResponse"], true, false, None)
         .compile(&["proto/request.proto", "proto/response.proto"], &["proto"])

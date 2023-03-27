@@ -1,4 +1,5 @@
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RegisterInfo {
@@ -10,6 +11,7 @@ pub struct RegisterInfo {
     pub password: ::prost::alloc::string::String,
 }
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LoginInfo {
@@ -19,6 +21,7 @@ pub struct LoginInfo {
     pub password: ::prost::alloc::string::String,
 }
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RefreshToken {
@@ -26,6 +29,7 @@ pub struct RefreshToken {
     pub token: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ClientInfo {
@@ -33,6 +37,7 @@ pub struct ClientInfo {
     pub client_name: ::prost::alloc::string::String,
 }
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LoginRequest {
@@ -42,6 +47,7 @@ pub struct LoginRequest {
     pub login_info: ::core::option::Option<LoginInfo>,
 }
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RegisterRequest {
@@ -51,6 +57,7 @@ pub struct RegisterRequest {
     pub register_info: ::core::option::Option<RegisterInfo>,
 }
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RefreshTokenRequest {
@@ -60,6 +67,7 @@ pub struct RefreshTokenRequest {
     pub refresh_token: ::core::option::Option<RefreshToken>,
 }
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedInfo {
@@ -71,6 +79,7 @@ pub struct FeedInfo {
     pub icon: ::prost::alloc::string::String,
 }
 #[derive(serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CreateFeedRequest {
