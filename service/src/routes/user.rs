@@ -17,7 +17,7 @@ async fn register_by_email(
         None => return Err(ErrorResponse::default()),
     };
     let response = auth_service.register_by_email(register_info).await?;
-    Ok(SuccessResponse::Success(Json(response.into())))
+    Ok(SuccessResponse::Created(Json(response.into())))
 }
 
 #[post("/login", data = "<request>")]
