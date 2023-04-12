@@ -28,7 +28,7 @@ pub struct RefreshToken {
     #[prost(string, tag = "1")]
     pub token: ::prost::alloc::string::String,
 }
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -70,19 +70,21 @@ pub struct RefreshTokenRequest {
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct FeedInfo {
-    #[prost(string, tag = "1")]
-    pub name: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub url: ::prost::alloc::string::String,
-    #[prost(string, tag = "3")]
-    pub icon: ::prost::alloc::string::String,
+pub struct ContentPullRequest {
+    #[prost(message, optional, tag = "1")]
+    pub sync_timestamp: ::core::option::Option<super::model::SyncTimestamp>,
 }
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct CreateFeedRequest {
-    #[prost(message, optional, tag = "2")]
-    pub feed_info: ::core::option::Option<FeedInfo>,
+pub struct ContentPushRequest {
+    #[prost(message, repeated, tag = "1")]
+    pub feeds: ::prost::alloc::vec::Vec<super::model::Feed>,
+    #[prost(message, repeated, tag = "2")]
+    pub feed_update_records: ::prost::alloc::vec::Vec<super::model::FeedUpdateRecord>,
+    #[prost(message, repeated, tag = "3")]
+    pub feed_groups: ::prost::alloc::vec::Vec<super::model::FeedGroup>,
+    #[prost(message, repeated, tag = "4")]
+    pub feed_items: ::prost::alloc::vec::Vec<super::model::FeedItem>,
 }

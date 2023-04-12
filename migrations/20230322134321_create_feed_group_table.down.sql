@@ -1,3 +1,3 @@
 -- Add down migration script here
 
-DROP TABLE recent_insert_content;
+DROP TABLE feed_group;

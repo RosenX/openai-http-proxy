@@ -1,0 +1,6 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "./content_sync/Cargo.toml",
+        "./content_sync/Cargo.toml"
+    ]
+}

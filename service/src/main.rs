@@ -16,5 +16,4 @@ async fn rocket_app() -> _ {
     rocket::build()
         .attach(common::init_service())
         .attach(routes::api())
-        .attach(common::start_service())
 }

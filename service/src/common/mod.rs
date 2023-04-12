@@ -1,10 +1,9 @@
 pub mod responder;
 
 use abi::{DatabaseConfig, DbService};
-use content_service::ContentService;
+use content_sync::ContentSyncService;
 pub use responder::{ErrorInfo, ErrorResponse, SuccessResponse};
 use rocket::{fairing::AdHoc, Config};
-use user_service::UserService;
 
 use crate::auth_service::AuthService;
 
@@ -26,31 +25,8 @@ pub fn create_auth_service(db_service: DbService) -> AuthService {
     AuthService::new(db_service, config)
 }
 
-pub fn create_user_service(db_service: DbService) -> UserService {
-    let config = Config::figment()
-        .select("user_content_service")
-        .extract()
-        .expect("user_content_service配置解析失败");
-    UserService::new(db_service, config)
-}
-
-pub fn create_content_service(db_service: DbService) -> ContentService {
-    let config = Config::figment()
-        .select("content_service")
-        .extract()
-        .expect("content_service配置解析失败");
-
-    ContentService::new(db_service, config)
-}
-
-pub fn start_service() -> AdHoc {
-    AdHoc::on_liftoff("Starting Service", |_| {
-        Box::pin(async move {
-            let db_service = create_mysql_service().await;
-            let content_service = create_content_service(db_service);
-            content_service.start_fetch_content();
-        })
-    })
+pub fn create_content_sync_service(db_service: DbService) -> ContentSyncService {
+    ContentSyncService::new(db_service)
 }
 
 pub fn init_service() -> AdHoc {
@@ -58,8 +34,7 @@ pub fn init_service() -> AdHoc {
         let db_service = create_mysql_service().await;
 
         rocket
-            .manage(create_content_service(db_service.clone()))
-            .manage(create_user_service(db_service.clone()))
+            .manage(create_content_sync_service(db_service.clone()))
             .manage(create_auth_service(db_service))
     })
 }

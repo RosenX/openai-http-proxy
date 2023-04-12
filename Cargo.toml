@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "service",
+    "content_sync",
     "abi",
-    "content_service",
-    "user_service"
 ]

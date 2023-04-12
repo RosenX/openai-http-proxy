@@ -3,8 +3,38 @@ use std::process::Command;
 use proto_builder_trait::tonic::BuilderAttributes;
 
 fn main() {
+    let protos = [
+        "proto/model.proto",
+        "proto/request.proto",
+        "proto/response.proto",
+    ];
     tonic_build::configure()
-        .out_dir("src/pb")
+        .with_serde(
+            &[
+                "model.Feed",
+                "model.FeedGroup",
+                "model.FeedItem",
+                "model.FeedUpdateRecord",
+                "model.UserProfile",
+                "model.SyncTimestamp",
+                "model.Tokens",
+                "model.ProLevel",
+            ],
+            true,
+            true,
+            Some(&[r#"#[serde(rename_all = "camelCase")]"#]),
+        )
+        .with_serde(
+            &[
+                "response.Tokens",
+                "response.ContentPullResponse",
+                "response.ContentPushResponse",
+                "response.AuthResponse",
+            ],
+            true,
+            false,
+            Some(&[r#"#[serde(rename_all = "camelCase")]"#]),
+        )
         .with_serde(
             &[
                 "request.RegisterInfo",
@@ -13,40 +43,27 @@ fn main() {
                 "request.LoginInfo",
                 "request.RefreshTokenRequest",
                 "request.RefreshToken",
-                "request.CreateFeedRequest",
-                "request.FeedInfo",
-            ],
-            false,
-            true,
-            Some(&[r#"#[serde(rename_all = "camelCase")]"#]),
-        )
-        .with_serde(
-            &[
-                "response.CreateFeedResponse",
-                "response.UserFeed",
-                "response.FeedProfile",
-                "response.UserContent",
-                "response.Content",
-                "response.FetchContentResponse",
-                "response.FecthFeedResponse",
-            ],
-            true,
-            false,
-            Some(&[r#"#[serde(rename_all = "camelCase")]"#]),
-        )
-        .with_serde(
-            &[
-                "response.UserProfile",
+                "request.ContentPullRequest",
+                "request.ContentPushRequest",
                 "request.ClientInfo",
-                "response.Tokens",
+                "request.FeedItem",
+                "request.FeedGroup",
+                "request.Feed",
             ],
-            true,
+            false,
             true,
             Some(&[r#"#[serde(rename_all = "camelCase")]"#]),
         )
-        .with_serde(&["response.AuthResponse"], true, false, None)
-        .compile(&["proto/request.proto", "proto/response.proto"], &["proto"])
+        .out_dir("src/pb")
+        .compile(&protos, &["proto/"])
         .unwrap();
 
+    rerun(&protos);
     Command::new("cargo").args(["fmt"]).output().unwrap();
+}
+
+fn rerun(proto_files: &[&str]) {
+    for proto_file in proto_files {
+        println!("cargo:rerun-if-changed={}", proto_file);
+    }
 }

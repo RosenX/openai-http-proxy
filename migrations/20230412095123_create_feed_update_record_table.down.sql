@@ -1,3 +1,3 @@
 -- Add down migration script here
 
-DROP TABLE content;
+DROP TABLE feed_update_record;
