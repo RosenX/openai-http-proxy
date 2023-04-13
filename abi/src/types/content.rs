@@ -1,4 +1,6 @@
-use crate::{Feed, FeedGroup, FeedItem, FeedUpdateRecord};
+use std::fmt::Display;
+
+use crate::{Feed, FeedGroup, FeedItem, FeedType, FeedUpdateRecord, ProLevel, ProLevelPostgres};
 use sqlx::{postgres::PgRow, FromRow, Row};
 
 impl FromRow<'_, PgRow> for FeedGroup {
@@ -54,6 +56,36 @@ impl FromRow<'_, PgRow> for Feed {
             feed_type: row.try_get("feed_type")?,
             tags: row.try_get("tags")?,
         })
+    }
+}
+
+impl Display for ProLevel {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ProLevel::Normal => write!(f, "Normal"),
+            ProLevel::Pro => write!(f, "Pro"),
+            ProLevel::Spro => write!(f, "ProPlus"),
+        }
+    }
+}
+
+impl Display for FeedType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FeedType::Rss => write!(f, "RSS"),
+            FeedType::Atom => write!(f, "Atom"),
+            FeedType::Unknown => write!(f, "Unknown"),
+        }
+    }
+}
+
+impl From<ProLevelPostgres> for ProLevel {
+    fn from(pg: ProLevelPostgres) -> Self {
+        match pg {
+            ProLevelPostgres::NORMAL => ProLevel::Normal,
+            ProLevelPostgres::PRO => ProLevel::Pro,
+            ProLevelPostgres::SPRO => ProLevel::Spro,
+        }
     }
 }
 

@@ -1,8 +1,9 @@
 use chrono::{DateTime, Utc};
+use sqlx::{postgres::PgRow, FromRow, Row};
 
 use crate::{
-    AuthResponse, Email, Id, InternalError, PasswordEncrypt, ProLevel, RegisterInfo, Tokens,
-    UserProfile,
+    AuthResponse, Email, Id, InternalError, PasswordEncrypt, ProLevel, ProLevelPostgres,
+    RegisterInfo, Tokens, UserProfile,
 };
 
 pub struct UserInformation {
@@ -10,7 +11,7 @@ pub struct UserInformation {
     pub username: String,
     pub email: Email,
     pub password: String,
-    pub pro_level: i16, // todo
+    pub pro_level: ProLevel,
     pub pro_end_time: DateTime<Utc>,
     pub created_time: DateTime<Utc>,
 }
@@ -26,11 +27,26 @@ impl TryFrom<RegisterInfo> for UserInformation {
             username: info.username,
             email: info.email,
             password: info.password,
-            pro_level: ProLevel::Free as i16,
+            pro_level: ProLevel::Normal,
             pro_end_time: now_datetime,
             created_time: now_datetime,
         };
         Ok(user)
+    }
+}
+
+impl FromRow<'_, PgRow> for UserInformation {
+    fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
+        let pro_level: ProLevelPostgres = row.get("pro_level");
+        Ok(Self {
+            id: row.try_get("id")?,
+            username: row.try_get("username")?,
+            email: row.try_get("email")?,
+            password: row.try_get("password")?,
+            pro_level: ProLevel::from(pro_level),
+            pro_end_time: row.try_get("pro_end_time")?,
+            created_time: row.try_get("created_time")?,
+        })
     }
 }
 

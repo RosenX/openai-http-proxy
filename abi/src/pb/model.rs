@@ -149,8 +149,9 @@ pub struct SyncTimestamp {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum ProLevel {
-    Free = 0,
+    Normal = 0,
     Pro = 1,
+    Spro = 2,
 }
 impl ProLevel {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -159,15 +160,17 @@ impl ProLevel {
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
-            ProLevel::Free => "PRO_LEVEL_FREE",
+            ProLevel::Normal => "PRO_LEVEL_NORMAL",
             ProLevel::Pro => "PRO_LEVEL_PRO",
+            ProLevel::Spro => "PRO_LEVEL_SPRO",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
-            "PRO_LEVEL_FREE" => Some(Self::Free),
+            "PRO_LEVEL_NORMAL" => Some(Self::Normal),
             "PRO_LEVEL_PRO" => Some(Self::Pro),
+            "PRO_LEVEL_SPRO" => Some(Self::Spro),
             _ => None,
         }
     }

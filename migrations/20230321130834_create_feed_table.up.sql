@@ -1,6 +1,6 @@
 -- Add up migration script here
 
-CREATE TYPE FeedType AS ENUM('Rss', 'Atom', 'Unknown');
+CREATE TYPE feed_type AS ENUM('rss', 'atom', 'unknown');
 
 CREATE TABLE feed (
     user_id INTEGER NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE feed (
     group_id INTEGER,
     tags VARCHAR(500),
     create_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
-    type FeedType,
+    type feed_type,
     update_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
     PRIMARY KEY (user_id, feed_id)
 );
