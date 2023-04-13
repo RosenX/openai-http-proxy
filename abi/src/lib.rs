@@ -23,14 +23,14 @@ pub type Id = i32;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, sqlx::Type)]
 #[sqlx(type_name = "feed_type", rename_all = "lowercase")]
 enum FeedTypePostgres {
-    RSS,
-    ATOM,
-    UNKNOWN,
+    Rss,
+    Atom,
+    Unknown,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, sqlx::Type)]
 #[sqlx(type_name = "pro_level", rename_all = "lowercase")]
 enum ProLevelPostgres {
-    NORMAL,
-    PRO,
-    SPRO,
+    Normal,
+    Pro,
+    Spro,
 }

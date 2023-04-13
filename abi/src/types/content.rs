@@ -82,9 +82,9 @@ impl Display for FeedType {
 impl From<ProLevelPostgres> for ProLevel {
     fn from(pg: ProLevelPostgres) -> Self {
         match pg {
-            ProLevelPostgres::NORMAL => ProLevel::Normal,
-            ProLevelPostgres::PRO => ProLevel::Pro,
-            ProLevelPostgres::SPRO => ProLevel::Spro,
+            ProLevelPostgres::Normal => ProLevel::Normal,
+            ProLevelPostgres::Pro => ProLevel::Pro,
+            ProLevelPostgres::Spro => ProLevel::Spro,
         }
     }
 }
