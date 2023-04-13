@@ -6,5 +6,7 @@ CREATE TABLE feed_group (
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
 
+    update_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
+
     PRIMARY KEY (user_id, group_id)
 );

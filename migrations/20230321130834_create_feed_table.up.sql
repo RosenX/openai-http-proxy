@@ -16,6 +16,6 @@ CREATE TABLE feed (
     tags VARCHAR(500),
     create_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
     type FeedType,
-
+    update_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
     PRIMARY KEY (user_id, feed_id)
 );

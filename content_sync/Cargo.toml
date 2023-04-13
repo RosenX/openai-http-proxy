@@ -12,3 +12,4 @@ sqlx = { version = "0.6", features = [ "postgres", "macros", "chrono"]}
 log = "0.4.17"
 env_logger = "0.10.0"
 serde = "1.0.158"
+tokio = "1.27.0"

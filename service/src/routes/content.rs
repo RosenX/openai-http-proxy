@@ -1,5 +1,5 @@
 use abi::{ContentPullRequest, ContentPullResponse, ContentPushRequest, ContentPushResponse};
-use content_sync::ContentSyncService;
+use content_sync::{ContentSyncService, ContentSyncServiceApi};
 use rocket::{fairing::AdHoc, get, post, routes, serde::json::Json, State};
 
 use crate::{
@@ -26,7 +26,10 @@ async fn sync_pull(
     service: &State<ContentSyncService>,
     request: Json<ContentPullRequest>,
 ) -> Result<SuccessResponse<ContentPullResponse>, ErrorResponse> {
-    todo!();
+    let response = service
+        .pull(user.get_user_id(), request.into_inner())
+        .await?;
+    Ok(SuccessResponse::Success(Json(response)))
 }
 
 #[post("/push", data = "<request>")]
@@ -35,12 +38,15 @@ async fn sync_push(
     service: &State<ContentSyncService>,
     request: Json<ContentPushRequest>,
 ) -> Result<SuccessResponse<ContentPushResponse>, ErrorResponse> {
-    todo!();
+    let response = service
+        .push(user.get_user_id(), request.into_inner())
+        .await?;
+    Ok(SuccessResponse::Success(Json(response)))
 }
 
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite(
         "Loading Routes About Content Sync Service",
-        |rocket| async { rocket.mount("/Content", routes![sync_pull]) },
+        |rocket| async { rocket.mount("/Content", routes![sync_pull, sync_push]) },
     )
 }

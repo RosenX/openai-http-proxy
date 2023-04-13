@@ -1,9 +1,12 @@
-use abi::DbService;
+use abi::{DbService, InternalError};
+use async_trait::async_trait;
 
 use crate::{
-    feed_group_manager::FeedGroupManager, feed_item_manager::FeedItemManager,
-    feed_manager::FeedManager, feed_update_record_manager::FeedUpdateRecordManager,
-    ContentSyncService,
+    feed_group_manager::{FeedGroupManageOp, FeedGroupManager},
+    feed_item_manager::{FeedItemManageOp, FeedItemManager},
+    feed_manager::{FeedManageOp, FeedManager},
+    feed_update_record_manager::{FeedUpdateRecordManageOp, FeedUpdateRecordManager},
+    ContentSyncService, ContentSyncServiceApi,
 };
 
 impl ContentSyncService {
@@ -14,5 +17,69 @@ impl ContentSyncService {
             feed_item_manager: FeedItemManager::new(db.clone()),
             feed_update_record_manager: FeedUpdateRecordManager::new(db),
         }
+    }
+}
+
+#[async_trait]
+impl ContentSyncServiceApi for ContentSyncService {
+    async fn pull(
+        &self,
+        user_id: i32,
+        request: abi::ContentPullRequest,
+    ) -> Result<abi::ContentPullResponse, InternalError> {
+        let timestamps = match request.sync_timestamp {
+            Some(timestamp) => timestamp,
+            None => {
+                return Err(InternalError::InvalidRequest(
+                    "sync_timestamp is required".to_string(),
+                ))
+            }
+        };
+        let feeds = self.feed_manager.query_need_sync(user_id, timestamps.feed);
+        let feed_groups = self
+            .feed_group_manager
+            .query_need_sync(user_id, timestamps.feed_group);
+        let feed_items = self
+            .feed_item_manager
+            .query_need_sync(user_id, timestamps.feed_item);
+        let feed_update_records = self
+            .feed_update_record_manager
+            .query_need_sync(user_id, timestamps.feed_update_record);
+
+        let (feeds, feed_groups, feed_items, feed_update_records) =
+            tokio::try_join!(feeds, feed_groups, feed_items, feed_update_records)?;
+
+        Ok(abi::ContentPullResponse {
+            feeds,
+            feed_groups,
+            feed_items,
+            feed_update_records,
+        })
+    }
+
+    async fn push(
+        &self,
+        user_id: i32,
+        request: abi::ContentPushRequest,
+    ) -> Result<abi::ContentPushResponse, abi::InternalError> {
+        let abi::ContentPushRequest {
+            feeds,
+            feed_groups,
+            feed_items,
+            feed_update_records,
+        } = request;
+
+        let feeds = self.feed_manager.insert_batch(user_id, feeds);
+        let feed_groups = self.feed_group_manager.insert_batch(user_id, feed_groups);
+        let feed_items = self.feed_item_manager.insert_batch(user_id, feed_items);
+        let feed_update_records = self
+            .feed_update_record_manager
+            .insert_batch(user_id, feed_update_records);
+
+        tokio::try_join!(feeds, feed_groups, feed_items, feed_update_records)?;
+
+        Ok(abi::ContentPushResponse {
+            message: "Success".to_string(), // TODO
+        })
     }
 }

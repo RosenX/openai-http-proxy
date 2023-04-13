@@ -35,6 +35,8 @@ pub struct FeedGroup {
     pub name: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
     pub description: ::prost::alloc::string::String,
+    #[prost(int64, tag = "4")]
+    pub update_time: i64,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -75,6 +77,8 @@ pub struct FeedItem {
     pub md5_string: ::prost::alloc::string::String,
     #[prost(int32, tag = "19")]
     pub feed_id: i32,
+    #[prost(int64, tag = "20")]
+    pub update_time: i64,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -91,6 +95,8 @@ pub struct FeedUpdateRecord {
     pub last_content_hash: ::prost::alloc::string::String,
     #[prost(int64, tag = "5")]
     pub last_item_publish_time: i64,
+    #[prost(int64, tag = "6")]
+    pub update_time: i64,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -120,7 +126,9 @@ pub struct Feed {
     #[prost(int64, tag = "11")]
     pub create_time: i64,
     #[prost(enumeration = "FeedType", tag = "12")]
-    pub r#type: i32,
+    pub feed_type: i32,
+    #[prost(int64, tag = "13")]
+    pub update_time: i64,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]

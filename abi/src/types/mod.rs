@@ -1,4 +1,4 @@
-// mod content;
+mod content;
 mod user;
 // mod user_content;
 
@@ -30,4 +30,10 @@ impl DecodeJwt<UserProfile> for Token {
         let payload = self.decode(&config.refresh_key)?;
         Ok(payload.data)
     }
+}
+
+pub trait ToSql {
+    fn to_insert_sql(&self, values: Vec<Self>) -> String
+    where
+        Self: Sized;
 }

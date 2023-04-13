@@ -38,6 +38,9 @@ pub enum InternalError {
     #[error("encrypt error {0}")]
     EncryptError(String),
 
+    #[error("error info: {0}")]
+    InvalidRequest(String),
+
     // Feed parse Error
     #[error("error info: {0}")]
     FeedParseError(#[from] feed_rs::parser::ParseFeedError),

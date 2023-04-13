@@ -13,9 +13,9 @@ impl UserManager {
 impl UserManagerOp for UserManager {
     type Error = InternalError;
     async fn create(&self, user_profile: UserInformation) -> Result<UserInformation, Self::Error> {
-        //     let user_info = sqlx::query_as!(
-        //         UserInformation,
-        //         r#"
+        // let user_info = sqlx::query_as!(
+        //     UserInformation,
+        //     r#"
         //     INSERT INTO user_information (
         //         username,
         //         email,
@@ -26,16 +26,16 @@ impl UserManagerOp for UserManager {
         //     ) VALUES ($1,$2,$3,$4,$5,$6)
         //     RETURNING *
         //     "#,
-        //         user_profile.username,
-        //         user_profile.email,
-        //         user_profile.password,
-        //         user_profile.pro_level,
-        //         user_profile.pro_end_time,
-        //         user_profile.created_time
-        //     )
-        //     .fetch_one(self.db_service.as_ref())
-        //     .await?;
-        //     Ok(user_info)
+        //     user_profile.username,
+        //     user_profile.email,
+        //     user_profile.password,
+        //     user_profile.pro_level,
+        //     user_profile.pro_end_time,
+        //     user_profile.created_time
+        // )
+        // .fetch_one(self.db_service.as_ref())
+        // .await?;
+        // Ok(user_info)
         todo!()
     }
 

@@ -5,7 +5,8 @@ mod feed_update_record_manager;
 mod service;
 
 use abi::{
-    ContentPullRequest, ContentPullResponse, ContentPushRequest, ContentPushResponse, InternalError,
+    ContentPullRequest, ContentPullResponse, ContentPushRequest, ContentPushResponse, Id,
+    InternalError,
 };
 use async_trait::async_trait;
 use feed_group_manager::FeedGroupManager;
@@ -22,9 +23,15 @@ pub struct ContentSyncService {
 
 #[async_trait]
 pub trait ContentSyncServiceApi {
-    async fn pull(&self, request: ContentPullRequest)
-        -> Result<ContentPullResponse, InternalError>;
+    async fn pull(
+        &self,
+        user_id: Id,
+        request: ContentPullRequest,
+    ) -> Result<ContentPullResponse, InternalError>;
 
-    async fn push(&self, request: ContentPushRequest)
-        -> Result<ContentPushResponse, InternalError>;
+    async fn push(
+        &self,
+        user_id: Id,
+        request: ContentPushRequest,
+    ) -> Result<ContentPushResponse, InternalError>;
 }

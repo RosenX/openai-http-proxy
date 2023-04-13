@@ -20,5 +20,7 @@ CREATE TABLE feed_item (
     md5_string VARCHAR(200) NOT NULL,
     feed_id INTEGER NOT NULL,
 
+    update_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
+
     PRIMARY KEY (user_id, item_id)
 );

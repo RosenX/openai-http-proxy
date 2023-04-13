@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use serde::Deserialize;
 
 use crate::InternalError;
@@ -17,6 +19,14 @@ pub struct DbService(DbPool);
 
 impl AsRef<DbPool> for DbService {
     fn as_ref(&self) -> &DbPool {
+        &self.0
+    }
+}
+
+impl Deref for DbService {
+    type Target = DbPool;
+
+    fn deref(&self) -> &Self::Target {
         &self.0
     }
 }

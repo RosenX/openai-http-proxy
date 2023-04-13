@@ -1,6 +1,9 @@
 {
     "rust-analyzer.linkedProjects": [
         "./content_sync/Cargo.toml",
-        "./content_sync/Cargo.toml"
-    ]
+        "./content_sync/Cargo.toml",
+        "./abi/Cargo.toml",
+        "./abi/Cargo.toml"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
 }

@@ -1,13 +1,21 @@
 mod authorization;
 mod user_manager;
 
-use abi::{DbService, Email, LoginInfo, RegisterInfo, Token, Tokens, UserInformation, UserProfile};
+use abi::{
+    DbService, Email, Id, LoginInfo, RegisterInfo, Token, Tokens, UserInformation, UserProfile,
+};
 
 use authorization::AuthConfig;
 use rocket::async_trait;
 
 pub struct AuthorizedUser {
     user_profile: UserProfile,
+}
+
+impl AuthorizedUser {
+    pub fn get_user_id(&self) -> Id {
+        self.user_profile.id
+    }
 }
 
 impl From<AuthorizedUser> for UserProfile {

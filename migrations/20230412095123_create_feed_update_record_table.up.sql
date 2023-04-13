@@ -7,5 +7,7 @@ CREATE TABLE feed_update_record (
     last_content_hash VARCHAR(200),
     last_item_publish_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
 
+    update_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
+
     PRIMARY KEY (user_id, feed_id)
 );
