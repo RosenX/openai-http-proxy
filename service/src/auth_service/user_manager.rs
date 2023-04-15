@@ -22,7 +22,8 @@ impl UserManagerOp for UserManager {
                 pro_level,
                 pro_end_time,
                 created_time
-            ) VALUES ({},{},{},{},{},{})
+            ) VALUES ('{}','{}','{}','{}','{}','{}')
+            RETURNING *
             "#,
             user_profile.username,
             user_profile.email,

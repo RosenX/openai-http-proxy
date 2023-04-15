@@ -62,9 +62,9 @@ impl FromRow<'_, PgRow> for Feed {
 impl Display for ProLevel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ProLevel::Normal => write!(f, "Normal"),
-            ProLevel::Pro => write!(f, "Pro"),
-            ProLevel::Spro => write!(f, "ProPlus"),
+            ProLevel::Normal => write!(f, "normal"),
+            ProLevel::Pro => write!(f, "pro"),
+            ProLevel::Spro => write!(f, "spro"),
         }
     }
 }
@@ -72,9 +72,9 @@ impl Display for ProLevel {
 impl Display for FeedType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FeedType::Rss => write!(f, "RSS"),
-            FeedType::Atom => write!(f, "Atom"),
-            FeedType::Unknown => write!(f, "Unknown"),
+            FeedType::Rss => write!(f, "rss"),
+            FeedType::Atom => write!(f, "atom"),
+            FeedType::Unknown => write!(f, "unknown"),
         }
     }
 }

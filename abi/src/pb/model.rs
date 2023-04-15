@@ -189,17 +189,17 @@ impl FeedType {
     /// (if the ProtoBuf definition does not change) and safe for programmatic use.
     pub fn as_str_name(&self) -> &'static str {
         match self {
-            FeedType::Rss => "RSS",
-            FeedType::Atom => "ATOM",
-            FeedType::Unknown => "Unknown",
+            FeedType::Rss => "FEED_TYPE_RSS",
+            FeedType::Atom => "FEED_TYPE_ATOM",
+            FeedType::Unknown => "FEED_TYPE_UNKNOWN",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
     pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
         match value {
-            "RSS" => Some(Self::Rss),
-            "ATOM" => Some(Self::Atom),
-            "Unknown" => Some(Self::Unknown),
+            "FEED_TYPE_RSS" => Some(Self::Rss),
+            "FEED_TYPE_ATOM" => Some(Self::Atom),
+            "FEED_TYPE_UNKNOWN" => Some(Self::Unknown),
             _ => None,
         }
     }
