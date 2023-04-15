@@ -1,4 +1,4 @@
-use abi::{DbService, FeedUpdateRecord, Id, InternalError};
+use abi::{timestamp_to_datetime, DbService, FeedUpdateRecord, Id, InternalError};
 use async_trait::async_trait;
 
 pub struct FeedUpdateRecordManager {
@@ -57,8 +57,8 @@ impl FeedUpdateRecordManageOp for FeedUpdateRecordManager {
         timestamp: i64,
     ) -> Result<Vec<FeedUpdateRecord>, InternalError> {
         let sql = format!(
-            "SELECT feed_id, last_update, last_content_hash, last_item_publish_time FROM feed_update_record WHERE user_id = {} AND last_update > {}",
-            user_id, timestamp
+            "SELECT feed_id, last_update, last_content_hash, last_item_publish_time FROM feed_update_record WHERE user_id = {} AND last_update > '{}'",
+            user_id, timestamp_to_datetime(timestamp)
         );
         let feed_update_records = sqlx::query_as::<_, FeedUpdateRecord>(&sql)
             .fetch_all(self.db_service.as_ref())

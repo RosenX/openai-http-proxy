@@ -1,4 +1,4 @@
-use abi::{DbService, FeedGroup, Id, InternalError};
+use abi::{timestamp_to_datetime, DbService, FeedGroup, Id, InternalError};
 use async_trait::async_trait;
 
 pub struct FeedGroupManager {
@@ -60,8 +60,9 @@ impl FeedGroupManageOp for FeedGroupManager {
         timestamp: i64,
     ) -> Result<Vec<FeedGroup>, InternalError> {
         let sql = format!(
-            "SELECT * FROM feed_group WHERE user_id = {} AND update_time > {}",
-            user_id, timestamp
+            "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}'",
+            user_id,
+            timestamp_to_datetime(timestamp)
         );
         let feed_groups = sqlx::query_as::<_, FeedGroup>(&sql)
             .fetch_all(self.db_service.as_ref())

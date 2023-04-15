@@ -9,6 +9,7 @@ fn main() {
         "proto/response.proto",
     ];
     tonic_build::configure()
+        .extern_path(".google.protobuf.Timestamp", "::prost_wkt_types::Timestamp")
         .with_serde(
             &[
                 "model.Feed",

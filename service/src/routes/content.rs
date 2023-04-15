@@ -47,6 +47,6 @@ async fn sync_push(
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite(
         "Loading Routes About Content Sync Service",
-        |rocket| async { rocket.mount("/Content", routes![sync_pull, sync_push]) },
+        |rocket| async { rocket.mount("/content", routes![sync_pull, sync_push]) },
     )
 }

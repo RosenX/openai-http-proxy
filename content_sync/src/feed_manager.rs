@@ -1,4 +1,4 @@
-use abi::{DbService, Feed, Id, InternalError};
+use abi::{timestamp_to_datetime, DbService, Feed, Id, InternalError};
 use async_trait::async_trait;
 
 pub struct FeedManager {
@@ -33,13 +33,18 @@ impl FeedManageOp for FeedManager {
                     user_id,
                     feed.id,
                     feed.url,
-                    feed.name,
-                    feed.custom_name,
-                    feed.logo,
-                    feed.custom_logo,
-                    feed.description,
-                    feed.custom_description,
-                    feed.group_id,
+                    feed.name.to_owned().unwrap_or("NULL".to_string()),
+                    feed.custom_name.to_owned().unwrap_or("NULL".to_string()),
+                    feed.logo.to_owned().unwrap_or("NULL".to_string()),
+                    feed.custom_logo.to_owned().unwrap_or("NULL".to_string()),
+                    feed.description.to_owned().unwrap_or("NULL".to_string()),
+                    feed.custom_description
+                        .to_owned()
+                        .unwrap_or("NULL".to_string()),
+                    match feed.group_id {
+                        Some(id) => id.to_string(),
+                        None => "NULL".to_string(),
+                    },
                     feed.create_time,
                     feed.feed_type
                 )
@@ -57,8 +62,9 @@ impl FeedManageOp for FeedManager {
         timestamp: i64,
     ) -> Result<Vec<Feed>, InternalError> {
         let sql = format!(
-            "SELECT * FROM feed WHERE user_id = {} AND update_time > {}",
-            user_id, timestamp
+            "SELECT * FROM feed WHERE user_id = {} AND update_time > '{}'",
+            user_id,
+            timestamp_to_datetime(timestamp)
         );
         let feeds = sqlx::query_as::<_, Feed>(&sql)
             .fetch_all(self.db_service.as_ref())

@@ -107,20 +107,20 @@ pub struct Feed {
     pub id: i32,
     #[prost(string, tag = "2")]
     pub url: ::prost::alloc::string::String,
-    #[prost(string, tag = "3")]
-    pub name: ::prost::alloc::string::String,
-    #[prost(string, tag = "4")]
-    pub custom_name: ::prost::alloc::string::String,
-    #[prost(string, tag = "5")]
-    pub logo: ::prost::alloc::string::String,
-    #[prost(string, tag = "6")]
-    pub custom_logo: ::prost::alloc::string::String,
-    #[prost(string, tag = "7")]
-    pub description: ::prost::alloc::string::String,
-    #[prost(string, tag = "8")]
-    pub custom_description: ::prost::alloc::string::String,
-    #[prost(int32, tag = "9")]
-    pub group_id: i32,
+    #[prost(string, optional, tag = "3")]
+    pub name: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "4")]
+    pub custom_name: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "5")]
+    pub logo: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "6")]
+    pub custom_logo: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "7")]
+    pub description: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "8")]
+    pub custom_description: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(int32, optional, tag = "9")]
+    pub group_id: ::core::option::Option<i32>,
     #[prost(string, repeated, tag = "10")]
     pub tags: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(int64, tag = "11")]
