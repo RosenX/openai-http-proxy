@@ -14,7 +14,7 @@ pub struct AuthorizedUser {
 
 impl AuthorizedUser {
     pub fn get_user_id(&self) -> Id {
-        self.user_profile.id
+        self.user_profile.user_id
     }
 }
 

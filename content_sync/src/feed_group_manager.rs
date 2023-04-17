@@ -21,7 +21,7 @@ pub trait FeedGroupManageOp {
     async fn query_need_sync(
         &self,
         user_id: Id,
-        timestamp: i64,
+        timestamp: Option<i64>,
     ) -> Result<Vec<FeedGroup>, abi::InternalError>;
 }
 
@@ -36,12 +36,8 @@ impl FeedGroupManageOp for FeedGroupManager {
             .iter()
             .map(|feed_group| {
                 format!(
-                    "({}, {}, {}, {}, {})",
-                    user_id,
-                    feed_group.id,
-                    feed_group.name,
-                    feed_group.description,
-                    feed_group.update_time
+                    "({}, {}, {}, {})",
+                    user_id, feed_group.name, feed_group.description, feed_group.update_time
                 )
             })
             .collect::<Vec<String>>()
@@ -57,16 +53,21 @@ impl FeedGroupManageOp for FeedGroupManager {
     async fn query_need_sync(
         &self,
         user_id: Id,
-        timestamp: i64,
+        timestamp: Option<i64>,
     ) -> Result<Vec<FeedGroup>, InternalError> {
-        let sql = format!(
-            "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}'",
-            user_id,
-            timestamp_to_datetime(timestamp)
-        );
-        let feed_groups = sqlx::query_as::<_, FeedGroup>(&sql)
-            .fetch_all(self.db_service.as_ref())
-            .await?;
-        Ok(feed_groups)
+        let result = match timestamp {
+            Some(t) => {
+                let sql = format!(
+                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}'",
+                    user_id,
+                    timestamp_to_datetime(t)
+                );
+                sqlx::query_as::<_, FeedGroup>(&sql)
+                    .fetch_all(self.db_service.as_ref())
+                    .await?
+            }
+            None => vec![],
+        };
+        Ok(result)
     }
 }

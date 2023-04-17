@@ -6,7 +6,6 @@ use sqlx::{postgres::PgRow, FromRow, Row};
 impl FromRow<'_, PgRow> for FeedGroup {
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
         Ok(Self {
-            id: row.try_get("group_id")?,
             name: row.try_get("name")?,
             description: row.try_get("description")?,
             update_time: row.try_get("update_time")?,
@@ -17,7 +16,7 @@ impl FromRow<'_, PgRow> for FeedGroup {
 impl FromRow<'_, PgRow> for FeedItem {
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
         Ok(Self {
-            id: row.try_get("item_id")?,
+            feed_url: row.try_get("feed_url")?,
             is_focus: row.try_get("is_focus")?,
             is_seen: row.try_get("is_seen")?,
             title: row.try_get("title")?,
@@ -42,7 +41,6 @@ impl FromRow<'_, PgRow> for FeedItem {
 impl FromRow<'_, PgRow> for Feed {
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
         Ok(Self {
-            id: row.try_get("feed_id")?,
             url: row.try_get("url")?,
             name: row.try_get("name")?,
             description: row.try_get("description")?,
@@ -92,8 +90,7 @@ impl From<ProLevelPostgres> for ProLevel {
 impl FromRow<'_, PgRow> for FeedUpdateRecord {
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
         Ok(Self {
-            id: row.try_get("id")?,
-            feed_id: row.try_get("feed_id")?,
+            feed_url: row.try_get("feed_url")?,
             update_time: row.try_get("update_time")?,
             last_content_hash: row.try_get("last_content_hash")?,
             last_update: row.try_get("last_update")?,

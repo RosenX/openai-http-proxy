@@ -35,6 +35,7 @@ impl ContentSyncServiceApi for ContentSyncService {
                 ))
             }
         };
+
         let feeds = self.feed_manager.query_need_sync(user_id, timestamps.feed);
         let feed_groups = self
             .feed_group_manager
@@ -46,10 +47,25 @@ impl ContentSyncServiceApi for ContentSyncService {
             .feed_update_record_manager
             .query_need_sync(user_id, timestamps.feed_update_record);
 
-        let (feeds, feed_groups, feed_items, feed_update_records) =
+        let (mut feeds, mut feed_groups, mut feed_items, mut feed_update_records) =
             tokio::try_join!(feeds, feed_groups, feed_items, feed_update_records)?;
 
+        feeds.sort_by(|a, b| b.update_time.cmp(&a.update_time));
+        feed_groups.sort_by(|a, b| b.update_time.cmp(&a.update_time));
+        feed_items.sort_by(|a, b| b.update_time.cmp(&a.update_time));
+        feed_update_records.sort_by(|a, b| b.update_time.cmp(&a.update_time));
+
+        let sync_timestamp = abi::SyncTimestamp {
+            feed_group: feed_groups.last().map(|feed_group| feed_group.update_time),
+            feed: feeds.last().map(|feed| feed.update_time),
+            feed_item: feed_items.last().map(|feed_item| feed_item.update_time),
+            feed_update_record: feed_update_records
+                .last()
+                .map(|feed_update_record| feed_update_record.update_time),
+        };
+
         Ok(abi::ContentPullResponse {
+            sync_timestamp: Some(sync_timestamp),
             feeds,
             feed_groups,
             feed_items,

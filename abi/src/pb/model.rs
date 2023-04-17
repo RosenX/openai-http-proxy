@@ -4,7 +4,7 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserProfile {
     #[prost(int32, tag = "1")]
-    pub id: i32,
+    pub user_id: i32,
     #[prost(string, tag = "2")]
     pub username: ::prost::alloc::string::String,
     #[prost(string, tag = "3")]
@@ -29,13 +29,11 @@ pub struct Tokens {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedGroup {
-    #[prost(int32, tag = "1")]
-    pub id: i32,
-    #[prost(string, tag = "2")]
+    #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,
-    #[prost(string, tag = "3")]
+    #[prost(string, tag = "2")]
     pub description: ::prost::alloc::string::String,
-    #[prost(int64, tag = "4")]
+    #[prost(int64, tag = "3")]
     pub update_time: i64,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -43,8 +41,8 @@ pub struct FeedGroup {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedItem {
-    #[prost(int32, tag = "1")]
-    pub id: i32,
+    #[prost(string, tag = "1")]
+    pub feed_url: ::prost::alloc::string::String,
     #[prost(bool, tag = "2")]
     pub is_focus: bool,
     #[prost(bool, tag = "3")]
@@ -85,17 +83,15 @@ pub struct FeedItem {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct FeedUpdateRecord {
-    #[prost(int32, tag = "1")]
-    pub id: i32,
-    #[prost(int32, tag = "2")]
-    pub feed_id: i32,
-    #[prost(int64, tag = "3")]
+    #[prost(string, tag = "1")]
+    pub feed_url: ::prost::alloc::string::String,
+    #[prost(int64, tag = "2")]
     pub last_update: i64,
-    #[prost(string, tag = "4")]
+    #[prost(string, tag = "3")]
     pub last_content_hash: ::prost::alloc::string::String,
-    #[prost(int64, tag = "5")]
+    #[prost(int64, tag = "4")]
     pub last_item_publish_time: i64,
-    #[prost(int64, tag = "6")]
+    #[prost(int64, tag = "5")]
     pub update_time: i64,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -103,31 +99,29 @@ pub struct FeedUpdateRecord {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Feed {
-    #[prost(int32, tag = "1")]
-    pub id: i32,
-    #[prost(string, tag = "2")]
+    #[prost(string, tag = "1")]
     pub url: ::prost::alloc::string::String,
-    #[prost(string, optional, tag = "3")]
+    #[prost(string, optional, tag = "2")]
     pub name: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, optional, tag = "4")]
+    #[prost(string, optional, tag = "3")]
     pub custom_name: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, optional, tag = "5")]
+    #[prost(string, optional, tag = "4")]
     pub logo: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, optional, tag = "6")]
+    #[prost(string, optional, tag = "5")]
     pub custom_logo: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, optional, tag = "7")]
+    #[prost(string, optional, tag = "6")]
     pub description: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(string, optional, tag = "8")]
+    #[prost(string, optional, tag = "7")]
     pub custom_description: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(int32, optional, tag = "9")]
+    #[prost(int32, optional, tag = "8")]
     pub group_id: ::core::option::Option<i32>,
-    #[prost(string, repeated, tag = "10")]
+    #[prost(string, repeated, tag = "9")]
     pub tags: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(int64, tag = "11")]
+    #[prost(int64, tag = "10")]
     pub create_time: i64,
-    #[prost(enumeration = "FeedType", tag = "12")]
+    #[prost(enumeration = "FeedType", tag = "11")]
     pub feed_type: i32,
-    #[prost(int64, tag = "13")]
+    #[prost(int64, tag = "12")]
     pub update_time: i64,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -135,14 +129,14 @@ pub struct Feed {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SyncTimestamp {
-    #[prost(int64, tag = "1")]
-    pub feed: i64,
-    #[prost(int64, tag = "2")]
-    pub feed_group: i64,
-    #[prost(int64, tag = "3")]
-    pub feed_item: i64,
-    #[prost(int64, tag = "4")]
-    pub feed_update_record: i64,
+    #[prost(int64, optional, tag = "1")]
+    pub feed: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "2")]
+    pub feed_group: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "3")]
+    pub feed_item: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "4")]
+    pub feed_update_record: ::core::option::Option<i64>,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]

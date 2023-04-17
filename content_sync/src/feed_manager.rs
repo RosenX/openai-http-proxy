@@ -17,7 +17,7 @@ pub trait FeedManageOp {
     async fn query_need_sync(
         &self,
         user_id: Id,
-        timestamp: i64,
+        timestamp: Option<i64>,
     ) -> Result<Vec<Feed>, abi::InternalError>;
 }
 
@@ -28,10 +28,9 @@ impl FeedManageOp for FeedManager {
             .iter()
             .map(|feed| {
                 format!(
-                    "({{ {} }},{},{},{},{},{},{},{},{},{},{},{},{})",
+                    "({{ {} }},{},{},{},{},{},{},{},{},{},{},{})",
                     feed.tags.join(","),
                     user_id,
-                    feed.id,
                     feed.url,
                     feed.name.to_owned().unwrap_or("NULL".to_string()),
                     feed.custom_name.to_owned().unwrap_or("NULL".to_string()),
@@ -59,16 +58,21 @@ impl FeedManageOp for FeedManager {
     async fn query_need_sync(
         &self,
         user_id: Id,
-        timestamp: i64,
+        timestamp: Option<i64>,
     ) -> Result<Vec<Feed>, InternalError> {
-        let sql = format!(
-            "SELECT * FROM feed WHERE user_id = {} AND update_time > '{}'",
-            user_id,
-            timestamp_to_datetime(timestamp)
-        );
-        let feeds = sqlx::query_as::<_, Feed>(&sql)
-            .fetch_all(self.db_service.as_ref())
-            .await?;
-        Ok(feeds)
+        let result = match timestamp {
+            Some(t) => {
+                let sql = format!(
+                    "SELECT * FROM feed WHERE user_id = {} AND update_time > '{}'",
+                    user_id,
+                    timestamp_to_datetime(t)
+                );
+                sqlx::query_as::<_, Feed>(&sql)
+                    .fetch_all(self.db_service.as_ref())
+                    .await?
+            }
+            None => vec![],
+        };
+        Ok(result)
     }
 }

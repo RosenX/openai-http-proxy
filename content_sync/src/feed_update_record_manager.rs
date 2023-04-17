@@ -21,7 +21,7 @@ pub trait FeedUpdateRecordManageOp {
     async fn query_need_sync(
         &self,
         user_id: Id,
-        timestamp: i64,
+        timestamp: Option<i64>,
     ) -> Result<Vec<FeedUpdateRecord>, abi::InternalError>;
 }
 
@@ -36,9 +36,8 @@ impl FeedUpdateRecordManageOp for FeedUpdateRecordManager {
             .iter()
             .map(|feed_update_record| {
                 format!(
-                    "({},{},{},{},{})",
+                    "({},{},{},{})",
                     user_id,
-                    feed_update_record.feed_id,
                     feed_update_record.last_update,
                     feed_update_record.last_content_hash,
                     feed_update_record.last_item_publish_time
@@ -54,15 +53,20 @@ impl FeedUpdateRecordManageOp for FeedUpdateRecordManager {
     async fn query_need_sync(
         &self,
         user_id: Id,
-        timestamp: i64,
+        timestamp: Option<i64>,
     ) -> Result<Vec<FeedUpdateRecord>, InternalError> {
-        let sql = format!(
-            "SELECT feed_id, last_update, last_content_hash, last_item_publish_time FROM feed_update_record WHERE user_id = {} AND last_update > '{}'",
-            user_id, timestamp_to_datetime(timestamp)
-        );
-        let feed_update_records = sqlx::query_as::<_, FeedUpdateRecord>(&sql)
-            .fetch_all(self.db_service.as_ref())
-            .await?;
-        Ok(feed_update_records)
+        let result = match timestamp {
+            Some(t) => {
+                let sql = format!(
+                    "SELECT feed_id, last_update, last_content_hash, last_item_publish_time FROM feed_update_record WHERE user_id = {} AND last_update > '{}'",
+                    user_id, timestamp_to_datetime(t)
+                );
+                sqlx::query_as::<_, FeedUpdateRecord>(&sql)
+                    .fetch_all(self.db_service.as_ref())
+                    .await?
+            }
+            None => vec![],
+        };
+        Ok(result)
     }
 }

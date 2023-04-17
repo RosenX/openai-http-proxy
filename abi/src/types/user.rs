@@ -63,7 +63,7 @@ impl FromRow<'_, PgRow> for UserInformation {
 impl From<UserInformation> for UserProfile {
     fn from(user_info: UserInformation) -> Self {
         Self {
-            id: user_info.id,
+            user_id: user_info.id,
             email: user_info.email,
             username: user_info.username,
             pro_level: user_info.pro_level as i32,
