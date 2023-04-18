@@ -78,8 +78,8 @@ impl UserManagerOp for UserManager {
     ) -> Result<ClientInfo, Self::Error> {
         let sql = format!(
             r#"
-            INSERT INTO user_device (user_id, client_name) VALUES ('{}','{}')
-            RETURNING id
+            INSERT INTO user_device (user_id, device_name) VALUES ('{}','{}')
+            RETURNING *
             "#,
             user_id, client_name
         );
