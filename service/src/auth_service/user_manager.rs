@@ -1,4 +1,4 @@
-use abi::{Client, DbService, Email, Id, InternalError, UserInformation};
+use abi::{ClientInfo, DbService, Email, Id, InternalError, UserInformation};
 use async_trait::async_trait;
 
 pub struct UserManager {
@@ -17,7 +17,7 @@ pub trait UserManagerOp {
         &self,
         user_id: Id,
         client_name: String,
-    ) -> Result<Client, Self::Error>;
+    ) -> Result<ClientInfo, Self::Error>;
 }
 
 impl UserManager {
@@ -75,7 +75,7 @@ impl UserManagerOp for UserManager {
         &self,
         user_id: Id,
         client_name: String,
-    ) -> Result<Client, Self::Error> {
+    ) -> Result<ClientInfo, Self::Error> {
         let sql = format!(
             r#"
             INSERT INTO user_device (user_id, client_name) VALUES ('{}','{}')
@@ -83,7 +83,7 @@ impl UserManagerOp for UserManager {
             "#,
             user_id, client_name
         );
-        let client = sqlx::query_as::<_, Client>(&sql)
+        let client = sqlx::query_as::<_, ClientInfo>(&sql)
             .fetch_one(self.db_service.as_ref())
             .await?;
         Ok(client)

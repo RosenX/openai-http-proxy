@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::{
-    Client, Feed, FeedGroup, FeedItem, FeedType, FeedUpdateRecord, ProLevel, ProLevelPostgres,
+    ClientInfo, Feed, FeedGroup, FeedItem, FeedType, FeedUpdateRecord, ProLevel, ProLevelPostgres,
 };
 use sqlx::{postgres::PgRow, FromRow, Row};
 
@@ -101,7 +101,7 @@ impl FromRow<'_, PgRow> for FeedUpdateRecord {
     }
 }
 
-impl FromRow<'_, PgRow> for Client {
+impl FromRow<'_, PgRow> for ClientInfo {
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
         Ok(Self {
             client_id: row.get("id"),

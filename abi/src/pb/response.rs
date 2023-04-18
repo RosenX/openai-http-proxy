@@ -6,7 +6,7 @@ pub struct AuthResponse {
     #[prost(message, optional, tag = "1")]
     pub jwt_tokens: ::core::option::Option<super::model::JwtTokens>,
     #[prost(message, optional, tag = "2")]
-    pub client: ::core::option::Option<super::model::Client>,
+    pub client: ::core::option::Option<super::model::ClientInfo>,
 }
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -24,7 +24,7 @@ pub struct ContentPullResponse {
     #[prost(message, repeated, tag = "5")]
     pub feed_items: ::prost::alloc::vec::Vec<super::model::FeedItem>,
     #[prost(message, optional, tag = "6")]
-    pub client: ::core::option::Option<super::model::Client>,
+    pub client: ::core::option::Option<super::model::ClientInfo>,
 }
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,7 +32,7 @@ pub struct ContentPullResponse {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ContentPushResponse {
     #[prost(message, optional, tag = "1")]
-    pub client: ::core::option::Option<super::model::Client>,
+    pub client: ::core::option::Option<super::model::ClientInfo>,
     #[prost(string, tag = "2")]
     pub message: ::prost::alloc::string::String,
 }

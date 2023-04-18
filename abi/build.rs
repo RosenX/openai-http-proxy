@@ -19,7 +19,7 @@ fn main() {
                 "model.SyncTimestamp",
                 "model.JwtTokens",
                 "model.ProLevel",
-                "model.Client",
+                "model.ClientInfo",
             ],
             true,
             true,

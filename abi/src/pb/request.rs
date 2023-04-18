@@ -26,7 +26,7 @@ pub struct LoginInfo {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LoginRequest {
     #[prost(message, optional, tag = "1")]
-    pub client: ::core::option::Option<super::model::Client>,
+    pub client: ::core::option::Option<super::model::ClientInfo>,
     #[prost(message, optional, tag = "2")]
     pub login_info: ::core::option::Option<LoginInfo>,
 }
@@ -36,7 +36,7 @@ pub struct LoginRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RegisterRequest {
     #[prost(message, optional, tag = "1")]
-    pub client: ::core::option::Option<super::model::Client>,
+    pub client: ::core::option::Option<super::model::ClientInfo>,
     #[prost(message, optional, tag = "2")]
     pub register_info: ::core::option::Option<RegisterInfo>,
 }
@@ -46,7 +46,7 @@ pub struct RegisterRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RefreshTokenRequest {
     #[prost(message, optional, tag = "1")]
-    pub client: ::core::option::Option<super::model::Client>,
+    pub client: ::core::option::Option<super::model::ClientInfo>,
     #[prost(string, tag = "2")]
     pub refresh_token: ::prost::alloc::string::String,
 }
@@ -56,7 +56,7 @@ pub struct RefreshTokenRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ContentPullRequest {
     #[prost(message, optional, tag = "1")]
-    pub client: ::core::option::Option<super::model::Client>,
+    pub client: ::core::option::Option<super::model::ClientInfo>,
     #[prost(message, optional, tag = "2")]
     pub sync_timestamp: ::core::option::Option<super::model::SyncTimestamp>,
 }
@@ -74,5 +74,5 @@ pub struct ContentPushRequest {
     #[prost(message, repeated, tag = "4")]
     pub feed_items: ::prost::alloc::vec::Vec<super::model::FeedItem>,
     #[prost(message, optional, tag = "5")]
-    pub client: ::core::option::Option<super::model::Client>,
+    pub client: ::core::option::Option<super::model::ClientInfo>,
 }

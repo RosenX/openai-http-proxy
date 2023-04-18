@@ -2,7 +2,7 @@
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Client {
+pub struct ClientInfo {
     #[prost(string, tag = "1")]
     pub client_name: ::prost::alloc::string::String,
     #[prost(int32, optional, tag = "2")]
