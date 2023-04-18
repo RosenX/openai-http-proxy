@@ -4,9 +4,9 @@ use chrono::Utc;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::{Hour, TimestampMillis, Token, Tokens};
+use crate::{Hour, JwtTokens, TimestampMillis, Token};
 
-impl Display for Tokens {
+impl Display for JwtTokens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -71,7 +71,7 @@ pub trait EncodeJwt {
         Ok(token)
     }
 
-    fn encode_tokens(self, config: &JwtConfig) -> Result<Tokens, Self::Error>;
+    fn encode_tokens(self, config: &JwtConfig) -> Result<JwtTokens, Self::Error>;
 }
 
 pub trait DecodeJwt<T> {

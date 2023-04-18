@@ -1,6 +1,8 @@
 use std::fmt::Display;
 
-use crate::{Feed, FeedGroup, FeedItem, FeedType, FeedUpdateRecord, ProLevel, ProLevelPostgres};
+use crate::{
+    Client, Feed, FeedGroup, FeedItem, FeedType, FeedUpdateRecord, ProLevel, ProLevelPostgres,
+};
 use sqlx::{postgres::PgRow, FromRow, Row};
 
 impl FromRow<'_, PgRow> for FeedGroup {
@@ -95,6 +97,15 @@ impl FromRow<'_, PgRow> for FeedUpdateRecord {
             last_content_hash: row.try_get("last_content_hash")?,
             last_update: row.try_get("last_update")?,
             last_item_publish_time: row.try_get("last_item_publish_time")?,
+        })
+    }
+}
+
+impl FromRow<'_, PgRow> for Client {
+    fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
+        Ok(Self {
+            client_id: row.get("id"),
+            client_name: row.get("device_name"),
         })
     }
 }

@@ -1,7 +1,24 @@
-use abi::{DbService, Email, InternalError, UserInformation};
+use abi::{Client, DbService, Email, Id, InternalError, UserInformation};
 use async_trait::async_trait;
 
-use super::{UserManager, UserManagerOp};
+pub struct UserManager {
+    db_service: DbService,
+}
+
+#[async_trait]
+pub trait UserManagerOp {
+    type Error;
+    async fn create(&self, user_profile: UserInformation) -> Result<UserInformation, Self::Error>;
+    async fn find_user_by_email(
+        &self,
+        email: &Email,
+    ) -> Result<Option<UserInformation>, Self::Error>;
+    async fn register_client(
+        &self,
+        user_id: Id,
+        client_name: String,
+    ) -> Result<Client, Self::Error>;
+}
 
 impl UserManager {
     pub fn new(db_service: DbService) -> Self {
@@ -52,5 +69,23 @@ impl UserManagerOp for UserManager {
             .fetch_optional(self.db_service.as_ref())
             .await?;
         Ok(res)
+    }
+
+    async fn register_client(
+        &self,
+        user_id: Id,
+        client_name: String,
+    ) -> Result<Client, Self::Error> {
+        let sql = format!(
+            r#"
+            INSERT INTO user_device (user_id, client_name) VALUES ('{}','{}')
+            RETURNING id
+            "#,
+            user_id, client_name
+        );
+        let client = sqlx::query_as::<_, Client>(&sql)
+            .fetch_one(self.db_service.as_ref())
+            .await?;
+        Ok(client)
     }
 }

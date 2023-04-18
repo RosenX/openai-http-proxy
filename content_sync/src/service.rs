@@ -65,6 +65,7 @@ impl ContentSyncServiceApi for ContentSyncService {
         };
 
         Ok(abi::ContentPullResponse {
+            client: request.client,
             sync_timestamp: Some(sync_timestamp),
             feeds,
             feed_groups,
@@ -79,6 +80,7 @@ impl ContentSyncServiceApi for ContentSyncService {
         request: abi::ContentPushRequest,
     ) -> Result<abi::ContentPushResponse, abi::InternalError> {
         let abi::ContentPushRequest {
+            client,
             feeds,
             feed_groups,
             feed_items,
@@ -95,6 +97,7 @@ impl ContentSyncServiceApi for ContentSyncService {
         tokio::try_join!(feeds, feed_groups, feed_items, feed_update_records)?;
 
         Ok(abi::ContentPushResponse {
+            client,
             message: "Success".to_string(), // TODO
         })
     }

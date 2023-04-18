@@ -4,7 +4,9 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct AuthResponse {
     #[prost(message, optional, tag = "1")]
-    pub tokens: ::core::option::Option<super::model::Tokens>,
+    pub jwt_tokens: ::core::option::Option<super::model::JwtTokens>,
+    #[prost(message, optional, tag = "2")]
+    pub client: ::core::option::Option<super::model::Client>,
 }
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,12 +23,16 @@ pub struct ContentPullResponse {
     pub feed_groups: ::prost::alloc::vec::Vec<super::model::FeedGroup>,
     #[prost(message, repeated, tag = "5")]
     pub feed_items: ::prost::alloc::vec::Vec<super::model::FeedItem>,
+    #[prost(message, optional, tag = "6")]
+    pub client: ::core::option::Option<super::model::Client>,
 }
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ContentPushResponse {
-    #[prost(string, tag = "1")]
+    #[prost(message, optional, tag = "1")]
+    pub client: ::core::option::Option<super::model::Client>,
+    #[prost(string, tag = "2")]
     pub message: ::prost::alloc::string::String,
 }

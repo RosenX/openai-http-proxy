@@ -1,6 +1,6 @@
 use abi::{
-    DbService, DecodeJwt, EncodeJwt, InternalError, JwtConfig, LoginInfo, PasswordVerify,
-    RegisterInfo, Token, Tokens, UserInformation, UserProfile,
+    AuthResponse, DbService, DecodeJwt, EncodeJwt, InternalError, JwtConfig, LoginRequest,
+    PasswordVerify, RefreshTokenRequest, RegisterRequest, UserInformation, UserProfile,
 };
 use async_trait::async_trait;
 use log::info;
@@ -11,7 +11,10 @@ use rocket::{
 };
 use serde::Deserialize;
 
-use super::{AuthService, AuthServiceApi, AuthorizedUser, UserManager, UserManagerOp};
+use super::{
+    user_manager::{UserManager, UserManagerOp},
+    AuthService, AuthServiceApi, AuthorizedUser,
+};
 
 #[derive(Deserialize)]
 pub struct AuthConfig {
@@ -25,31 +28,57 @@ impl AuthService {
             user_manager: UserManager::new(db_service),
         }
     }
-}
 
-#[async_trait]
-impl AuthServiceApi for AuthService {
-    type Error = InternalError;
-    fn authurize(&self, token: abi::Token) -> Result<AuthorizedUser, Self::Error> {
+    fn authurize(&self, token: abi::Token) -> Result<AuthorizedUser, InternalError> {
         let profile = token.decode_access_token(&self.config.jwt)?;
         Ok(AuthorizedUser {
             user_profile: profile,
         })
     }
+}
 
-    async fn register_by_email(&self, request: RegisterInfo) -> Result<abi::Tokens, Self::Error> {
-        let user_info = UserInformation::try_from(request)?;
+#[async_trait]
+impl AuthServiceApi for AuthService {
+    type Error = InternalError;
+
+    async fn register_by_email(
+        &self,
+        request: RegisterRequest,
+    ) -> Result<AuthResponse, Self::Error> {
+        // check request
+        let register_info = match request.register_info {
+            Some(info) => info,
+            None => Err(InternalError::InvalidRequest(
+                "Register info is required".to_string(),
+            ))?,
+        };
+        let user_info = UserInformation::try_from(register_info)?;
         let user_info = self.user_manager.create(user_info).await?;
         let user_profile = UserProfile::from(user_info);
         let tokens = user_profile.encode_tokens(&self.config.jwt)?;
-        Ok(tokens)
+        Ok(AuthResponse {
+            jwt_tokens: Some(tokens),
+            client: request.client,
+        })
     }
 
-    async fn login_by_email(&self, request: LoginInfo) -> Result<abi::Tokens, Self::Error> {
-        let user_info = self.user_manager.find_user_by_email(&request.email).await?;
-        match user_info {
-            Some(user) => match request.verify(&user.password) {
+    async fn login_by_email(&self, request: LoginRequest) -> Result<AuthResponse, Self::Error> {
+        // check request
+        let login_info = match request.login_info {
+            Some(info) => info,
+            None => Err(InternalError::InvalidRequest(
+                "Login info is required".to_string(),
+            ))?,
+        };
+        let user_info = self
+            .user_manager
+            .find_user_by_email(&login_info.email)
+            .await?;
+        let mut user_id = -1;
+        let token = match user_info {
+            Some(user) => match login_info.verify(&user.password) {
                 Ok(true) => {
+                    user_id = user.id;
                     let tokens = UserProfile::from(user).encode_tokens(&self.config.jwt)?;
                     info!("{}", tokens);
                     Ok(tokens)
@@ -57,14 +86,36 @@ impl AuthServiceApi for AuthService {
                 _ => Err(InternalError::WrongPassword),
             },
             None => Err(InternalError::UserNotExist),
-        }
+        }?;
+        let client = match request.client {
+            Some(info) => info,
+            None => Err(InternalError::InvalidRequest(
+                "Client info is required".to_string(),
+            ))?,
+        };
+        let client = match client.client_id {
+            Some(_) => client,
+            None => {
+                self.user_manager
+                    .register_client(user_id, client.client_name)
+                    .await?
+            }
+        };
+        Ok(AuthResponse {
+            jwt_tokens: Some(token),
+            client: Some(client),
+        })
     }
 
-    fn refresh_token(&self, refresh_token: Token) -> Result<Tokens, Self::Error> {
+    fn refresh_token(&self, request: RefreshTokenRequest) -> Result<AuthResponse, Self::Error> {
+        let refresh_token = request.refresh_token;
         let user_profile = refresh_token.decode_refresh_token(&self.config.jwt)?;
         let tokens = user_profile.encode_tokens(&self.config.jwt)?;
         info!("Refresh {}", tokens);
-        Ok(tokens)
+        Ok(AuthResponse {
+            jwt_tokens: Some(tokens),
+            client: request.client,
+        })
     }
 }
 

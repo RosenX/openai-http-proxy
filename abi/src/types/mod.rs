@@ -1,15 +1,14 @@
 mod content;
 mod user;
-// mod user_content;
 
 pub use user::*;
 
-use crate::{DecodeJwt, EncodeJwt, InternalError, JwtConfig, Token, Tokens, UserProfile};
+use crate::{DecodeJwt, EncodeJwt, InternalError, JwtConfig, JwtTokens, Token, UserProfile};
 
 impl EncodeJwt for UserProfile {
     type Error = InternalError;
-    fn encode_tokens(self, config: &JwtConfig) -> Result<Tokens, Self::Error> {
-        let tokens = Tokens {
+    fn encode_tokens(self, config: &JwtConfig) -> Result<JwtTokens, Self::Error> {
+        let tokens = JwtTokens {
             access_token: self
                 .clone()
                 .encode_token(&config.access_key, config.access_expiration_hour)?,

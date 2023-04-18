@@ -24,25 +24,9 @@ pub struct LoginInfo {
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RefreshToken {
-    #[prost(string, tag = "1")]
-    pub token: ::prost::alloc::string::String,
-}
-#[derive(serde::Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ClientInfo {
-    #[prost(string, tag = "1")]
-    pub client_name: ::prost::alloc::string::String,
-}
-#[derive(serde::Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LoginRequest {
     #[prost(message, optional, tag = "1")]
-    pub client_info: ::core::option::Option<ClientInfo>,
+    pub client: ::core::option::Option<super::model::Client>,
     #[prost(message, optional, tag = "2")]
     pub login_info: ::core::option::Option<LoginInfo>,
 }
@@ -52,7 +36,7 @@ pub struct LoginRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RegisterRequest {
     #[prost(message, optional, tag = "1")]
-    pub client_info: ::core::option::Option<ClientInfo>,
+    pub client: ::core::option::Option<super::model::Client>,
     #[prost(message, optional, tag = "2")]
     pub register_info: ::core::option::Option<RegisterInfo>,
 }
@@ -62,9 +46,9 @@ pub struct RegisterRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RefreshTokenRequest {
     #[prost(message, optional, tag = "1")]
-    pub client_info: ::core::option::Option<ClientInfo>,
-    #[prost(message, optional, tag = "2")]
-    pub refresh_token: ::core::option::Option<RefreshToken>,
+    pub client: ::core::option::Option<super::model::Client>,
+    #[prost(string, tag = "2")]
+    pub refresh_token: ::prost::alloc::string::String,
 }
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -72,6 +56,8 @@ pub struct RefreshTokenRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ContentPullRequest {
     #[prost(message, optional, tag = "1")]
+    pub client: ::core::option::Option<super::model::Client>,
+    #[prost(message, optional, tag = "2")]
     pub sync_timestamp: ::core::option::Option<super::model::SyncTimestamp>,
 }
 #[derive(serde::Deserialize)]
@@ -87,4 +73,6 @@ pub struct ContentPushRequest {
     pub feed_groups: ::prost::alloc::vec::Vec<super::model::FeedGroup>,
     #[prost(message, repeated, tag = "4")]
     pub feed_items: ::prost::alloc::vec::Vec<super::model::FeedItem>,
+    #[prost(message, optional, tag = "5")]
+    pub client: ::core::option::Option<super::model::Client>,
 }

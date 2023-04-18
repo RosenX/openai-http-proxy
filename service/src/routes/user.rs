@@ -11,13 +11,8 @@ async fn register_by_email(
     request: Json<RegisterRequest>,
     auth_service: &State<AuthService>,
 ) -> Result<SuccessResponse<AuthResponse>, ErrorResponse> {
-    println!("register_info: {:?}", request);
-    let register_info = match request.into_inner().register_info {
-        Some(info) => info,
-        None => return Err(ErrorResponse::default()),
-    };
-    let response = auth_service.register_by_email(register_info).await?;
-    Ok(SuccessResponse::Created(Json(response.into())))
+    let response = auth_service.register_by_email(request.into_inner()).await?;
+    Ok(SuccessResponse::Created(Json(response)))
 }
 
 #[post("/login", data = "<request>")]
@@ -25,12 +20,8 @@ async fn login_by_email(
     request: Json<LoginRequest>,
     auth_service: &State<AuthService>,
 ) -> Result<SuccessResponse<AuthResponse>, ErrorResponse> {
-    let login_info = match request.into_inner().login_info {
-        Some(info) => info,
-        None => return Err(ErrorResponse::default()),
-    };
-    let response = auth_service.login_by_email(login_info).await?;
-    Ok(SuccessResponse::Success(Json(response.into())))
+    let response = auth_service.login_by_email(request.into_inner()).await?;
+    Ok(SuccessResponse::Success(Json(response)))
 }
 
 #[post("/refresh_token", data = "<request>")]
@@ -38,12 +29,8 @@ fn refresh_token(
     request: Json<RefreshTokenRequest>,
     auth_service: &State<AuthService>,
 ) -> Result<SuccessResponse<AuthResponse>, ErrorResponse> {
-    let refresh_token = match request.into_inner().refresh_token {
-        Some(token) => token,
-        None => return Err(ErrorResponse::default()),
-    };
-    let response = auth_service.refresh_token(refresh_token.token)?;
-    Ok(SuccessResponse::Created(Json(response.into())))
+    let response = auth_service.refresh_token(request.into_inner())?;
+    Ok(SuccessResponse::Created(Json(response)))
 }
 
 pub fn stage() -> AdHoc {

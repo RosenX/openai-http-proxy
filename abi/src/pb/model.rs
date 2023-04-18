@@ -2,6 +2,16 @@
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Client {
+    #[prost(string, tag = "1")]
+    pub client_name: ::prost::alloc::string::String,
+    #[prost(int32, optional, tag = "2")]
+    pub client_id: ::core::option::Option<i32>,
+}
+#[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserProfile {
     #[prost(int32, tag = "1")]
     pub user_id: i32,
@@ -18,7 +28,7 @@ pub struct UserProfile {
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Tokens {
+pub struct JwtTokens {
     #[prost(string, tag = "1")]
     pub access_token: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]

@@ -2,10 +2,11 @@ use chrono::{DateTime, Utc};
 use sqlx::{postgres::PgRow, FromRow, Row};
 
 use crate::{
-    AuthResponse, Email, Id, InternalError, PasswordEncrypt, ProLevel, ProLevelPostgres,
-    RegisterInfo, Tokens, UserProfile,
+    Email, Id, InternalError, PasswordEncrypt, ProLevel, ProLevelPostgres, RegisterInfo,
+    UserProfile,
 };
 
+#[derive(Debug, Clone)]
 pub struct UserInformation {
     pub id: Id,
     pub username: String,
@@ -68,14 +69,6 @@ impl From<UserInformation> for UserProfile {
             username: user_info.username,
             pro_level: user_info.pro_level as i32,
             pro_end_time: user_info.pro_end_time.timestamp(),
-        }
-    }
-}
-
-impl From<Tokens> for AuthResponse {
-    fn from(value: Tokens) -> Self {
-        Self {
-            tokens: Some(value),
         }
     }
 }
