@@ -41,10 +41,6 @@ pub enum InternalError {
     #[error("error info: {0}")]
     InvalidRequest(String),
 
-    // Feed parse Error
-    #[error("error info: {0}")]
-    FeedParseError(#[from] feed_rs::parser::ParseFeedError),
-
     #[error("error info: md5 error")]
     MD5Error(#[from] FromUtf8Error),
 }

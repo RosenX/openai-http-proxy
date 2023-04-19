@@ -27,14 +27,7 @@ impl ContentSyncServiceApi for ContentSyncService {
         user_id: i32,
         request: abi::ContentPullRequest,
     ) -> Result<abi::ContentPullResponse, InternalError> {
-        let timestamps = match request.sync_timestamp {
-            Some(timestamp) => timestamp,
-            None => {
-                return Err(InternalError::InvalidRequest(
-                    "sync_timestamp is required".to_string(),
-                ))
-            }
-        };
+        let timestamps = request.sync_timestamp;
 
         let feeds = self.feed_manager.query_need_sync(user_id, timestamps.feed);
         let feed_groups = self
@@ -66,7 +59,7 @@ impl ContentSyncServiceApi for ContentSyncService {
 
         Ok(abi::ContentPullResponse {
             client: request.client,
-            sync_timestamp: Some(sync_timestamp),
+            sync_timestamp,
             feeds,
             feed_groups,
             feed_items,

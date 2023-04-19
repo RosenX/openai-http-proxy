@@ -1,4 +1,4 @@
-use abi::{timestamp_to_datetime, DbService, FeedUpdateRecord, Id, InternalError};
+use abi::{timestamp_to_datetime, DbService, FeedUpdateRecord, Id, InternalError, OptionDisplay};
 use async_trait::async_trait;
 
 pub struct FeedUpdateRecordManager {
@@ -40,7 +40,7 @@ impl FeedUpdateRecordManageOp for FeedUpdateRecordManager {
                     user_id,
                     feed_update_record.last_update,
                     feed_update_record.last_content_hash,
-                    feed_update_record.last_item_publish_time
+                    feed_update_record.last_item_publish_time.display()
                 )
             })
             .collect::<Vec<String>>()

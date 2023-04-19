@@ -1,10 +1,11 @@
 use std::ops::Deref;
 
 use serde::Deserialize;
+use utoipa::ToSchema;
 
 use crate::InternalError;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct DatabaseConfig {
     pub url: String,
     pub database: String,

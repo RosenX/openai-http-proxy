@@ -1,9 +1,15 @@
 mod content;
+mod model;
+mod request;
+mod response;
 mod user;
 
+pub use model::*;
+pub use request::*;
+pub use response::*;
 pub use user::*;
 
-use crate::{DecodeJwt, EncodeJwt, InternalError, JwtConfig, JwtTokens, Token, UserProfile};
+use crate::{DecodeJwt, EncodeJwt, InternalError, JwtConfig, Token};
 
 impl EncodeJwt for UserProfile {
     type Error = InternalError;
@@ -35,4 +41,45 @@ pub trait ToSql {
     fn to_insert_sql(&self, values: Vec<Self>) -> String
     where
         Self: Sized;
+}
+
+pub trait OptionDisplay {
+    fn display(self) -> String;
+}
+
+impl OptionDisplay for Option<String> {
+    fn display(self) -> String {
+        match self {
+            Some(string) => string,
+            None => "null".to_string(),
+        }
+    }
+}
+
+impl OptionDisplay for Option<i64> {
+    fn display(self) -> String {
+        match self {
+            Some(i64) => i64.to_string(),
+            None => "null".to_string(),
+        }
+    }
+}
+
+impl OptionDisplay for Option<bool> {
+    fn display(self) -> String {
+        match self {
+            Some(bool) => bool.to_string(),
+            None => "null".to_string(),
+        }
+    }
+}
+
+impl OptionDisplay for Option<Vec<String>> {
+    fn display(self) -> String {
+        match self {
+            // to posgres array
+            Some(vec) => format!("{{{}}}", vec.join(",")),
+            None => "null".to_string(),
+        }
+    }
 }

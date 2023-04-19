@@ -1,4 +1,4 @@
-use abi::{timestamp_to_datetime, DbService, FeedGroup, Id, InternalError};
+use abi::{timestamp_to_datetime, DbService, FeedGroup, Id, InternalError, OptionDisplay};
 use async_trait::async_trait;
 
 pub struct FeedGroupManager {
@@ -37,7 +37,10 @@ impl FeedGroupManageOp for FeedGroupManager {
             .map(|feed_group| {
                 format!(
                     "({}, {}, {}, {})",
-                    user_id, feed_group.name, feed_group.description, feed_group.update_time
+                    user_id,
+                    feed_group.name,
+                    feed_group.description.to_owned().display(),
+                    feed_group.update_time
                 )
             })
             .collect::<Vec<String>>()

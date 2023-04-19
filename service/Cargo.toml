@@ -22,3 +22,7 @@ serde = "1.0.154"
 abi = { version = "0.1.0", path = "../abi" }
 async-trait = "0.1.67"
 content_sync = { version = "0.1.0", path = "../content_sync" }
+
+[build-dependencies]
+utoipa = {version= "3", features = ["rocket_extras", "chrono", ]}
+abi = { version = "0.1.0", path = "../abi" }

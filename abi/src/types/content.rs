@@ -1,7 +1,8 @@
 use std::fmt::Display;
 
 use crate::{
-    ClientInfo, Feed, FeedGroup, FeedItem, FeedType, FeedUpdateRecord, ProLevel, ProLevelPostgres,
+    ClientInfo, Feed, FeedGroup, FeedItem, FeedTypeServer, FeedUpdateRecord, ProLevel,
+    ProLevelPostgres,
 };
 use sqlx::{postgres::PgRow, FromRow, Row};
 
@@ -30,11 +31,8 @@ impl FromRow<'_, PgRow> for FeedItem {
             category: row.try_get("category")?,
             description: row.try_get("description")?,
             summary_algo: row.try_get("summary_algo")?,
-            content: row.try_get("content")?,
-            content_have_parsed: row.try_get("content_have_parsed")?,
             create_time: row.try_get("create_time")?,
             md5_string: row.try_get("md5_string")?,
-            feed_id: row.try_get("feed_id")?,
             update_time: row.try_get("update_time")?,
         })
     }
@@ -69,12 +67,12 @@ impl Display for ProLevel {
     }
 }
 
-impl Display for FeedType {
+impl Display for FeedTypeServer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FeedType::Rss => write!(f, "rss"),
-            FeedType::Atom => write!(f, "atom"),
-            FeedType::Unknown => write!(f, "unknown"),
+            FeedTypeServer::Rss => write!(f, "rss"),
+            FeedTypeServer::Atom => write!(f, "atom"),
+            FeedTypeServer::Unknown => write!(f, "unknown"),
         }
     }
 }

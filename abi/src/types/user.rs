@@ -1,12 +1,13 @@
 use chrono::{DateTime, Utc};
 use sqlx::{postgres::PgRow, FromRow, Row};
+use utoipa::ToSchema;
 
 use crate::{
     Email, Id, InternalError, PasswordEncrypt, ProLevel, ProLevelPostgres, RegisterInfo,
     UserProfile,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, ToSchema)]
 pub struct UserInformation {
     pub id: Id,
     pub username: String,
@@ -67,7 +68,7 @@ impl From<UserInformation> for UserProfile {
             user_id: user_info.id,
             email: user_info.email,
             username: user_info.username,
-            pro_level: user_info.pro_level as i32,
+            pro_level: user_info.pro_level,
             pro_end_time: user_info.pro_end_time.timestamp(),
         }
     }

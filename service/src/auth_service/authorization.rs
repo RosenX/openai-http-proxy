@@ -46,30 +46,20 @@ impl AuthServiceApi for AuthService {
         request: RegisterRequest,
     ) -> Result<AuthResponse, Self::Error> {
         // check request
-        let register_info = match request.register_info {
-            Some(info) => info,
-            None => Err(InternalError::InvalidRequest(
-                "Register info is required".to_string(),
-            ))?,
-        };
+        let register_info = request.register_info;
         let user_info = UserInformation::try_from(register_info)?;
         let user_info = self.user_manager.create(user_info).await?;
         let user_profile = UserProfile::from(user_info);
         let tokens = user_profile.encode_tokens(&self.config.jwt)?;
         Ok(AuthResponse {
-            jwt_tokens: Some(tokens),
+            jwt_tokens: tokens,
             client: request.client,
         })
     }
 
     async fn login_by_email(&self, request: LoginRequest) -> Result<AuthResponse, Self::Error> {
         // check request
-        let login_info = match request.login_info {
-            Some(info) => info,
-            None => Err(InternalError::InvalidRequest(
-                "Login info is required".to_string(),
-            ))?,
-        };
+        let login_info = request.login_info;
         let user_info = self
             .user_manager
             .find_user_by_email(&login_info.email)
@@ -87,12 +77,7 @@ impl AuthServiceApi for AuthService {
             },
             None => Err(InternalError::UserNotExist),
         }?;
-        let client = match request.client {
-            Some(info) => info,
-            None => Err(InternalError::InvalidRequest(
-                "Client info is required".to_string(),
-            ))?,
-        };
+        let client = request.client;
         let client = match client.client_id {
             Some(_) => client,
             None => {
@@ -102,8 +87,8 @@ impl AuthServiceApi for AuthService {
             }
         };
         Ok(AuthResponse {
-            jwt_tokens: Some(token),
-            client: Some(client),
+            jwt_tokens: token,
+            client,
         })
     }
 
@@ -113,7 +98,7 @@ impl AuthServiceApi for AuthService {
         let tokens = user_profile.encode_tokens(&self.config.jwt)?;
         info!("Refresh {}", tokens);
         Ok(AuthResponse {
-            jwt_tokens: Some(tokens),
+            jwt_tokens: tokens,
             client: request.client,
         })
     }
