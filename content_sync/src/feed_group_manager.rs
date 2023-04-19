@@ -1,4 +1,4 @@
-use abi::{timestamp_to_datetime, DbService, FeedGroup, Id, InternalError, OptionDisplay};
+use abi::{execute_bulk_insert, timestamp_to_datetime, DbService, FeedGroup, Id, InternalError};
 use async_trait::async_trait;
 
 pub struct FeedGroupManager {
@@ -32,24 +32,10 @@ impl FeedGroupManageOp for FeedGroupManager {
         user_id: Id,
         feed_groups: Vec<FeedGroup>,
     ) -> Result<(), InternalError> {
-        let values = feed_groups
-            .iter()
-            .map(|feed_group| {
-                format!(
-                    "({}, {}, {}, {})",
-                    user_id,
-                    feed_group.name,
-                    feed_group.description.to_owned().display(),
-                    feed_group.update_time
-                )
-            })
-            .collect::<Vec<String>>()
-            .join(", ");
-        let sql = format!(
-            "INSERT INTO feed_group (user_id, group_id, name, description, update_time) VALUES {}",
-            values
-        );
-        sqlx::query(&sql).execute(self.db_service.as_ref()).await?;
+        if feed_groups.is_empty() {
+            return Ok(());
+        }
+        execute_bulk_insert(&self.db_service, "feed_group", feed_groups, user_id).await?;
         Ok(())
     }
 

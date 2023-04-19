@@ -1,4 +1,6 @@
-use abi::{timestamp_to_datetime, DbService, FeedUpdateRecord, Id, InternalError, OptionDisplay};
+use abi::{
+    execute_bulk_insert, timestamp_to_datetime, DbService, FeedUpdateRecord, Id, InternalError,
+};
 use async_trait::async_trait;
 
 pub struct FeedUpdateRecordManager {
@@ -32,21 +34,17 @@ impl FeedUpdateRecordManageOp for FeedUpdateRecordManager {
         user_id: Id,
         feed_update_records: Vec<FeedUpdateRecord>,
     ) -> Result<(), InternalError> {
-        let values = feed_update_records
-            .iter()
-            .map(|feed_update_record| {
-                format!(
-                    "({},{},{},{})",
-                    user_id,
-                    feed_update_record.last_update,
-                    feed_update_record.last_content_hash,
-                    feed_update_record.last_item_publish_time.display()
-                )
-            })
-            .collect::<Vec<String>>()
-            .join(", ");
-        let sql = format!( "INSERT INTO feed_update_record (user_id, feed_id, last_update, last_content_hash, last_item_publish_time) VALUES {}", values);
-        sqlx::query(&sql).execute(self.db_service.as_ref()).await?;
+        if feed_update_records.is_empty() {
+            return Ok(());
+        }
+        execute_bulk_insert(
+            &self.db_service,
+            "feed_update_record",
+            feed_update_records,
+            user_id,
+        )
+        .await?;
+
         Ok(())
     }
 

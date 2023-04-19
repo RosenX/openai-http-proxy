@@ -46,7 +46,6 @@ impl FromRow<'_, PgRow> for Feed {
             description: row.try_get("description")?,
             custom_description: row.try_get("custom_description")?,
             custom_name: row.try_get("custom_name")?,
-            group_id: row.try_get("group_id")?,
             update_time: row.try_get("update_time")?,
             logo: row.try_get("logo")?,
             custom_logo: row.try_get("custom_logo")?,

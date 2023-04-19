@@ -14,7 +14,7 @@ CREATE TABLE feed (
     group_name VARCHAR(100),
     tags VARCHAR(100)[],
     create_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
-    type feed_type,
+    feed_type feed_type,
     update_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
     sync_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
     sync_devices INTEGER[] NOT NULL,
