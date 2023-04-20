@@ -1,3 +1,4 @@
+#![deny(unused_crate_dependencies)]
 mod auth_service;
 mod common;
 mod routes;

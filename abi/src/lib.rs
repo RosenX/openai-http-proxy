@@ -1,3 +1,5 @@
+#![deny(unused_crate_dependencies)]
+
 mod error;
 mod types;
 mod utils;

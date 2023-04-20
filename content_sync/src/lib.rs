@@ -1,3 +1,5 @@
+#![deny(unused_crate_dependencies)]
+
 mod feed_group_manager;
 mod feed_item_manager;
 mod feed_manager;
