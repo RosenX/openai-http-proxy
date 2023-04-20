@@ -1,5 +1,4 @@
 mod error;
-mod pb;
 mod types;
 mod utils;
 
@@ -18,6 +17,8 @@ pub type Email = String;
 pub type Token = String;
 
 pub type Id = i32;
+
+pub const INSERT_CHUNK_SIZE: usize = 50;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, sqlx::Type)]
 #[sqlx(type_name = "feed_type", rename_all = "lowercase")]

@@ -11,7 +11,9 @@ pub use response::*;
 use sqlx::{postgres::PgArguments, query::Query, Postgres};
 pub use user::*;
 
-use crate::{DbService, DecodeJwt, EncodeJwt, Id, InternalError, JwtConfig, Token};
+use crate::{
+    DbService, DecodeJwt, EncodeJwt, Id, InternalError, JwtConfig, Token, INSERT_CHUNK_SIZE,
+};
 
 impl EncodeJwt for UserProfile {
     type Error = InternalError;
@@ -151,7 +153,7 @@ pub trait InsertSqlProvider: DbTableName {
 
 // 一个通用的生成SQL插入语句的函数
 pub fn generate_insert_query<T: InsertSqlProvider>(
-    data: Vec<T>,
+    data: &[T],
     user_id: Id,
     client_id: Id,
 ) -> (String, Vec<SqlValue>) {
@@ -181,16 +183,20 @@ pub async fn execute_bulk_insert<T: InsertSqlProvider>(
     user_id: Id,
     client_id: Id,
 ) -> Result<(), sqlx::Error> {
-    let (insert_query, bindings) = generate_insert_query(data, user_id, client_id);
-
+    // 开启事务
     let mut tx = database.begin().await?;
-    let mut query = sqlx::query(&insert_query);
 
-    for binding in bindings {
-        query = binding.bind(query);
+    for chunk in data.chunks(INSERT_CHUNK_SIZE) {
+        let (insert_query, bindings) = generate_insert_query(chunk, user_id, client_id);
+        let mut query = sqlx::query(&insert_query);
+
+        for binding in bindings {
+            query = binding.bind(query);
+        }
+
+        query.execute(&mut tx).await?;
     }
 
-    query.execute(&mut tx).await?;
     tx.commit().await?;
     Ok(())
 }
