@@ -1,6 +1,7 @@
+use chrono::Utc;
 use utoipa::ToSchema;
 
-use crate::{Id, InsertSqlProvider, SqlValue};
+use crate::{timestamp_to_datetime, DbTableName, Id, InsertSqlProvider, SqlValue};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, ToSchema)]
 #[serde(rename_all = "camelCase")]
@@ -42,17 +43,45 @@ pub struct FeedGroup {
     pub update_time: i64,
 }
 
+impl DbTableName for FeedGroup {
+    fn table_name() -> String {
+        "feed_group".to_string()
+    }
+}
+
 impl InsertSqlProvider for FeedGroup {
     fn sql_columns() -> String {
-        "user_id, name, description, update_time".to_string()
+        "user_id, name, description, update_time, sync_time, sync_devices".to_string()
     }
-    fn sql_values(&self, user_id: Id) -> Vec<SqlValue> {
+    fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
         vec![
             SqlValue::I32(user_id),
             SqlValue::String(self.name.clone()),
             SqlValue::NullableString(self.description.clone()),
-            SqlValue::I64(self.update_time),
+            SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
+            SqlValue::Datetime(Utc::now()),
+            SqlValue::I32Array(vec![client_id]),
         ]
+    }
+    fn sql_conflict(client_id: Id) -> String {
+        format!(
+            "
+            ON CONFLICT (user_id, name) DO UPDATE SET
+                description = EXCLUDED.description,
+                update_time = EXCLUDED.update_time,
+                sync_time = EXCLUDED.sync_time,
+                sync_devices = (
+                    CASE
+                        WHEN NOT ({client_id} = ANY({table_name}.sync_devices))
+                        THEN array_append({table_name}.sync_devices, {client_id})
+                        ELSE {table_name}.sync_devices
+                    END
+                )
+            WHERE EXCLUDED.update_time > {table_name}.update_time;
+        ",
+            client_id = client_id,
+            table_name = Self::table_name()
+        )
     }
 }
 
@@ -76,11 +105,17 @@ pub struct FeedItem {
     pub update_time: i64,
 }
 
+impl DbTableName for FeedItem {
+    fn table_name() -> String {
+        "feed_item".to_string()
+    }
+}
+
 impl InsertSqlProvider for FeedItem {
     fn sql_columns() -> String {
-        "user_id, feed_url, is_focus, is_seen, title, cover, link, publish_time, authors, tags, category, description, summary_algo, create_time, md5_string, update_time".to_string()
+        "user_id, feed_url, is_focus, is_seen, title, cover, link, publish_time, authors, tags, category, description, summary_algo, create_time, md5_string, update_time, sync_time, sync_devices".to_string()
     }
-    fn sql_values(&self, user_id: Id) -> Vec<SqlValue> {
+    fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
         vec![
             SqlValue::I32(user_id),
             SqlValue::String(self.feed_url.clone()),
@@ -89,16 +124,48 @@ impl InsertSqlProvider for FeedItem {
             SqlValue::NullableString(self.title.clone()),
             SqlValue::NullableString(self.cover.clone()),
             SqlValue::NullableString(self.link.clone()),
-            SqlValue::NullableI64(self.publish_time),
+            SqlValue::NullableDatetime(self.publish_time.map(timestamp_to_datetime)),
             SqlValue::NullableString(self.authors.clone()),
             SqlValue::NullableStringArray(self.tags.clone()),
             SqlValue::NullableString(self.category.clone()),
             SqlValue::NullableString(self.description.clone()),
             SqlValue::NullableString(self.summary_algo.clone()),
-            SqlValue::I64(self.create_time),
+            SqlValue::Datetime(timestamp_to_datetime(self.create_time)),
             SqlValue::String(self.md5_string.clone()),
-            SqlValue::I64(self.update_time),
+            SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
+            SqlValue::Datetime(Utc::now()),
+            SqlValue::I32Array(vec![client_id]),
         ]
+    }
+    fn sql_conflict(client_id: Id) -> String {
+        format!(
+            "
+            ON CONFLICT (user_id, md5_string) DO UPDATE SET
+                is_focus = EXCLUDED.is_focus,
+                is_seen = EXCLUDED.is_seen,
+                title = EXCLUDED.title,
+                cover = EXCLUDED.cover,
+                link = EXCLUDED.link,
+                publish_time = EXCLUDED.publish_time,
+                authors = EXCLUDED.authors,
+                tags = EXCLUDED.tags,
+                category = EXCLUDED.category,
+                description = EXCLUDED.description,
+                summary_algo = EXCLUDED.summary_algo,
+                update_time = EXCLUDED.update_time,
+                sync_time = EXCLUDED.sync_time,
+                sync_devices = (
+                    CASE
+                        WHEN NOT ({client_id} = ANY({table_name}.sync_devices))
+                        THEN array_append({table_name}.sync_devices, {client_id})
+                        ELSE {table_name}.sync_devices
+                    END
+                )
+            WHERE EXCLUDED.update_time > {table_name}.update_time;
+        ",
+            client_id = client_id,
+            table_name = Self::table_name()
+        )
     }
 }
 
@@ -112,25 +179,56 @@ pub struct FeedUpdateRecord {
     pub update_time: i64,
 }
 
-// impl SqlProvider for FeedUpdateRecord
-impl InsertSqlProvider for FeedUpdateRecord {
-    fn sql_columns() -> String {
-        "user_id, feed_url, last_update, last_content_hash, last_item_publish_time, update_time"
-            .to_string()
-    }
-    fn sql_values(&self, user_id: Id) -> Vec<SqlValue> {
-        vec![
-            SqlValue::I32(user_id),
-            SqlValue::String(self.feed_url.clone()),
-            SqlValue::I64(self.last_update),
-            SqlValue::String(self.last_content_hash.clone()),
-            SqlValue::NullableI64(self.last_item_publish_time),
-            SqlValue::I64(self.update_time),
-        ]
+impl DbTableName for FeedUpdateRecord {
+    fn table_name() -> String {
+        "feed_update_record".to_string()
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, sqlx::Type, ToSchema)]
+// impl SqlProvider for FeedUpdateRecord
+impl InsertSqlProvider for FeedUpdateRecord {
+    fn sql_columns() -> String {
+        "user_id, feed_url, last_update, last_content_hash, last_item_publish_time, update_time, sync_time, sync_devices"
+            .to_string()
+    }
+    fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
+        vec![
+            SqlValue::I32(user_id),
+            SqlValue::String(self.feed_url.clone()),
+            SqlValue::Datetime(timestamp_to_datetime(self.last_update)),
+            SqlValue::String(self.last_content_hash.clone()),
+            SqlValue::NullableDatetime(self.last_item_publish_time.map(timestamp_to_datetime)),
+            SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
+            SqlValue::Datetime(Utc::now()),
+            SqlValue::I32Array(vec![client_id]),
+        ]
+    }
+    fn sql_conflict(client_id: Id) -> String {
+        format!(
+            "
+            ON CONFLICT (user_id, feed_url) DO UPDATE SET
+                last_update = EXCLUDED.last_update,
+                last_content_hash = EXCLUDED.last_content_hash,
+                last_item_publish_time = EXCLUDED.last_item_publish_time,
+                update_time = EXCLUDED.update_time,
+                sync_time = EXCLUDED.sync_time,
+                sync_devices = (
+                    CASE
+                        WHEN NOT ({client_id} = ANY({table_name}.sync_devices))
+                        THEN array_append({table_name}.sync_devices, {client_id})
+                        ELSE {table_name}.sync_devices
+                    END
+                )
+            WHERE EXCLUDED.update_time > {table_name}.update_time;
+        ",
+            client_id = client_id,
+            table_name = Self::table_name()
+        )
+    }
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, sqlx::Type, ToSchema, Copy)]
+#[sqlx(type_name = "feed_type", rename_all = "lowercase")]
 #[serde(rename_all = "camelCase")]
 pub enum FeedTypeServer {
     Rss,
@@ -154,12 +252,18 @@ pub struct Feed {
     pub update_time: i64,
 }
 
+impl DbTableName for Feed {
+    fn table_name() -> String {
+        "feed".to_string()
+    }
+}
+
 // impl SqlProvider for Feed
 impl InsertSqlProvider for Feed {
     fn sql_columns() -> String {
-        "user_id, url, name, custom_name, logo, custom_logo, description, custom_description, tags, create_time, feed_type, update_time".to_string()
+        "user_id, url, name, custom_name, logo, custom_logo, description, custom_description, tags, create_time, feed_type, update_time, sync_time, sync_devices".to_string()
     }
-    fn sql_values(&self, user_id: Id) -> Vec<SqlValue> {
+    fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
         vec![
             SqlValue::I32(user_id),
             SqlValue::String(self.url.clone()),
@@ -170,14 +274,42 @@ impl InsertSqlProvider for Feed {
             SqlValue::NullableString(self.description.clone()),
             SqlValue::NullableString(self.custom_description.clone()),
             SqlValue::NullableStringArray(self.tags.clone()),
-            SqlValue::I64(self.create_time),
-            SqlValue::String(self.feed_type.to_string()),
-            SqlValue::I64(self.update_time),
+            SqlValue::Datetime(timestamp_to_datetime(self.create_time)),
+            SqlValue::EnumFeedType(self.feed_type),
+            SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
+            SqlValue::Datetime(Utc::now()),
+            SqlValue::I32Array(vec![client_id]),
         ]
+    }
+    fn sql_conflict(client_id: Id) -> String {
+        format!(
+            "
+            ON CONFLICT (user_id, url) DO UPDATE SET
+                name = EXCLUDED.name,
+                custom_name = EXCLUDED.custom_name,
+                logo = EXCLUDED.logo,
+                custom_logo = EXCLUDED.custom_logo,
+                description = EXCLUDED.description,
+                custom_description = EXCLUDED.custom_description,
+                tags = EXCLUDED.tags,
+                update_time = EXCLUDED.update_time,
+                sync_time = EXCLUDED.sync_time,
+                sync_devices = (
+                    CASE
+                        WHEN NOT ({client_id} = ANY({table_name}.sync_devices))
+                        THEN array_append({table_name}.sync_devices, {client_id})
+                        ELSE {table_name}.sync_devices
+                    END
+                )
+            WHERE EXCLUDED.update_time > {table_name}.update_time;
+        ",
+            client_id = client_id,
+            table_name = Self::table_name()
+        )
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema, Copy)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncTimestamp {
     pub feed: Option<i64>,

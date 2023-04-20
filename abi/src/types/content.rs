@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
 use crate::{
-    ClientInfo, Feed, FeedGroup, FeedItem, FeedTypeServer, FeedUpdateRecord, ProLevel,
-    ProLevelPostgres,
+    datetime_to_timestamp, ClientInfo, Feed, FeedGroup, FeedItem, FeedTypeServer, FeedUpdateRecord,
+    ProLevel, ProLevelPostgres,
 };
 use sqlx::{postgres::PgRow, FromRow, Row};
 
@@ -11,7 +11,7 @@ impl FromRow<'_, PgRow> for FeedGroup {
         Ok(Self {
             name: row.try_get("name")?,
             description: row.try_get("description")?,
-            update_time: row.try_get("update_time")?,
+            update_time: datetime_to_timestamp(row.get("update_time")),
         })
     }
 }

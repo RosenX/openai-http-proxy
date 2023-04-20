@@ -17,11 +17,13 @@ pub trait FeedGroupManageOp {
         &self,
         user_id: Id,
         feed_groups: Vec<FeedGroup>,
+        client_id: Id,
     ) -> Result<(), abi::InternalError>;
     async fn query_need_sync(
         &self,
         user_id: Id,
         timestamp: Option<i64>,
+        client_id: Id,
     ) -> Result<Vec<FeedGroup>, abi::InternalError>;
 }
 
@@ -31,11 +33,12 @@ impl FeedGroupManageOp for FeedGroupManager {
         &self,
         user_id: Id,
         feed_groups: Vec<FeedGroup>,
+        client_id: Id,
     ) -> Result<(), InternalError> {
         if feed_groups.is_empty() {
             return Ok(());
         }
-        execute_bulk_insert(&self.db_service, "feed_group", feed_groups, user_id).await?;
+        execute_bulk_insert(&self.db_service, feed_groups, user_id, client_id).await?;
         Ok(())
     }
 
@@ -43,13 +46,15 @@ impl FeedGroupManageOp for FeedGroupManager {
         &self,
         user_id: Id,
         timestamp: Option<i64>,
+        client_id: Id,
     ) -> Result<Vec<FeedGroup>, InternalError> {
         let result = match timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}'",
+                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY sync_devices)",
                     user_id,
-                    timestamp_to_datetime(t)
+                    timestamp_to_datetime(t),
+                    client_id
                 );
                 sqlx::query_as::<_, FeedGroup>(&sql)
                     .fetch_all(self.db_service.as_ref())

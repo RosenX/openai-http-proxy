@@ -13,21 +13,32 @@ impl FeedManager {
 
 #[async_trait]
 pub trait FeedManageOp {
-    async fn insert_batch(&self, user_id: Id, feeds: Vec<Feed>) -> Result<(), abi::InternalError>;
+    async fn insert_batch(
+        &self,
+        user_id: Id,
+        feeds: Vec<Feed>,
+        client_id: Id,
+    ) -> Result<(), abi::InternalError>;
     async fn query_need_sync(
         &self,
         user_id: Id,
         timestamp: Option<i64>,
+        client_id: Id,
     ) -> Result<Vec<Feed>, abi::InternalError>;
 }
 
 #[async_trait]
 impl FeedManageOp for FeedManager {
-    async fn insert_batch(&self, user_id: Id, feeds: Vec<Feed>) -> Result<(), InternalError> {
+    async fn insert_batch(
+        &self,
+        user_id: Id,
+        feeds: Vec<Feed>,
+        client_id: Id,
+    ) -> Result<(), InternalError> {
         if feeds.is_empty() {
             return Ok(());
         }
-        execute_bulk_insert(&self.db_service, "feed", feeds, user_id).await?;
+        execute_bulk_insert(&self.db_service, feeds, user_id, client_id).await?;
         Ok(())
     }
 
@@ -35,13 +46,15 @@ impl FeedManageOp for FeedManager {
         &self,
         user_id: Id,
         timestamp: Option<i64>,
+        client_id: Id,
     ) -> Result<Vec<Feed>, InternalError> {
         let result = match timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed WHERE user_id = {} AND update_time > '{}'",
+                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY sync_devices)",
                     user_id,
-                    timestamp_to_datetime(t)
+                    timestamp_to_datetime(t),
+                    client_id
                 );
                 sqlx::query_as::<_, Feed>(&sql)
                     .fetch_all(self.db_service.as_ref())

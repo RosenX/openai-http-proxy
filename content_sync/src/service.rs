@@ -28,17 +28,30 @@ impl ContentSyncServiceApi for ContentSyncService {
         request: abi::ContentPullRequest,
     ) -> Result<abi::ContentPullResponse, InternalError> {
         let timestamps = request.sync_timestamp;
+        let client = request.client;
+        let client_id = match client.client_id {
+            Some(id) => id,
+            None => {
+                return Err(InternalError::InvalidRequest(
+                    "client_id is required".to_string(),
+                ))
+            }
+        };
 
-        let feeds = self.feed_manager.query_need_sync(user_id, timestamps.feed);
-        let feed_groups = self
-            .feed_group_manager
-            .query_need_sync(user_id, timestamps.feed_group);
-        let feed_items = self
-            .feed_item_manager
-            .query_need_sync(user_id, timestamps.feed_item);
-        let feed_update_records = self
-            .feed_update_record_manager
-            .query_need_sync(user_id, timestamps.feed_update_record);
+        let feeds = self
+            .feed_manager
+            .query_need_sync(user_id, timestamps.feed, client_id);
+        let feed_groups =
+            self.feed_group_manager
+                .query_need_sync(user_id, timestamps.feed_group, client_id);
+        let feed_items =
+            self.feed_item_manager
+                .query_need_sync(user_id, timestamps.feed_item, client_id);
+        let feed_update_records = self.feed_update_record_manager.query_need_sync(
+            user_id,
+            timestamps.feed_update_record,
+            client_id,
+        );
 
         let (mut feeds, mut feed_groups, mut feed_items, mut feed_update_records) =
             tokio::try_join!(feeds, feed_groups, feed_items, feed_update_records)?;
@@ -58,7 +71,7 @@ impl ContentSyncServiceApi for ContentSyncService {
         };
 
         Ok(abi::ContentPullResponse {
-            client: request.client,
+            client,
             sync_timestamp,
             feeds,
             feed_groups,
@@ -80,12 +93,25 @@ impl ContentSyncServiceApi for ContentSyncService {
             feed_update_records,
         } = request;
 
-        let feeds = self.feed_manager.insert_batch(user_id, feeds);
-        let feed_groups = self.feed_group_manager.insert_batch(user_id, feed_groups);
-        let feed_items = self.feed_item_manager.insert_batch(user_id, feed_items);
-        let feed_update_records = self
-            .feed_update_record_manager
-            .insert_batch(user_id, feed_update_records);
+        let client_id = match client.client_id {
+            Some(id) => id,
+            None => {
+                return Err(InternalError::InvalidRequest(
+                    "client_id is required".to_string(),
+                ))
+            }
+        };
+
+        let feeds = self.feed_manager.insert_batch(user_id, feeds, client_id);
+        let feed_groups = self
+            .feed_group_manager
+            .insert_batch(user_id, feed_groups, client_id);
+        let feed_items = self
+            .feed_item_manager
+            .insert_batch(user_id, feed_items, client_id);
+        let feed_update_records =
+            self.feed_update_record_manager
+                .insert_batch(user_id, feed_update_records, client_id);
 
         tokio::try_join!(feeds, feed_groups, feed_items, feed_update_records)?;
 

@@ -4,6 +4,7 @@ mod request;
 mod response;
 mod user;
 
+use chrono::{DateTime, Utc};
 pub use model::*;
 pub use request::*;
 pub use response::*;
@@ -90,11 +91,10 @@ pub enum SqlValue {
     NullableStringArray(Option<Vec<String>>),
     StringArray(Vec<String>),
     Boolean(bool),
-}
-
-pub trait Bing {
-    type Q;
-    fn bing(&self, query: Self::Q) -> Self::Q;
+    Datetime(DateTime<Utc>),
+    NullableDatetime(Option<DateTime<Utc>>),
+    EnumFeedType(FeedTypeServer),
+    I32Array(Vec<i32>),
 }
 
 impl SqlValue {
@@ -109,6 +109,10 @@ impl SqlValue {
             SqlValue::StringArray(vec) => query.bind(vec),
             SqlValue::Boolean(bool) => query.bind(bool),
             SqlValue::NullableStringArray(vec) => query.bind(vec),
+            SqlValue::Datetime(datetime) => query.bind(datetime),
+            SqlValue::NullableDatetime(datetime) => query.bind(datetime),
+            SqlValue::EnumFeedType(feed_type) => query.bind(feed_type),
+            SqlValue::I32Array(vec) => query.bind(vec),
         }
     }
 }
@@ -127,27 +131,36 @@ impl ToOwned for SqlValue {
             SqlValue::StringArray(vec) => SqlValue::StringArray(vec.to_owned()),
             SqlValue::Boolean(bool) => SqlValue::Boolean(bool.to_owned()),
             SqlValue::NullableStringArray(vec) => SqlValue::NullableStringArray(vec.to_owned()),
+            SqlValue::Datetime(datetime) => SqlValue::Datetime(datetime.to_owned()),
+            SqlValue::NullableDatetime(datetime) => SqlValue::NullableDatetime(datetime.to_owned()),
+            SqlValue::EnumFeedType(feed_type) => SqlValue::EnumFeedType(feed_type.to_owned()),
+            SqlValue::I32Array(vec) => SqlValue::I32Array(vec.to_owned()),
         }
     }
 }
 
-pub trait InsertSqlProvider {
+pub trait DbTableName {
+    fn table_name() -> String;
+}
+
+pub trait InsertSqlProvider: DbTableName {
     fn sql_columns() -> String;
-    fn sql_values(&self, user_id: Id) -> Vec<SqlValue>;
+    fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue>;
+    fn sql_conflict(client_id: Id) -> String;
 }
 
 // 一个通用的生成SQL插入语句的函数
 pub fn generate_insert_query<T: InsertSqlProvider>(
-    table_name: &str,
     data: Vec<T>,
     user_id: Id,
+    client_id: Id,
 ) -> (String, Vec<SqlValue>) {
     let columns = T::sql_columns();
-    let mut insert_query = format!("INSERT INTO {} ({}) VALUES ", table_name, columns);
+    let mut insert_query = format!("INSERT INTO {} ({}) VALUES ", T::table_name(), columns);
     let mut bindings: Vec<SqlValue> = Vec::new();
 
     for (i, item) in data.iter().enumerate() {
-        let values = item.sql_values(user_id);
+        let values = item.sql_values(user_id, client_id);
         insert_query.push('(');
         for (j, value) in values.iter().enumerate() {
             insert_query.push_str(&format!("${},", i * values.len() + j + 1));
@@ -156,19 +169,19 @@ pub fn generate_insert_query<T: InsertSqlProvider>(
         insert_query.pop(); // 移除最后一个逗号
         insert_query.push_str("),");
     }
-
     insert_query.pop(); // 移除最后一个逗号
+    insert_query.push_str(T::sql_conflict(client_id).as_str());
     (insert_query, bindings)
 }
 
 // 在事务中执行批量插入
 pub async fn execute_bulk_insert<T: InsertSqlProvider>(
     database: &DbService,
-    table_name: &str,
     data: Vec<T>,
     user_id: Id,
+    client_id: Id,
 ) -> Result<(), sqlx::Error> {
-    let (insert_query, bindings) = generate_insert_query(table_name, data, user_id);
+    let (insert_query, bindings) = generate_insert_query(data, user_id, client_id);
 
     let mut tx = database.begin().await?;
     let mut query = sqlx::query(&insert_query);

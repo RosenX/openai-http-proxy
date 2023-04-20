@@ -10,6 +10,7 @@ dependencies = [
  "chrono",
  "hex",
  "jsonwebtoken",
+ "log",
  "md-5",
  "prost",
  "prost-types",
