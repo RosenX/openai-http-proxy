@@ -1,3 +1,0 @@
-[submodule "abi/proto"]
-	path = abi/proto
-	url = https://github.com/BotYet/readbot_proto.git
