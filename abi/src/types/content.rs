@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
 use crate::{
-    datetime_to_timestamp, ClientInfo, Feed, FeedGroup, FeedItem, FeedTypeServer, FeedUpdateRecord,
-    ProLevel, ProLevelPostgres,
+    datetime_to_timestamp, datetime_to_timestamp_option, ClientInfo, Feed, FeedGroup, FeedItem,
+    FeedTypeServer, FeedUpdateRecord, ProLevel, ProLevelPostgres,
 };
 use sqlx::{postgres::PgRow, FromRow, Row};
 
@@ -11,7 +11,7 @@ impl FromRow<'_, PgRow> for FeedGroup {
         Ok(Self {
             name: row.try_get("name")?,
             description: row.try_get("description")?,
-            update_time: datetime_to_timestamp(row.get("update_time")),
+            update_time: datetime_to_timestamp(row.try_get("update_time")?),
         })
     }
 }
@@ -25,15 +25,15 @@ impl FromRow<'_, PgRow> for FeedItem {
             title: row.try_get("title")?,
             cover: row.try_get("cover")?,
             link: row.try_get("link")?,
-            publish_time: row.try_get("publish_time")?,
+            publish_time: datetime_to_timestamp_option(row.try_get("publish_time")?),
             authors: row.try_get("authors")?,
             tags: row.try_get("tags")?,
             category: row.try_get("category")?,
             description: row.try_get("description")?,
             summary_algo: row.try_get("summary_algo")?,
-            create_time: row.try_get("create_time")?,
+            create_time: datetime_to_timestamp(row.try_get("create_time")?),
             md5_string: row.try_get("md5_string")?,
-            update_time: row.try_get("update_time")?,
+            update_time: datetime_to_timestamp(row.try_get("update_time")?),
         })
     }
 }
@@ -46,10 +46,10 @@ impl FromRow<'_, PgRow> for Feed {
             description: row.try_get("description")?,
             custom_description: row.try_get("custom_description")?,
             custom_name: row.try_get("custom_name")?,
-            update_time: row.try_get("update_time")?,
+            update_time: datetime_to_timestamp(row.try_get("update_time")?),
             logo: row.try_get("logo")?,
             custom_logo: row.try_get("custom_logo")?,
-            create_time: row.try_get("create_time")?,
+            create_time: datetime_to_timestamp(row.try_get("create_time")?),
             feed_type: row.try_get("feed_type")?,
             tags: row.try_get("tags")?,
         })
@@ -90,10 +90,12 @@ impl FromRow<'_, PgRow> for FeedUpdateRecord {
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
         Ok(Self {
             feed_url: row.try_get("feed_url")?,
-            update_time: row.try_get("update_time")?,
+            update_time: datetime_to_timestamp(row.try_get("update_time")?),
             last_content_hash: row.try_get("last_content_hash")?,
             last_update: row.try_get("last_update")?,
-            last_item_publish_time: row.try_get("last_item_publish_time")?,
+            last_item_publish_time: datetime_to_timestamp_option(
+                row.try_get("last_item_publish_time")?,
+            ),
         })
     }
 }

@@ -21,3 +21,7 @@ pub fn timestamp_to_datetime(timestamp: i64) -> DateTime<Utc> {
 pub fn datetime_to_timestamp(datetime: DateTime<Utc>) -> i64 {
     datetime.timestamp()
 }
+
+pub fn datetime_to_timestamp_option(datetime: Option<DateTime<Utc>>) -> Option<i64> {
+    datetime.map(|datetime| datetime.timestamp())
+}

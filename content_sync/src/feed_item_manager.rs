@@ -51,7 +51,7 @@ impl FeedItemManageOp for FeedItemManager {
         let result = match timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY sync_devices)",
+                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY (sync_devices))",
                     user_id,
                     timestamp_to_datetime(t),
                     client_id
