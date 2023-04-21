@@ -1,40 +1,43 @@
-pub mod responder;
+pub mod app_config;
+// pub mod responder;
 
-use abi::{DatabaseConfig, DbService};
+use std::sync::Arc;
+
+use abi::{DatabaseConfig, DbService, InternalError};
+pub use app_config::AppConfig;
 use content_sync::ContentSyncService;
-pub use responder::{ErrorInfo, ErrorResponse, SuccessResponse};
-use rocket::{fairing::AdHoc, Config};
 
-use crate::auth_service::AuthService;
+use crate::auth_service::{AuthService, AuthServiceConfig};
 
-pub async fn create_mysql_service() -> DbService {
-    let config: DatabaseConfig = Config::figment()
-        .select("database")
-        .extract()
-        .expect("数据库配置解析失败");
-    DbService::from_config(config)
-        .await
-        .expect("数据库连接无法建立")
+#[derive(Clone)]
+pub struct AppState {
+    pub auth_service: Arc<AuthService>,
+    pub content_service: Arc<ContentSyncService>,
 }
 
-pub fn create_auth_service(db_service: DbService) -> AuthService {
-    let config = Config::figment()
-        .select("auth_service")
-        .extract()
-        .expect("auth_service配置解析失败");
-    AuthService::new(db_service, config)
-}
+// impl FromRef<AppState> for Arc<AuthService> {
+//     fn from_ref(app_state: &AppState) -> Arc<AuthService> {
+//         app_state.auth_service.clone()
+//     }
+// }
 
-pub fn create_content_sync_service(db_service: DbService) -> ContentSyncService {
-    ContentSyncService::new(db_service)
-}
+// impl FromRef<AppState> for Arc<ContentSyncService> {
+//     fn from_ref(app_state: &AppState) -> Arc<ContentSyncService> {
+//         app_state.content_service.clone()
+//     }
+// }
 
-pub fn init_service() -> AdHoc {
-    AdHoc::on_ignite("Loading Service", |rocket| async {
-        let db_service = create_mysql_service().await;
-
-        rocket
-            .manage(create_content_sync_service(db_service.clone()))
-            .manage(create_auth_service(db_service))
-    })
+impl AppState {
+    pub async fn new(
+        auth_config: AuthServiceConfig,
+        database_config: DatabaseConfig,
+    ) -> Result<Self, InternalError> {
+        let db_service = DbService::from_config(database_config).await?;
+        let auth_service = Arc::new(AuthService::new(db_service.clone(), auth_config));
+        let content_service = Arc::new(ContentSyncService::new(db_service));
+        Ok(Self {
+            auth_service,
+            content_service,
+        })
+    }
 }

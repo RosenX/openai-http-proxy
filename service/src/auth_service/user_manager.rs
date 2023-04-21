@@ -1,6 +1,7 @@
 use abi::{ClientInfo, DbService, Email, Id, InternalError, UserInformation};
 use async_trait::async_trait;
 
+#[derive(Clone)]
 pub struct UserManager {
     db_service: DbService,
 }

@@ -10,4 +10,4 @@ abi = { version = "0.1.0", path = "../abi" }
 async-trait = "0.1.67"
 sqlx = { version = "0.6", features = [ "postgres", "macros", "chrono"]}
 # log = "0.4.17"
-tokio = "1.27.0"
+tokio = {version = "1.27.0", features = ["full"]}

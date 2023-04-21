@@ -1,52 +1,33 @@
-use abi::{ContentPullRequest, ContentPullResponse, ContentPushRequest, ContentPushResponse};
-use content_sync::{ContentSyncService, ContentSyncServiceApi};
-use rocket::{fairing::AdHoc, get, post, routes, serde::json::Json, State};
-
-use crate::{
-    auth_service::AuthorizedUser,
-    common::responder::{ErrorResponse, SuccessResponse},
+use abi::{
+    ContentPullRequest, ContentPullResponse, ContentPushRequest, ContentPushResponse, InternalError,
 };
+use axum::extract::{Json, State};
+use content_sync::ContentSyncServiceApi;
 
-// #[get("/pull/<feed_id>", data = "<req>")]
-// async fn get_latest_post_by_id(
-//     user: AuthorizedUser,
-//     req: Json<PostReq>,
-//     pool: &State<MySqlService>,
-//     feed_id: i32,
-// ) -> Result<SuccessResponse<Vec<UserPost>>, ErrorResponse> {
-//     let posts =
-//         UserPost::retrieve_latest_post_by_id(pool, user.id, req.latest_post_id, feed_id)
-//             .await?;
-//     Ok(SuccessResponse::Success(Json(posts)))
-// }
+use crate::auth_service::AuthorizedUser;
 
-#[get("/pull", data = "<request>")]
-async fn sync_pull(
+use super::AppState;
+
+pub async fn sync_pull(
     user: AuthorizedUser,
-    service: &State<ContentSyncService>,
-    request: Json<ContentPullRequest>,
-) -> Result<SuccessResponse<ContentPullResponse>, ErrorResponse> {
+    State(service): State<AppState>,
+    Json(request): Json<ContentPullRequest>,
+) -> Result<Json<ContentPullResponse>, InternalError> {
     let response = service
-        .pull(user.get_user_id(), request.into_inner())
+        .content_service
+        .pull(user.get_user_id(), request)
         .await?;
-    Ok(SuccessResponse::Success(Json(response)))
+    Ok(Json(response))
 }
 
-#[post("/push", data = "<request>")]
-async fn sync_push(
+pub async fn sync_push(
+    State(service): State<AppState>,
     user: AuthorizedUser,
-    service: &State<ContentSyncService>,
-    request: Json<ContentPushRequest>,
-) -> Result<SuccessResponse<ContentPushResponse>, ErrorResponse> {
+    Json(request): Json<ContentPushRequest>,
+) -> Result<Json<ContentPushResponse>, InternalError> {
     let response = service
-        .push(user.get_user_id(), request.into_inner())
+        .content_service
+        .push(user.get_user_id(), request)
         .await?;
-    Ok(SuccessResponse::Success(Json(response)))
-}
-
-pub fn stage() -> AdHoc {
-    AdHoc::on_ignite(
-        "Loading Routes About Content Sync Service",
-        |rocket| async { rocket.mount("/content", routes![sync_pull, sync_push]) },
-    )
+    Ok(Json(response))
 }

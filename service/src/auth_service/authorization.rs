@@ -3,26 +3,29 @@ use abi::{
     PasswordVerify, RefreshTokenRequest, RegisterRequest, UserInformation, UserProfile,
 };
 use async_trait::async_trait;
-use log::info;
-use rocket::{
-    http::Status,
-    request::{FromRequest, Outcome},
-    Request,
+use axum::{
+    extract::FromRequestParts,
+    headers::{authorization::Bearer, Authorization},
+    http::request::Parts,
+    TypedHeader,
 };
+use log::info;
 use serde::Deserialize;
+
+use crate::common::AppState;
 
 use super::{
     user_manager::{UserManager, UserManagerOp},
     AuthService, AuthServiceApi, AuthorizedUser,
 };
 
-#[derive(Deserialize)]
-pub struct AuthConfig {
+#[derive(Deserialize, Clone, Debug)]
+pub struct AuthServiceConfig {
     pub jwt: JwtConfig,
 }
 
 impl AuthService {
-    pub fn new(db_service: DbService, auth_config: AuthConfig) -> Self {
+    pub fn new(db_service: DbService, auth_config: AuthServiceConfig) -> Self {
         AuthService {
             config: auth_config,
             user_manager: UserManager::new(db_service),
@@ -104,32 +107,35 @@ impl AuthServiceApi for AuthService {
     }
 }
 
-fn check_auth_header(auth_header: Option<&str>) -> Result<String, InternalError> {
-    if let Some(auth_string) = auth_header {
-        let vec_header: Vec<&str> = auth_string.split_whitespace().collect();
-        if vec_header.len() == 2 && vec_header[0] == "Bearer" {
-            return Ok(vec_header[1].to_string());
-        }
-    }
-    Err(InternalError::InvalidAuthToken("Token错误".to_string()))
-}
+// fn check_auth_header(auth_header: Option<&str>) -> Result<String, InternalError> {
+//     if let Some(auth_string) = auth_header {
+//         let vec_header: Vec<&str> = auth_string.split_whitespace().collect();
+//         if vec_header.len() == 2 && vec_header[0] == "Bearer" {
+//             return Ok(vec_header[1].to_string());
+//         }
+//     }
+//     Err(InternalError::InvalidAuthToken("Token错误".to_string()))
+// }
 
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for AuthorizedUser {
-    type Error = InternalError;
+#[async_trait]
+impl FromRequestParts<AppState> for AuthorizedUser
+where
+    AppState: Send + Sync,
+{
+    type Rejection = InternalError;
 
-    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        let auth_header = request.headers().get_one("Authorization");
-        let access_token = check_auth_header(auth_header);
+    async fn from_request_parts(
+        parts: &mut Parts,
+        service: &AppState,
+    ) -> Result<Self, Self::Rejection> {
+        let TypedHeader(Authorization(bearer)) =
+            TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, service)
+                .await
+                .map_err(|e| InternalError::InvalidAuthToken(e.to_string()))?;
 
-        let auth_service = request.rocket().state::<AuthService>().unwrap();
-
-        match access_token {
-            Ok(token) => match auth_service.authurize(token) {
-                Ok(user) => Outcome::Success(user),
-                Err(err) => Outcome::Failure((Status::Unauthorized, err)),
-            },
-            Err(err) => Outcome::Failure((Status::Unauthorized, err)),
+        match service.auth_service.authurize(bearer.token().to_string()) {
+            Ok(user) => Ok(user),
+            Err(err) => Err(InternalError::InvalidAuthToken(err.to_string())),
         }
     }
 }

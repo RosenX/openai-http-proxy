@@ -1,5 +1,9 @@
 use std::string::FromUtf8Error;
 
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
 use bcrypt::BcryptError;
 
 #[derive(Debug, thiserror::Error)]
@@ -48,5 +52,15 @@ pub enum InternalError {
 impl From<BcryptError> for InternalError {
     fn from(value: BcryptError) -> Self {
         Self::EncryptError(value.to_string())
+    }
+}
+
+impl IntoResponse for InternalError {
+    fn into_response(self) -> Response {
+        let (code, message) = match self {
+            InternalError::WrongPassword => (StatusCode::UNAUTHORIZED, self.to_string()),
+            _ => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
+        };
+        (code, message).into_response()
     }
 }

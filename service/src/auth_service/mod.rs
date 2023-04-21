@@ -3,10 +3,10 @@ mod user_manager;
 
 use abi::{AuthResponse, Id, LoginRequest, RefreshTokenRequest, RegisterRequest, UserProfile};
 
+use async_trait::async_trait;
 use user_manager::UserManager;
 
-use authorization::AuthConfig;
-use rocket::async_trait;
+pub use authorization::AuthServiceConfig;
 
 pub struct AuthorizedUser {
     user_profile: UserProfile,
@@ -24,8 +24,9 @@ impl From<AuthorizedUser> for UserProfile {
     }
 }
 
+#[derive(Clone)]
 pub struct AuthService {
-    config: AuthConfig,
+    config: AuthServiceConfig,
     user_manager: UserManager,
 }
 

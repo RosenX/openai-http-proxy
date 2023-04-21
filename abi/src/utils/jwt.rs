@@ -22,7 +22,7 @@ pub struct Payload<T> {
     exp: TimestampMillis,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct JwtConfig {
     pub access_key: String,
     pub access_expiration_hour: i64,
