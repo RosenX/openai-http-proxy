@@ -9,7 +9,6 @@ use axum::{
     http::request::Parts,
     TypedHeader,
 };
-use log::info;
 use serde::Deserialize;
 
 use crate::common::AppState;
@@ -73,7 +72,7 @@ impl AuthServiceApi for AuthService {
                 Ok(true) => {
                     user_id = user.id;
                     let tokens = UserProfile::from(user).encode_tokens(&self.config.jwt)?;
-                    info!("{}", tokens);
+                    tracing::info!("Login success: {}", tokens);
                     Ok(tokens)
                 }
                 _ => Err(InternalError::WrongPassword),
@@ -99,7 +98,6 @@ impl AuthServiceApi for AuthService {
         let refresh_token = request.refresh_token;
         let user_profile = refresh_token.decode_refresh_token(&self.config.jwt)?;
         let tokens = user_profile.encode_tokens(&self.config.jwt)?;
-        info!("Refresh {}", tokens);
         Ok(AuthResponse {
             jwt_tokens: tokens,
             client: request.client,

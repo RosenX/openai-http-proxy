@@ -5,7 +5,6 @@ mod routes;
 
 use common::{AppConfig, AppState};
 use config::{Config, FileFormat};
-use env_logger::Env;
 use routes::create_route;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
@@ -23,17 +22,14 @@ fn load_config() -> AppConfig {
 
 #[tokio::main]
 async fn main() {
-    let env = Env::default()
-        .filter_or("MY_LOG_LEVEL", "Info")
-        .write_style_or("MY_LOG_STYLE", "always");
-
-    env_logger::init_from_env(env);
-
     let app_config: AppConfig = load_config();
 
     let app_state = AppState::new(app_config.auth_service, app_config.database)
         .await
         .expect("Failed to create app state");
+
+    // Setup tracing
+    tracing_subscriber::fmt().init();
 
     let app = create_route()
         .with_state(app_state)
