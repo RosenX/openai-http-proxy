@@ -1,7 +1,7 @@
 #![deny(unused_crate_dependencies)]
-mod auth_service;
-mod common;
-mod routes;
+pub mod auth_service;
+pub mod common;
+pub mod routes;
 
 use common::{AppConfig, AppState};
 use config::{Config, FileFormat};

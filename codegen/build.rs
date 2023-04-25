@@ -1,10 +1,8 @@
 use std::{io::Write, process::Command};
-
 use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(),
     components(schemas(
         abi::JwtTokens,
         abi::ProLevel,
@@ -50,11 +48,11 @@ fn main() {
         }
     }
 
-    let output_path = "../codegen/code";
+    let output_path = "code";
     let model_path = format!("{}/lib/model", output_path);
-    let template_path = "../codegen/dart2";
+    let template_path = "dart";
     let target_path = "../../readbot_app/lib/common/models/codegen";
-    let josn_helper_path = "../codegen/json.dart";
+    let josn_helper_path = "dart/json.dart";
     std::fs::remove_dir_all(output_path).unwrap_or_default();
 
     // use openapi generator to generate client code

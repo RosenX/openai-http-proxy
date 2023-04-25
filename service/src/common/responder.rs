@@ -5,8 +5,6 @@ pub enum SuccessResponse<T> {
     #[response(status = 201)]
     Created(Json<T>),
 
-    // #[response(status = 204)]
-    // Deleted(Json<T>),
     #[response(status = 200)]
     Success(Json<T>),
 }
