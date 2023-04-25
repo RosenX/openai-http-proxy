@@ -38,7 +38,8 @@ impl DbService {
         let pool = DbOption::new()
             .max_connections(config.max_connection) //todo
             .connect(&url)
-            .await?;
+            .await
+            .map_err(|e| InternalError::DatabaseStartError(e.to_string()))?;
         Ok(Self(pool))
     }
 }

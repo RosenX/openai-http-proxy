@@ -21,9 +21,11 @@ impl EncodeJwt for UserProfile {
         let tokens = JwtTokens {
             access_token: self
                 .clone()
-                .encode_token(&config.access_key, config.access_expiration_hour)?,
+                .encode_token(&config.access_key, config.access_expiration_hour)
+                .map_err(|e| InternalError::JwtEncodeError(e.to_string()))?,
             refresh_token: self
-                .encode_token(&config.refresh_key, config.refresh_expiration_hour)?,
+                .encode_token(&config.refresh_key, config.refresh_expiration_hour)
+                .map_err(|e| InternalError::JwtEncodeError(e.to_string()))?,
         };
         Ok(tokens)
     }
@@ -32,11 +34,15 @@ impl EncodeJwt for UserProfile {
 impl DecodeJwt<UserProfile> for Token {
     type Error = InternalError;
     fn decode_access_token(self, config: &JwtConfig) -> Result<UserProfile, Self::Error> {
-        let payload = self.decode(&config.access_key)?;
+        let payload = self
+            .decode(&config.access_key)
+            .map_err(|e| InternalError::InvalidToken(e.to_string()))?;
         Ok(payload.data)
     }
     fn decode_refresh_token(self, config: &JwtConfig) -> Result<UserProfile, Self::Error> {
-        let payload = self.decode(&config.refresh_key)?;
+        let payload = self
+            .decode(&config.refresh_key)
+            .map_err(|e| InternalError::InvalidToken(e.to_string()))?;
         Ok(payload.data)
     }
 }
@@ -182,9 +188,12 @@ pub async fn execute_bulk_insert<T: InsertSqlProvider>(
     data: Vec<T>,
     user_id: Id,
     client_id: Id,
-) -> Result<(), sqlx::Error> {
+) -> Result<(), InternalError> {
     // 开启事务
-    let mut tx = database.begin().await?;
+    let mut tx = database
+        .begin()
+        .await
+        .map_err(|e| InternalError::CouldNotStartTransaction(e.to_string()))?;
 
     for chunk in data.chunks(INSERT_CHUNK_SIZE) {
         let (insert_query, bindings) = generate_insert_query(chunk, user_id, client_id);
@@ -194,9 +203,14 @@ pub async fn execute_bulk_insert<T: InsertSqlProvider>(
             query = binding.bind(query);
         }
 
-        query.execute(&mut tx).await?;
+        query
+            .execute(&mut tx)
+            .await
+            .map_err(|e| InternalError::DatabaseInsertError(e.to_string()))?;
     }
 
-    tx.commit().await?;
+    tx.commit()
+        .await
+        .map_err(|e| InternalError::CouldNotStartTransaction(e.to_string()))?;
     Ok(())
 }

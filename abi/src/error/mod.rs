@@ -1,65 +1,76 @@
-use std::string::FromUtf8Error;
-
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use bcrypt::BcryptError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum InternalError {
-    // user
-    // #[error("email is already in use, error info: {0}")]
-    // DuplicateEmail(String),
-    #[error("token is expired, error info: {0}")]
-    TokenExpired(String),
+    // auth
+    #[error("Invalid Token: {0}")]
+    InvalidToken(String),
 
-    #[error("error info: {0}")]
-    JsonWebTokenError(#[from] jsonwebtoken::errors::Error),
+    #[error("Invalid User: {0}")]
+    InvalidUser(String),
 
-    #[error("error info: {0}")]
-    InvalidAuthToken(String),
-
-    #[error("user not exist")]
-    UserNotExist,
-
-    #[error("wrong password")]
-    WrongPassword,
-
-    // source
-    // #[error("rss source not exists: {0}")]
-    // SourceNotExist(String),
-
-    // content
-    // #[error("error info: {0}")]
-    // InvalidUrl(String),
+    #[error("Password wrong: {0}")]
+    WrongPassword(String),
 
     // database
-    #[error("error info: {0}")]
-    DatabaseError(#[from] sqlx::Error),
+    #[error("Could not start transaction: {0}")]
+    CouldNotStartTransaction(String),
 
-    // encrypt
-    #[error("encrypt error {0}")]
-    EncryptError(String),
+    #[error("Database Error: {0}")]
+    DatabaseStartError(String),
 
-    #[error("error info: {0}")]
+    #[error("Database Insert Error: {0}")]
+    DatabaseInsertError(String),
+
+    #[error("Database Select Error: {0}")]
+    DatabaseSelectError(String),
+
+    // other
+    #[error("Encrypt error when veriry: {0}")]
+    EncryptVerifyError(String),
+
+    #[error("Encrypt error when hash: {0}")]
+    EncryptHashError(String),
+
+    #[error("Jwt encode error: {0}")]
+    JwtEncodeError(String),
+
+    #[error("Invalid request: {0}")]
     InvalidRequest(String),
-
-    #[error("error info: md5 error")]
-    MD5Error(#[from] FromUtf8Error),
-}
-
-impl From<BcryptError> for InternalError {
-    fn from(value: BcryptError) -> Self {
-        Self::EncryptError(value.to_string())
-    }
 }
 
 impl IntoResponse for InternalError {
     fn into_response(self) -> Response {
         let (code, message) = match self {
-            InternalError::WrongPassword => (StatusCode::UNAUTHORIZED, self.to_string()),
-            _ => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
+            InternalError::InvalidToken(_) => (StatusCode::UNAUTHORIZED, self.to_string()),
+            InternalError::InvalidUser(_) => (StatusCode::UNAUTHORIZED, self.to_string()),
+            InternalError::WrongPassword(_) => (StatusCode::UNAUTHORIZED, self.to_string()),
+
+            InternalError::CouldNotStartTransaction(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
+            }
+            InternalError::DatabaseStartError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
+            }
+            InternalError::DatabaseInsertError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
+            }
+            InternalError::DatabaseSelectError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
+            }
+            InternalError::EncryptHashError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
+            }
+            InternalError::EncryptVerifyError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
+            }
+            InternalError::JwtEncodeError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
+            }
+            InternalError::InvalidRequest(_) => (StatusCode::BAD_REQUEST, self.to_string()),
         };
         (code, message).into_response()
     }

@@ -58,7 +58,8 @@ impl FeedManageOp for FeedManager {
                 );
                 sqlx::query_as::<_, Feed>(&sql)
                     .fetch_all(self.db_service.as_ref())
-                    .await?
+                    .await
+                    .map_err(|e| InternalError::DatabaseSelectError(e.to_string()))?
             }
             None => vec![],
         };

@@ -58,7 +58,8 @@ impl FeedGroupManageOp for FeedGroupManager {
                 );
                 sqlx::query_as::<_, FeedGroup>(&sql)
                     .fetch_all(self.db_service.as_ref())
-                    .await?
+                    .await
+                    .map_err(|e| InternalError::DatabaseSelectError(e.to_string()))?
             }
             None => vec![],
         };

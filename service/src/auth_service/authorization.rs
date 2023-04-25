@@ -66,18 +66,19 @@ impl AuthServiceApi for AuthService {
             .user_manager
             .find_user_by_email(&login_info.email)
             .await?;
+
+        let user =
+            user_info.ok_or_else(|| InternalError::InvalidUser("User not found".to_string()))?;
         let mut user_id = -1;
-        let token = match user_info {
-            Some(user) => match login_info.verify(&user.password) {
-                Ok(true) => {
-                    user_id = user.id;
-                    let tokens = UserProfile::from(user).encode_tokens(&self.config.jwt)?;
-                    tracing::info!("Login success: {}", tokens);
-                    Ok(tokens)
-                }
-                _ => Err(InternalError::WrongPassword),
-            },
-            None => Err(InternalError::UserNotExist),
+
+        let token = match login_info.verify(&user.password) {
+            Ok(true) => {
+                user_id = user.id;
+                let tokens = UserProfile::from(user).encode_tokens(&self.config.jwt)?;
+                tracing::info!("Login success: {}", tokens);
+                Ok(tokens)
+            }
+            _ => Err(InternalError::WrongPassword("Wrong Password".to_string())),
         }?;
         let client = request.client;
         let client = match client.client_id {
@@ -119,11 +120,11 @@ where
         let TypedHeader(Authorization(bearer)) =
             TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, service)
                 .await
-                .map_err(|e| InternalError::InvalidAuthToken(e.to_string()))?;
+                .map_err(|e| InternalError::InvalidToken(e.to_string()))?;
 
         match service.auth_service.authurize(bearer.token().to_string()) {
             Ok(user) => Ok(user),
-            Err(err) => Err(InternalError::InvalidAuthToken(err.to_string())),
+            Err(err) => Err(InternalError::InvalidToken(err.to_string())),
         }
     }
 }

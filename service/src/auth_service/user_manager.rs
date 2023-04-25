@@ -52,7 +52,8 @@ impl UserManagerOp for UserManager {
         );
         let user_info = sqlx::query_as::<_, UserInformation>(&sql)
             .fetch_one(self.db_service.as_ref())
-            .await?;
+            .await
+            .map_err(|e| InternalError::DatabaseInsertError(e.to_string()))?;
         Ok(user_info)
     }
 
@@ -68,7 +69,8 @@ impl UserManagerOp for UserManager {
         );
         let res = sqlx::query_as::<_, UserInformation>(&sql)
             .fetch_optional(self.db_service.as_ref())
-            .await?;
+            .await
+            .map_err(|e| InternalError::DatabaseInsertError(e.to_string()))?;
         Ok(res)
     }
 
@@ -86,7 +88,8 @@ impl UserManagerOp for UserManager {
         );
         let client = sqlx::query_as::<_, ClientInfo>(&sql)
             .fetch_one(self.db_service.as_ref())
-            .await?;
+            .await
+            .map_err(|e| InternalError::DatabaseInsertError(e.to_string()))?;
         Ok(client)
     }
 }

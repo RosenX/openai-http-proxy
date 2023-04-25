@@ -6,7 +6,8 @@ pub struct EncryptUtil;
 
 impl EncryptUtil {
     pub fn hash_password(origin_passwod: &str) -> Result<String, InternalError> {
-        let hashed_password = hash(origin_passwod, 4)?;
+        let hashed_password =
+            hash(origin_passwod, 4).map_err(|e| InternalError::EncryptHashError(e.to_string()))?;
         Ok(hashed_password)
     }
 
@@ -14,7 +15,8 @@ impl EncryptUtil {
         input_password: &str,
         database_password: &str,
     ) -> Result<bool, InternalError> {
-        let res = verify(input_password, database_password)?;
+        let res = verify(input_password, database_password)
+            .map_err(|e| InternalError::EncryptVerifyError(e.to_string()))?;
         Ok(res)
     }
 }
