@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{fmt::Display, ops::Deref};
 
 use serde::Deserialize;
 use utoipa::ToSchema;
@@ -7,9 +7,22 @@ use crate::InternalError;
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct DatabaseConfig {
-    pub url: String,
+    pub host: String,
+    pub port: u16,
+    pub user: String,
+    pub password: String,
     pub database: String,
     pub max_connection: u32,
+}
+
+impl Display for DatabaseConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{{host: {}, port: {}, user: {}, database: {}, max_connection: {}}}",
+            self.host, self.port, self.user, self.database, self.max_connection
+        )
+    }
 }
 
 pub type DbOption = sqlx::postgres::PgPoolOptions;
@@ -34,7 +47,10 @@ impl Deref for DbService {
 
 impl DbService {
     pub async fn from_config(config: DatabaseConfig) -> Result<Self, InternalError> {
-        let url = format!("{}/{}", config.url, config.database);
+        let url = format!(
+            "postgres://{}:{}@{}:{}/{}",
+            config.user, config.password, config.host, config.port, config.database
+        );
         let pool = DbOption::new()
             .max_connections(config.max_connection) //todo
             .connect(&url)

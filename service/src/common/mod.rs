@@ -6,6 +6,7 @@ use std::sync::Arc;
 use abi::{DatabaseConfig, DbService, InternalError};
 pub use app_config::AppConfig;
 use content_sync::ContentSyncService;
+use tracing::info;
 
 use crate::auth_service::{AuthService, AuthServiceConfig};
 
@@ -32,6 +33,7 @@ impl AppState {
         auth_config: AuthServiceConfig,
         database_config: DatabaseConfig,
     ) -> Result<Self, InternalError> {
+        info!("Starting database service from config: {}", database_config);
         let db_service = DbService::from_config(database_config).await?;
         let auth_service = Arc::new(AuthService::new(db_service.clone(), auth_config));
         let content_service = Arc::new(ContentSyncService::new(db_service));
