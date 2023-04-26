@@ -54,6 +54,8 @@ async fn main() {
     let app = create_route().with_state(app_state).layer(layer);
 
     let host = format!("{}:{}", app_config.server.ip, app_config.server.port);
+
+    info!("Starting server at: {}", host);
     axum::Server::bind(&host.parse().unwrap())
         .serve(app.into_make_service())
         .await

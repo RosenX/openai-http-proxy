@@ -4,4 +4,5 @@ dart
 openapi.json
 config.prod.yaml
 config.test.yaml
+aliyun-fc
 .env
