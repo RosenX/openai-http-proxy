@@ -6,3 +6,4 @@ config.prod.yaml
 config.test.yaml
 aliyun-fc
 .env
+.s

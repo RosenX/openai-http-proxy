@@ -1,0 +1,57 @@
+edition: 1.0.0
+name: readbot
+access: "default"
+
+vars:
+  cn-region: "cn-shanghai"
+  service:
+    name: "readbot"
+    description: 'AI helper for reading'
+    vpcConfig:
+      vpcId: vpc-uf69o8x2c9dpe9ni9zhd6
+      securityGroupId: sg-uf6dklm6ropymextgbrp
+      vswitchIds:
+        - vsw-uf6mjuikdtht9k3xq7rop
+    logConfig:
+          project: aliyun-fc-cn-shanghai-c375fd07-3907-5f9d-b092-492f05f3f60e
+          logstore: function-log
+          enableRequestMetrics: true
+          enableInstanceMetrics: true
+          logBeginRule: DefaultRegex
+
+services:
+  feedbox:
+    component: fc
+    actions:
+      pre-deploy:
+        - run: make build-fc
+          path: ./
+
+    props:
+      region: ${vars.cn-region}
+      service: ${vars.service}
+      function:
+        name: "readbot-service"
+        description: 'readbot service include Sync & Auth'
+        timeout: 30
+        memorySize: 128
+        runtime: custom
+        codeUri: ./aliyun-fc
+        environmentVariables:
+          FEEDBOX_ENV: prod
+        instanceConcurrency: 15
+        caPort: 8000
+        customRuntimeConfig:
+          command:
+            - "./feedbox"
+      triggers:
+        - name: httpTrigger
+          type: http
+          config:
+            authType: anonymous
+            disableURLInternet: false
+            methods: # HTTP 触发器支持的访问方法，可选值：GET、POST、PUT、DELETE、HEAD
+              - GET
+              - POST
+              - PUT
+              - DELETE

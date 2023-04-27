@@ -15,6 +15,9 @@ pub enum InternalError {
     #[error("Password wrong: {0}")]
     WrongPassword(String),
 
+    #[error("User exist: {0}")]
+    UserExist(String),
+
     // database
     #[error("Could not start transaction: {0}")]
     CouldNotStartTransaction(String),
@@ -48,7 +51,7 @@ impl IntoResponse for InternalError {
             InternalError::InvalidToken(_) => (StatusCode::UNAUTHORIZED, self.to_string()),
             InternalError::InvalidUser(_) => (StatusCode::UNAUTHORIZED, self.to_string()),
             InternalError::WrongPassword(_) => (StatusCode::UNAUTHORIZED, self.to_string()),
-
+            InternalError::UserExist(_) => (StatusCode::BAD_REQUEST, self.to_string()),
             InternalError::CouldNotStartTransaction(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
             }
