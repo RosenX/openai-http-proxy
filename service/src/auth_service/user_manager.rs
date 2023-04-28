@@ -19,6 +19,7 @@ pub trait UserManagerOp {
         user_id: Id,
         client_name: String,
     ) -> Result<ClientInfo, Self::Error>;
+    async fn delete(&self, user_id: Id) -> Result<(), Self::Error>;
 }
 
 impl UserManager {
@@ -91,5 +92,19 @@ impl UserManagerOp for UserManager {
             .await
             .map_err(|e| InternalError::DatabaseInsertError(e.to_string()))?;
         Ok(client)
+    }
+
+    async fn delete(&self, user_id: Id) -> Result<(), Self::Error> {
+        let sql = format!(
+            r#"
+            DELETE FROM user_information WHERE id = '{}'
+            "#,
+            user_id
+        );
+        sqlx::query(&sql)
+            .execute(self.db_service.as_ref())
+            .await
+            .map_err(|e| InternalError::DatabaseDeleteError(e.to_string()))?;
+        Ok(())
     }
 }

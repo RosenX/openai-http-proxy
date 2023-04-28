@@ -42,4 +42,5 @@ pub trait AuthServiceApi {
         &self,
         refresh_token: RefreshTokenRequest,
     ) -> Result<AuthResponse, Self::Error>;
+    async fn delete_user_account(&self, user_id: Id) -> Result<(), Self::Error>;
 }

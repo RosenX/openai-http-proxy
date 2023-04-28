@@ -1,6 +1,7 @@
-use crate::auth_service::AuthServiceApi;
+use crate::auth_service::{AuthServiceApi, AuthorizedUser};
 use abi::{AuthResponse, InternalError, LoginRequest, RefreshTokenRequest, RegisterRequest};
 use axum::extract::{Json, State};
+use content_sync::ContentSyncServiceApi;
 
 use super::AppState;
 
@@ -26,4 +27,16 @@ pub async fn refresh_token(
 ) -> Result<Json<AuthResponse>, InternalError> {
     let response: AuthResponse = service.auth_service.refresh_token(request)?;
     Ok(Json(response))
+}
+
+pub async fn destroy_account(
+    State(service): State<AppState>,
+    user: AuthorizedUser,
+) -> Result<(), InternalError> {
+    let user_delete_future = service.auth_service.delete_user_account(user.get_user_id());
+    let content_delete_future = service
+        .content_service
+        .delete_user_content(user.get_user_id());
+    tokio::try_join!(user_delete_future, content_delete_future)?;
+    Ok(())
 }

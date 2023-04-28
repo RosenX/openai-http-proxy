@@ -1,4 +1,4 @@
-use abi::{DbService, InternalError};
+use abi::{DbService, Id, InternalError};
 use async_trait::async_trait;
 
 use crate::{
@@ -119,5 +119,16 @@ impl ContentSyncServiceApi for ContentSyncService {
             client,
             message: "Success".to_string(), // TODO
         })
+    }
+
+    async fn delete_user_content(&self, user_id: Id) -> Result<(), abi::InternalError> {
+        let feed_groups = self.feed_group_manager.delete_by_user_id(user_id);
+        let feeds = self.feed_manager.delete_by_user_id(user_id);
+        let feed_items = self.feed_item_manager.delete_by_user_id(user_id);
+        let feed_update_records = self.feed_update_record_manager.delete_by_user_id(user_id);
+
+        tokio::try_join!(feed_groups, feeds, feed_items, feed_update_records)?;
+
+        Ok(())
     }
 }

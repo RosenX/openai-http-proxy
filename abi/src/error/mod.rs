@@ -28,6 +28,9 @@ pub enum InternalError {
     #[error("Database Insert Error: {0}")]
     DatabaseInsertError(String),
 
+    #[error("Database Delete Error: {0}")]
+    DatabaseDeleteError(String),
+
     #[error("Database Select Error: {0}")]
     DatabaseSelectError(String),
 
@@ -59,6 +62,9 @@ impl IntoResponse for InternalError {
                 (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
             }
             InternalError::DatabaseInsertError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
+            }
+            InternalError::DatabaseDeleteError(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
             }
             InternalError::DatabaseSelectError(_) => {

@@ -25,6 +25,8 @@ pub trait FeedItemManageOp {
         timestamp: Option<i64>,
         client_id: Id,
     ) -> Result<Vec<FeedItem>, abi::InternalError>;
+
+    async fn delete_by_user_id(&self, user_id: Id) -> Result<(), abi::InternalError>;
 }
 
 #[async_trait]
@@ -64,5 +66,14 @@ impl FeedItemManageOp for FeedItemManager {
             None => vec![],
         };
         Ok(result)
+    }
+
+    async fn delete_by_user_id(&self, user_id: Id) -> Result<(), InternalError> {
+        let sql = format!("DELETE FROM feed_item WHERE user_id = {}", user_id);
+        sqlx::query(&sql)
+            .execute(self.db_service.as_ref())
+            .await
+            .map_err(|e| InternalError::DatabaseDeleteError(e.to_string()))?;
+        Ok(())
     }
 }

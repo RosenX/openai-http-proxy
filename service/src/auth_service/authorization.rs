@@ -1,5 +1,5 @@
 use abi::{
-    AuthResponse, DbService, DecodeJwt, EncodeJwt, InternalError, JwtConfig, LoginRequest,
+    AuthResponse, DbService, DecodeJwt, EncodeJwt, Id, InternalError, JwtConfig, LoginRequest,
     PasswordVerify, RefreshTokenRequest, RegisterRequest, UserInformation, UserProfile,
 };
 use async_trait::async_trait;
@@ -103,6 +103,11 @@ impl AuthServiceApi for AuthService {
             jwt_tokens: tokens,
             client: request.client,
         })
+    }
+
+    async fn delete_user_account(&self, user_id: Id) -> Result<(), Self::Error> {
+        self.user_manager.delete(user_id).await?;
+        Ok(())
     }
 }
 

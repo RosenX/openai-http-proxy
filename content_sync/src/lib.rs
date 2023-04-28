@@ -36,4 +36,6 @@ pub trait ContentSyncServiceApi {
         user_id: Id,
         request: ContentPushRequest,
     ) -> Result<ContentPushResponse, InternalError>;
+
+    async fn delete_user_content(&self, user_id: Id) -> Result<(), InternalError>;
 }
