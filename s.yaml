@@ -55,3 +55,13 @@ services:
               - POST
               - PUT
               - DELETE
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: '/*'
+              methods:
+                - GET
+                - POST
+                - PUT
+                - DELETE
