@@ -53,7 +53,7 @@ impl FeedManageOp for FeedManager {
         let result = match timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY (sync_devices))",
+                    "SELECT * FROM feed WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY (sync_devices))",
                     user_id,
                     timestamp_to_datetime(t),
                     client_id
@@ -69,7 +69,7 @@ impl FeedManageOp for FeedManager {
     }
 
     async fn delete_by_user_id(&self, user_id: Id) -> Result<(), InternalError> {
-        let sql = format!("DELETE FROM feed_group WHERE user_id = {}", user_id);
+        let sql = format!("DELETE FROM feed WHERE user_id = {}", user_id);
         sqlx::query(&sql)
             .execute(self.db_service.as_ref())
             .await
