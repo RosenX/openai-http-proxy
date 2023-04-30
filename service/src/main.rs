@@ -3,12 +3,13 @@ pub mod auth_service;
 pub mod common;
 pub mod routes;
 
+use axum::{body::Body, http::Request};
 use common::{AppConfig, AppState};
 use config::{Config, FileFormat};
 use routes::create_route;
 use tower::ServiceBuilder;
-use tower_http::trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer};
-use tracing::{info, Level};
+use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
+use tracing::{info, Level, Span};
 
 fn load_config() -> AppConfig {
     // Read 'FEEDBOX_ENV' from environment variable
@@ -38,7 +39,7 @@ fn load_config() -> AppConfig {
 #[tokio::main]
 async fn main() {
     // Setup tracing
-    tracing_subscriber::fmt().init();
+    tracing_subscriber::fmt().compact().init();
     let app_config: AppConfig = load_config();
 
     let app_state = AppState::new(app_config.auth_service, app_config.database)
@@ -47,7 +48,10 @@ async fn main() {
 
     let layer = ServiceBuilder::new().layer(
         TraceLayer::new_for_http()
-            .on_request(DefaultOnRequest::new().level(Level::INFO))
+            .make_span_with(DefaultMakeSpan::new().include_headers(true))
+            .on_request(|request: &Request<Body>, _span: &Span| {
+                tracing::info!("started {} {}", request.method(), request.uri().path())
+            })
             .on_response(DefaultOnResponse::new().level(Level::INFO)),
     );
 
