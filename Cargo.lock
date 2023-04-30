@@ -13,6 +13,7 @@ dependencies = [
  "serde",
  "sqlx",
  "thiserror",
+ "tracing",
  "utoipa",
 ]
 

@@ -2,6 +2,7 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use tracing::error;
 
 #[derive(Debug, thiserror::Error)]
 pub enum InternalError {
@@ -50,6 +51,7 @@ pub enum InternalError {
 
 impl IntoResponse for InternalError {
     fn into_response(self) -> Response {
+        error!("InternalError: {}", self);
         let (code, message) = match self {
             InternalError::InvalidToken(_) => (StatusCode::UNAUTHORIZED, self.to_string()),
             InternalError::InvalidUser(_) => (StatusCode::UNAUTHORIZED, self.to_string()),

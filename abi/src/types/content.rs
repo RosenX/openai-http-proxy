@@ -92,7 +92,7 @@ impl FromRow<'_, PgRow> for FeedUpdateRecord {
             feed_url: row.try_get("feed_url")?,
             update_time: datetime_to_timestamp(row.try_get("update_time")?),
             last_content_hash: row.try_get("last_content_hash")?,
-            last_update: row.try_get("last_update")?,
+            last_update: datetime_to_timestamp(row.try_get("last_update")?),
             last_item_publish_time: datetime_to_timestamp_option(
                 row.try_get("last_item_publish_time")?,
             ),
