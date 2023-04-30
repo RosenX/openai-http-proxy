@@ -38,7 +38,7 @@ fn load_config() -> AppConfig {
 #[tokio::main]
 async fn main() {
     // Setup tracing
-    tracing_subscriber::fmt().with_max_level(Level::INFO).init();
+    tracing_subscriber::fmt().init();
     let app_config: AppConfig = load_config();
 
     let app_state = AppState::new(app_config.auth_service, app_config.database)

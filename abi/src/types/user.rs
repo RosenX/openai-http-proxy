@@ -3,8 +3,8 @@ use sqlx::{postgres::PgRow, FromRow, Row};
 use utoipa::ToSchema;
 
 use crate::{
-    Email, Id, InternalError, PasswordEncrypt, ProLevel, ProLevelPostgres, RegisterInfo,
-    UserProfile,
+    datetime_to_timestamp, Email, Id, InternalError, PasswordEncrypt, ProLevel, ProLevelPostgres,
+    RegisterInfo, UserProfile,
 };
 
 #[derive(Debug, Clone, ToSchema)]
@@ -69,7 +69,7 @@ impl From<UserInformation> for UserProfile {
             email: user_info.email,
             username: user_info.username,
             pro_level: user_info.pro_level,
-            pro_end_time: user_info.pro_end_time.timestamp(),
+            pro_end_time: datetime_to_timestamp(user_info.pro_end_time),
         }
     }
 }
