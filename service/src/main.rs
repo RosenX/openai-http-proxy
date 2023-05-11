@@ -38,13 +38,25 @@ fn load_config() -> AppConfig {
 
 #[tokio::main]
 async fn main() {
+    // start timing
+    let start = std::time::Instant::now();
     // Setup tracing
     tracing_subscriber::fmt().compact().init();
     let app_config: AppConfig = load_config();
 
+    // stat load config time
+    let end = std::time::Instant::now();
+    let elapsed = end.duration_since(start);
+    info!("Config load time: {:?}", elapsed);
+
     let app_state = AppState::new(app_config.auth_service, app_config.database)
         .await
         .expect("Failed to create app state");
+
+    // stat create app state time
+    let end = std::time::Instant::now();
+    let elapsed = end.duration_since(start);
+    info!("App state create time: {:?}", elapsed);
 
     let layer = ServiceBuilder::new().layer(
         TraceLayer::new_for_http()
@@ -58,6 +70,11 @@ async fn main() {
     let app = create_route().with_state(app_state).layer(layer);
 
     let host = format!("{}:{}", app_config.server.ip, app_config.server.port);
+
+    // end timing
+    let end = std::time::Instant::now();
+    let elapsed = end.duration_since(start);
+    info!("Startup time: {:?}", elapsed);
 
     info!("Starting server at: {}", host);
     axum::Server::bind(&host.parse().unwrap())
