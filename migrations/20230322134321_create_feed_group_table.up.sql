@@ -3,7 +3,7 @@
 CREATE TABLE feed_group (
     user_id INTEGER NOT NULL,
     name VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
+    description VARCHAR(255),
 
     update_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
     sync_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
