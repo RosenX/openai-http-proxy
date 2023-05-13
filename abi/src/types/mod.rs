@@ -103,6 +103,7 @@ pub enum SqlValue {
     NullableDatetime(Option<DateTime<Utc>>),
     EnumFeedType(FeedTypeServer),
     I32Array(Vec<i32>),
+    Bool(bool),
 }
 
 impl SqlValue {
@@ -121,6 +122,7 @@ impl SqlValue {
             SqlValue::NullableDatetime(datetime) => query.bind(datetime),
             SqlValue::EnumFeedType(feed_type) => query.bind(feed_type),
             SqlValue::I32Array(vec) => query.bind(vec),
+            SqlValue::Bool(bool) => query.bind(bool),
         }
     }
 }
@@ -143,6 +145,7 @@ impl ToOwned for SqlValue {
             SqlValue::NullableDatetime(datetime) => SqlValue::NullableDatetime(datetime.to_owned()),
             SqlValue::EnumFeedType(feed_type) => SqlValue::EnumFeedType(feed_type.to_owned()),
             SqlValue::I32Array(vec) => SqlValue::I32Array(vec.to_owned()),
+            SqlValue::Bool(bool) => SqlValue::Bool(bool.to_owned()),
         }
     }
 }

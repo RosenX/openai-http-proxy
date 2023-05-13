@@ -41,6 +41,7 @@ pub struct FeedGroup {
     pub name: String,
     pub description: Option<String>,
     pub update_time: i64,
+    pub is_deleted: bool,
 }
 
 impl DbTableName for FeedGroup {
@@ -51,7 +52,7 @@ impl DbTableName for FeedGroup {
 
 impl InsertSqlProvider for FeedGroup {
     fn sql_columns() -> String {
-        "user_id, name, description, update_time, sync_time, sync_devices".to_string()
+        "user_id, name, description, update_time, sync_time, sync_devices, is_deleted".to_string()
     }
     fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
         vec![
@@ -61,6 +62,7 @@ impl InsertSqlProvider for FeedGroup {
             SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
             SqlValue::Datetime(Utc::now()),
             SqlValue::I32Array(vec![client_id]),
+            SqlValue::Boolean(self.is_deleted),
         ]
     }
     fn sql_conflict(client_id: Id) -> String {
@@ -70,6 +72,7 @@ impl InsertSqlProvider for FeedGroup {
                 description = EXCLUDED.description,
                 update_time = EXCLUDED.update_time,
                 sync_time = EXCLUDED.sync_time,
+                is_deleted = EXCLUDED.is_deleted,
                 sync_devices = (
                     CASE
                         WHEN NOT ({client_id} = ANY({table_name}.sync_devices))
@@ -103,6 +106,7 @@ pub struct FeedItem {
     pub create_time: i64,
     pub md5_string: String,
     pub update_time: i64,
+    pub is_deleted: bool,
 }
 
 impl DbTableName for FeedItem {
@@ -113,7 +117,7 @@ impl DbTableName for FeedItem {
 
 impl InsertSqlProvider for FeedItem {
     fn sql_columns() -> String {
-        "user_id, feed_url, is_focus, is_seen, title, cover, link, publish_time, authors, tags, category, description, summary_algo, create_time, md5_string, update_time, sync_time, sync_devices".to_string()
+        "user_id, feed_url, is_focus, is_seen, title, cover, link, publish_time, authors, tags, category, description, summary_algo, create_time, md5_string, update_time, sync_time, sync_devices, is_deleted".to_string()
     }
     fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
         vec![
@@ -135,6 +139,7 @@ impl InsertSqlProvider for FeedItem {
             SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
             SqlValue::Datetime(Utc::now()),
             SqlValue::I32Array(vec![client_id]),
+            SqlValue::Boolean(self.is_deleted),
         ]
     }
     fn sql_conflict(client_id: Id) -> String {
@@ -153,6 +158,7 @@ impl InsertSqlProvider for FeedItem {
                 description = EXCLUDED.description,
                 summary_algo = EXCLUDED.summary_algo,
                 update_time = EXCLUDED.update_time,
+                is_deleted = EXCLUDED.is_deleted,
                 sync_time = EXCLUDED.sync_time,
                 sync_devices = (
                     CASE
@@ -250,6 +256,7 @@ pub struct Feed {
     pub create_time: i64,
     pub feed_type: FeedTypeServer,
     pub update_time: i64,
+    pub is_deleted: bool,
 }
 
 impl DbTableName for Feed {
@@ -261,7 +268,7 @@ impl DbTableName for Feed {
 // impl SqlProvider for Feed
 impl InsertSqlProvider for Feed {
     fn sql_columns() -> String {
-        "user_id, url, name, custom_name, logo, custom_logo, description, custom_description, tags, create_time, feed_type, update_time, sync_time, sync_devices".to_string()
+        "user_id, url, name, custom_name, logo, custom_logo, description, custom_description, tags, create_time, feed_type, update_time, sync_time, sync_devices, is_deleted".to_string()
     }
     fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
         vec![
@@ -279,6 +286,7 @@ impl InsertSqlProvider for Feed {
             SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
             SqlValue::Datetime(Utc::now()),
             SqlValue::I32Array(vec![client_id]),
+            SqlValue::Bool(self.is_deleted),
         ]
     }
     fn sql_conflict(client_id: Id) -> String {
@@ -293,6 +301,7 @@ impl InsertSqlProvider for Feed {
                 custom_description = EXCLUDED.custom_description,
                 tags = EXCLUDED.tags,
                 update_time = EXCLUDED.update_time,
+                is_deleted = EXCLUDED.is_deleted,
                 sync_time = EXCLUDED.sync_time,
                 sync_devices = (
                     CASE

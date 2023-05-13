@@ -12,6 +12,7 @@ impl FromRow<'_, PgRow> for FeedGroup {
             name: row.try_get("name")?,
             description: row.try_get("description")?,
             update_time: datetime_to_timestamp(row.try_get("update_time")?),
+            is_deleted: row.try_get("is_deleted")?,
         })
     }
 }
@@ -34,6 +35,7 @@ impl FromRow<'_, PgRow> for FeedItem {
             create_time: datetime_to_timestamp(row.try_get("create_time")?),
             md5_string: row.try_get("md5_string")?,
             update_time: datetime_to_timestamp(row.try_get("update_time")?),
+            is_deleted: row.try_get("is_deleted")?,
         })
     }
 }
@@ -52,6 +54,7 @@ impl FromRow<'_, PgRow> for Feed {
             create_time: datetime_to_timestamp(row.try_get("create_time")?),
             feed_type: row.try_get("feed_type")?,
             tags: row.try_get("tags")?,
+            is_deleted: row.try_get("is_deleted")?,
         })
     }
 }
