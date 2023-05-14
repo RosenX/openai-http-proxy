@@ -21,6 +21,7 @@ CREATE TABLE feed_item (
     sync_time TIMESTAMP(0) WITH TIME ZONE NOT NULL,
     sync_devices INTEGER[] NOT NULL,
     is_deleted BOOLEAN NOT NULL,
+    focus_time TIMESTAMP(0) WITH TIME ZONE,
 
     PRIMARY KEY (user_id, md5_string)
 );
