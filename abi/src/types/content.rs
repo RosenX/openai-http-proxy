@@ -36,7 +36,7 @@ impl FromRow<'_, PgRow> for FeedItem {
             md5_string: row.try_get("md5_string")?,
             update_time: datetime_to_timestamp(row.try_get("update_time")?),
             is_deleted: row.try_get("is_deleted")?,
-            focus_time: row.try_get("focus_time")?,
+            focus_time: datetime_to_timestamp_option(row.try_get("focus_time")?),
         })
     }
 }

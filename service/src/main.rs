@@ -3,13 +3,11 @@ pub mod auth_service;
 pub mod common;
 pub mod routes;
 
-use axum::{body::Body, http::Request};
 use common::{AppConfig, AppState};
 use config::{Config, FileFormat};
 use routes::create_route;
-use tower::ServiceBuilder;
-use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
-use tracing::{info, Level, Span};
+use tower_http::trace::{DefaultMakeSpan, TraceLayer};
+use tracing::{info, Level};
 
 fn load_config() -> AppConfig {
     // Read 'FEEDBOX_ENV' from environment variable
@@ -41,7 +39,10 @@ async fn main() {
     // start timing
     let start = std::time::Instant::now();
     // Setup tracing
-    tracing_subscriber::fmt().compact().init();
+    tracing_subscriber::fmt()
+        .compact()
+        .with_max_level(Level::DEBUG)
+        .init();
     let app_config: AppConfig = load_config();
 
     // stat load config time
@@ -58,16 +59,9 @@ async fn main() {
     let elapsed = end.duration_since(start);
     info!("App state create time: {:?}", elapsed);
 
-    let layer = ServiceBuilder::new().layer(
-        TraceLayer::new_for_http()
-            .make_span_with(DefaultMakeSpan::new().include_headers(true))
-            .on_request(|request: &Request<Body>, _span: &Span| {
-                tracing::info!("started {} {}", request.method(), request.uri().path())
-            })
-            .on_response(DefaultOnResponse::new().level(Level::INFO)),
+    let app = create_route().with_state(app_state).layer(
+        TraceLayer::new_for_http().make_span_with(DefaultMakeSpan::new().include_headers(true)),
     );
-
-    let app = create_route().with_state(app_state).layer(layer);
 
     let host = format!("{}:{}", app_config.server.ip, app_config.server.port);
 
