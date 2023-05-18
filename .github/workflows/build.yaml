@@ -38,7 +38,7 @@ jobs:
       - name: Check code format
         run: cargo fmt -- --check
       - name: Check the package for errors
-        run: cargo check --all
+        run: cargo check --exclude codegen --workspace
       - name: Lint rust sources
         run: cargo clippy --all-targets --all-features --tests --benches -- -D warnings
       - name: Run tests
