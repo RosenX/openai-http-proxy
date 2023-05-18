@@ -1,7 +1,7 @@
 target
 .DS_Store
-dart
 openapi.json
+codegen/code
 config.prod.yaml
 config.test.yaml
 aliyun-fc
