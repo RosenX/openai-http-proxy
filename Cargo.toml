@@ -1,0 +1,10 @@
+[package]
+name = "example-http-proxy"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+hyper = { version = "0.14", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
+http = "0.2"
