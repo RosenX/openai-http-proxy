@@ -20,6 +20,8 @@ jobs:
             os: ubuntu-18.04
             target: x86_64-unknown-linux-musl
 
+    runs-on: ${{ matrix.os }}
+    
     steps:
       - uses: actions/checkout@v3
       - name: Cache cargo registry
