@@ -1,0 +1,41 @@
+edition: 1.0.0
+name: openai-http-proxy
+access: "default"
+
+vars:
+  region: "ap-southeast-1"
+  service:
+    name: "openai-http-proxy"
+    description: 'openai http proxy'
+
+services:
+  http-proxy:
+    component: fc
+    actions:
+      pre-deploy:
+        - run: make build-fc
+          path: ./
+
+    props:
+      region: ${vars.region}
+      service: ${vars.service}
+      function:
+        name: "openai-http-proxy"
+        timeout: 30
+        memorySize: 128
+        runtime: custom
+        codeUri: ./aliyun-fc
+        instanceConcurrency: 15
+        caPort: 8100
+        customRuntimeConfig:
+          command:
+            - "./openai-http-proxy"
+      triggers:
+        - name: httpTrigger
+          type: http
+          config:
+            authType: anonymous
+            disableURLInternet: false
+            methods: # HTTP 触发器支持的访问方法，可选值：GET、POST、PUT、DELETE、HEAD
+              - GET
+              - POST
