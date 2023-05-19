@@ -7,6 +7,12 @@ vars:
   service:
     name: "openai-http-proxy"
     description: 'openai http proxy'
+    logConfig:
+      project: aliyun-fc-ap-southeast-1-c375fd07-3907-5f9d-b092-492f05f3f60e
+      logstore: function-log
+      enableRequestMetrics: true
+      enableInstanceMetrics: true
+      logBeginRule: DefaultRegex
 
 services:
   http-proxy:
@@ -21,12 +27,12 @@ services:
       service: ${vars.service}
       function:
         name: "openai-http-proxy"
-        timeout: 30
+        timeout: 100
         memorySize: 128
         runtime: custom
-        codeUri: ./aliyun-fc
+        codeUri: ./serverless-fc
         instanceConcurrency: 15
-        caPort: 8100
+        caPort: 8000
         customRuntimeConfig:
           command:
             - "./openai-http-proxy"
@@ -39,3 +45,11 @@ services:
             methods: # HTTP 触发器支持的访问方法，可选值：GET、POST、PUT、DELETE、HEAD
               - GET
               - POST
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: '/*'
+              methods:
+                - GET
+                - POST
