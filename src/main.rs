@@ -45,6 +45,8 @@ async fn proxy(_client: HttpClient, req: Request<Body>) -> Result<Response<Body>
             hyper::header::AUTHORIZATION,
             req.headers().get("Authorization").unwrap().to_owned(),
         );
+    } else {
+        return Ok(Response::new(Body::from("Missing Authorization header")));
     }
 
     request_builder = request_builder.header(
