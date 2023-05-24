@@ -19,6 +19,14 @@ pub trait FeedManageOp {
         feeds: Vec<Feed>,
         client_id: Id,
     ) -> Result<(), abi::InternalError>;
+
+    async fn insert(
+        &self,
+        user_id: Id,
+        feeds: Feed,
+        client_id: Id,
+    ) -> Result<(), abi::InternalError>;
+
     async fn query_need_sync(
         &self,
         user_id: Id,
@@ -40,6 +48,12 @@ impl FeedManageOp for FeedManager {
         if feeds.is_empty() {
             return Ok(());
         }
+        execute_bulk_insert(&self.db_service, feeds, user_id, client_id).await?;
+        Ok(())
+    }
+
+    async fn insert(&self, user_id: Id, feeds: Feed, client_id: Id) -> Result<(), InternalError> {
+        let feeds = vec![feeds];
         execute_bulk_insert(&self.db_service, feeds, user_id, client_id).await?;
         Ok(())
     }

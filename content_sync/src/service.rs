@@ -1,4 +1,4 @@
-use abi::{DbService, Id, InternalError};
+use abi::{DbService, Feed, Id, InternalError};
 use async_trait::async_trait;
 
 use crate::{
@@ -130,5 +130,30 @@ impl ContentSyncServiceApi for ContentSyncService {
         tokio::try_join!(feed_groups, feeds, feed_items, feed_update_records)?;
 
         Ok(())
+    }
+
+    async fn subscribe_feed(
+        &self,
+        user_id: Id,
+        request: abi::SubscribeFeedRequest,
+    ) -> Result<abi::SubscribeFeedResponse, abi::InternalError> {
+        let abi::SubscribeFeedRequest { client, feed_info } = request;
+
+        let client_id = match client.client_id {
+            Some(id) => id,
+            None => {
+                return Err(InternalError::InvalidRequest(
+                    "client_id is required".to_string(),
+                ))
+            }
+        };
+
+        let feed: Feed = feed_info.into();
+        self.feed_manager.insert(user_id, feed, client_id).await?;
+
+        Ok(abi::SubscribeFeedResponse {
+            client,
+            message: "Success".to_string(), // TODO
+        })
     }
 }

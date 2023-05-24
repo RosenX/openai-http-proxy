@@ -24,6 +24,9 @@ use utoipa::OpenApi;
         abi::AuthResponse,
         abi::ContentPullResponse,
         abi::ContentPushResponse,
+        abi::SubscribeFeedRequest,
+        abi::SubscribeFeedResponse,
+        abi::FeedInfo,
     ),),
     tags()
 )]

@@ -3,4 +3,5 @@ members = [
     "service",
     "content_sync",
     "abi",
+    "codegen"
 ]

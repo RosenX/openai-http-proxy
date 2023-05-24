@@ -25,3 +25,10 @@ pub struct ContentPushResponse {
     pub client: ClientInfo,
     pub message: String,
 }
+
+#[derive(serde::Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct SubscribeFeedResponse {
+    pub client: ClientInfo,
+    pub message: String,
+}

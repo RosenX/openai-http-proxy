@@ -1,9 +1,10 @@
 use std::fmt::Display;
 
 use crate::{
-    datetime_to_timestamp, datetime_to_timestamp_option, ClientInfo, Feed, FeedGroup, FeedItem,
-    FeedTypeServer, FeedUpdateRecord, ProLevel, ProLevelPostgres,
+    datetime_to_timestamp, datetime_to_timestamp_option, ClientInfo, Feed, FeedGroup, FeedInfo,
+    FeedItem, FeedTypeServer, FeedUpdateRecord, ProLevel, ProLevelPostgres,
 };
+use chrono::Utc;
 use sqlx::{postgres::PgRow, FromRow, Row};
 
 impl FromRow<'_, PgRow> for FeedGroup {
@@ -86,6 +87,25 @@ impl From<ProLevelPostgres> for ProLevel {
             ProLevelPostgres::Normal => ProLevel::Normal,
             ProLevelPostgres::Pro => ProLevel::Pro,
             ProLevelPostgres::Spro => ProLevel::Spro,
+        }
+    }
+}
+
+impl From<FeedInfo> for Feed {
+    fn from(info: FeedInfo) -> Self {
+        Self {
+            url: info.url,
+            name: info.title,
+            description: None,
+            custom_description: None,
+            custom_name: None,
+            update_time: datetime_to_timestamp(Utc::now()),
+            logo: info.image,
+            custom_logo: None,
+            create_time: datetime_to_timestamp(Utc::now()),
+            feed_type: Some(FeedTypeServer::Unknown),
+            tags: None,
+            is_deleted: false,
         }
     }
 }

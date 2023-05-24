@@ -11,6 +11,14 @@ pub struct RegisterInfo {
 
 #[derive(serde::Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
+pub struct FeedInfo {
+    pub url: String,
+    pub image: Option<String>,
+    pub title: Option<String>,
+}
+
+#[derive(serde::Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct LoginInfo {
     pub email: String,
     pub password: String,
@@ -42,6 +50,13 @@ pub struct RefreshTokenRequest {
 pub struct ContentPullRequest {
     pub client: ClientInfo,
     pub sync_timestamp: SyncTimestamp,
+}
+
+#[derive(serde::Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct SubscribeFeedRequest {
+    pub client: ClientInfo,
+    pub feed_info: FeedInfo,
 }
 
 #[derive(serde::Deserialize, ToSchema)]

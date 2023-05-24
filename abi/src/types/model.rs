@@ -257,7 +257,7 @@ pub struct Feed {
     pub custom_description: Option<String>,
     pub tags: Option<Vec<String>>,
     pub create_time: i64,
-    pub feed_type: FeedTypeServer,
+    pub feed_type: Option<FeedTypeServer>,
     pub update_time: i64,
     pub is_deleted: bool,
 }
@@ -285,7 +285,7 @@ impl InsertSqlProvider for Feed {
             SqlValue::NullableString(self.custom_description.clone()),
             SqlValue::NullableStringArray(self.tags.clone()),
             SqlValue::Datetime(timestamp_to_datetime(self.create_time)),
-            SqlValue::EnumFeedType(self.feed_type),
+            SqlValue::NullableEnumFeedType(self.feed_type),
             SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
             SqlValue::Datetime(Utc::now()),
             SqlValue::I32Array(vec![client_id]),

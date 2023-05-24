@@ -8,7 +8,7 @@ mod service;
 
 use abi::{
     ContentPullRequest, ContentPullResponse, ContentPushRequest, ContentPushResponse, Id,
-    InternalError,
+    InternalError, SubscribeFeedRequest, SubscribeFeedResponse,
 };
 use async_trait::async_trait;
 use feed_group_manager::FeedGroupManager;
@@ -38,4 +38,10 @@ pub trait ContentSyncServiceApi {
     ) -> Result<ContentPushResponse, InternalError>;
 
     async fn delete_user_content(&self, user_id: Id) -> Result<(), InternalError>;
+
+    async fn subscribe_feed(
+        &self,
+        user_id: Id,
+        request: SubscribeFeedRequest,
+    ) -> Result<SubscribeFeedResponse, InternalError>;
 }

@@ -102,6 +102,7 @@ pub enum SqlValue {
     Datetime(DateTime<Utc>),
     NullableDatetime(Option<DateTime<Utc>>),
     EnumFeedType(FeedTypeServer),
+    NullableEnumFeedType(Option<FeedTypeServer>),
     I32Array(Vec<i32>),
     Bool(bool),
 }
@@ -123,6 +124,7 @@ impl SqlValue {
             SqlValue::EnumFeedType(feed_type) => query.bind(feed_type),
             SqlValue::I32Array(vec) => query.bind(vec),
             SqlValue::Bool(bool) => query.bind(bool),
+            SqlValue::NullableEnumFeedType(feed_type) => query.bind(feed_type),
         }
     }
 }
@@ -146,6 +148,9 @@ impl ToOwned for SqlValue {
             SqlValue::EnumFeedType(feed_type) => SqlValue::EnumFeedType(feed_type.to_owned()),
             SqlValue::I32Array(vec) => SqlValue::I32Array(vec.to_owned()),
             SqlValue::Bool(bool) => SqlValue::Bool(bool.to_owned()),
+            SqlValue::NullableEnumFeedType(feed_type) => {
+                SqlValue::NullableEnumFeedType(feed_type.to_owned())
+            }
         }
     }
 }
@@ -182,6 +187,8 @@ pub fn generate_insert_query<T: InsertSqlProvider>(
     }
     insert_query.pop(); // 移除最后一个逗号
     insert_query.push_str(T::sql_conflict(client_id).as_str());
+    // info!("insert binding: {}", bindings);
+
     (insert_query, bindings)
 }
 
