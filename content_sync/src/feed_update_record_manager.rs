@@ -1,9 +1,52 @@
-use abi::{
-    execute_bulk_insert, timestamp_to_datetime, DbService, FeedUpdateRecord, Id, InternalError,
-};
+use abi::{timestamp_to_datetime, DbService, FeedUpdateRecord, Id, InternalError, SqlValue};
 use async_trait::async_trait;
+use sqlx::types::chrono::Utc;
 
-use crate::{TableDeleteOp, TablePullOp, TablePushOp};
+use crate::{
+    service::execute_bulk_insert, InsertSqlProvider, TableDeleteOp, TableName, TablePullOp,
+    TablePushOp,
+};
+
+impl TableName for FeedUpdateRecord {
+    fn table_name() -> String {
+        "feed_update_record".to_string()
+    }
+}
+
+// impl SqlProvider for FeedUpdateRecord
+impl InsertSqlProvider for FeedUpdateRecord {
+    fn sql_columns() -> String {
+        "user_id, feed_url, last_update, last_content_hash, last_item_publish_time, update_time, sync_time, last_sync_device"
+            .to_string()
+    }
+    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
+        vec![
+            SqlValue::I32(user_id),
+            SqlValue::String(self.feed_url.clone()),
+            SqlValue::Datetime(timestamp_to_datetime(self.last_update)),
+            SqlValue::String(self.last_content_hash.clone()),
+            SqlValue::NullableDatetime(self.last_item_publish_time.map(timestamp_to_datetime)),
+            SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
+            SqlValue::Datetime(Utc::now()),
+            SqlValue::String(client_name),
+        ]
+    }
+    fn sql_conflict() -> String {
+        format!(
+            "
+            ON CONFLICT (user_id, feed_url) DO UPDATE SET
+                last_update = EXCLUDED.last_update,
+                last_content_hash = EXCLUDED.last_content_hash,
+                last_item_publish_time = EXCLUDED.last_item_publish_time,
+                update_time = EXCLUDED.update_time,
+                sync_time = EXCLUDED.sync_time,
+                last_sync_device = EXCLUDED.last_sync_device
+            WHERE EXCLUDED.update_time > {table_name}.update_time;
+        ",
+            table_name = Self::table_name()
+        )
+    }
+}
 
 #[async_trait]
 impl TablePullOp for FeedUpdateRecord {

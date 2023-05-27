@@ -1,6 +1,48 @@
-use crate::{TableDeleteOp, TablePullOp, TablePushOp};
-use abi::{execute_bulk_insert, timestamp_to_datetime, DbService, FeedGroup, Id, InternalError};
+use crate::{
+    service::execute_bulk_insert, InsertSqlProvider, TableDeleteOp, TableName, TablePullOp,
+    TablePushOp,
+};
+use abi::{timestamp_to_datetime, DbService, FeedGroup, Id, InternalError, SqlValue};
 use async_trait::async_trait;
+use sqlx::types::chrono::Utc;
+
+impl TableName for FeedGroup {
+    fn table_name() -> String {
+        "feed_group".to_string()
+    }
+}
+
+impl InsertSqlProvider for FeedGroup {
+    fn sql_columns() -> String {
+        "user_id, name, description, update_time, sync_time, is_deleted, last_sync_device"
+            .to_string()
+    }
+    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
+        vec![
+            SqlValue::I32(user_id),
+            SqlValue::String(self.name.clone()),
+            SqlValue::NullableString(self.description.clone()),
+            SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
+            SqlValue::Datetime(Utc::now()),
+            SqlValue::Boolean(self.is_deleted),
+            SqlValue::String(client_name),
+        ]
+    }
+    fn sql_conflict() -> String {
+        format!(
+            "
+            ON CONFLICT (user_id, name) DO UPDATE SET
+                description = EXCLUDED.description,
+                update_time = EXCLUDED.update_time,
+                sync_time = EXCLUDED.sync_time,
+                is_deleted = EXCLUDED.is_deleted,
+                last_sync_device = EXCLUDED.last_sync_device
+            WHERE EXCLUDED.update_time > {table_name}.update_time;
+        ",
+            table_name = Self::table_name()
+        )
+    }
+}
 
 #[async_trait]
 impl TablePullOp for FeedGroup {

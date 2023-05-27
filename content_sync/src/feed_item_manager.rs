@@ -1,7 +1,72 @@
-use abi::{execute_bulk_insert, timestamp_to_datetime, DbService, FeedItem, Id, InternalError};
+use abi::{timestamp_to_datetime, DbService, FeedItem, Id, InternalError, SqlValue};
 use async_trait::async_trait;
+use sqlx::types::chrono::Utc;
 
-use crate::{TableDeleteOp, TablePullOp, TablePushOp};
+use crate::{
+    service::execute_bulk_insert, InsertSqlProvider, TableDeleteOp, TableName, TablePullOp,
+    TablePushOp,
+};
+
+impl TableName for FeedItem {
+    fn table_name() -> String {
+        "feed_item".to_string()
+    }
+}
+
+impl InsertSqlProvider for FeedItem {
+    fn sql_columns() -> String {
+        "user_id, feed_url, is_focus, is_seen, title, cover, link, publish_time, authors, tags, category, description, summary_algo, create_time, md5_string, update_time, sync_time, is_deleted, focus_time, last_sync_device".to_string()
+    }
+    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
+        vec![
+            SqlValue::I32(user_id),
+            SqlValue::String(self.feed_url.clone()),
+            SqlValue::Boolean(self.is_focus),
+            SqlValue::Boolean(self.is_seen),
+            SqlValue::NullableString(self.title.clone()),
+            SqlValue::NullableString(self.cover.clone()),
+            SqlValue::NullableString(self.link.clone()),
+            SqlValue::NullableDatetime(self.publish_time.map(timestamp_to_datetime)),
+            SqlValue::NullableString(self.authors.clone()),
+            SqlValue::NullableStringArray(self.tags.clone()),
+            SqlValue::NullableString(self.category.clone()),
+            SqlValue::NullableString(self.description.clone()),
+            SqlValue::NullableString(self.summary_algo.clone()),
+            SqlValue::Datetime(timestamp_to_datetime(self.create_time)),
+            SqlValue::String(self.md5_string.clone()),
+            SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
+            SqlValue::Datetime(Utc::now()),
+            SqlValue::Boolean(self.is_deleted),
+            SqlValue::NullableDatetime(self.focus_time.map(timestamp_to_datetime)),
+            SqlValue::String(client_name),
+        ]
+    }
+    fn sql_conflict() -> String {
+        format!(
+            "
+            ON CONFLICT (user_id, md5_string) DO UPDATE SET
+                is_focus = EXCLUDED.is_focus,
+                is_seen = EXCLUDED.is_seen,
+                title = EXCLUDED.title,
+                cover = EXCLUDED.cover,
+                link = EXCLUDED.link,
+                publish_time = EXCLUDED.publish_time,
+                authors = EXCLUDED.authors,
+                tags = EXCLUDED.tags,
+                category = EXCLUDED.category,
+                description = EXCLUDED.description,
+                summary_algo = EXCLUDED.summary_algo,
+                update_time = EXCLUDED.update_time,
+                is_deleted = EXCLUDED.is_deleted,
+                sync_time = EXCLUDED.sync_time,
+                focus_time = EXCLUDED.focus_time,
+                last_sync_device = EXCLUDED.last_sync_device
+            WHERE EXCLUDED.update_time > {table_name}.update_time;
+        ",
+            table_name = Self::table_name()
+        )
+    }
+}
 
 #[async_trait]
 pub trait FeedItemManageOp {
