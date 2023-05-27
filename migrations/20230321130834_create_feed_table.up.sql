@@ -5,7 +5,7 @@ CREATE TYPE feed_type AS ENUM('rss', 'atom', 'unknown');
 CREATE TABLE feed (
     user_id INTEGER NOT NULL,
     url VARCHAR(200) NOT NULL,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(100),
     custom_name VARCHAR(100),
     logo VARCHAR(200),
     custom_logo VARCHAR(200),

@@ -67,7 +67,7 @@ impl FeedManageOp for FeedManager {
         let result = match timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY (sync_devices))",
+                    "SELECT * FROM feed WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY (sync_devices)) AND is_deleted = false",
                     user_id,
                     timestamp_to_datetime(t),
                     client_id

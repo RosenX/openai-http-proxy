@@ -52,8 +52,9 @@ impl FeedGroupManageOp for FeedGroupManager {
     ) -> Result<Vec<FeedGroup>, InternalError> {
         let result = match timestamp {
             Some(t) => {
+                // TODO: Bug here, sync_device change to last_sysnc_device
                 let sql = format!(
-                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY (sync_devices))",
+                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY (sync_devices)) and is_deleted = false",
                     user_id,
                     timestamp_to_datetime(t),
                     client_id

@@ -103,7 +103,7 @@ impl From<FeedInfo> for Feed {
             logo: info.image,
             custom_logo: None,
             create_time: datetime_to_timestamp(Utc::now()),
-            feed_type: Some(FeedTypeServer::Unknown),
+            feed_type: None,
             tags: None,
             is_deleted: false,
         }
