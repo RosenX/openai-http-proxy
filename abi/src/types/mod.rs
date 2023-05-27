@@ -170,14 +170,14 @@ pub trait InsertSqlProvider: DbTableName {
 pub fn generate_insert_query<T: InsertSqlProvider>(
     data: &[T],
     user_id: Id,
-    client_name: String,
+    client_name: &str,
 ) -> (String, Vec<SqlValue>) {
     let columns = T::sql_columns();
     let mut insert_query = format!("INSERT INTO {} ({}) VALUES ", T::table_name(), columns);
     let mut bindings: Vec<SqlValue> = Vec::new();
 
     for (i, item) in data.iter().enumerate() {
-        let values = item.sql_values(user_id, client_name.clone());
+        let values = item.sql_values(user_id, client_name.to_owned());
         insert_query.push('(');
         for (j, value) in values.iter().enumerate() {
             insert_query.push_str(&format!("${},", i * values.len() + j + 1));
@@ -198,7 +198,7 @@ pub async fn execute_bulk_insert<T: InsertSqlProvider>(
     database: &DbService,
     data: Vec<T>,
     user_id: Id,
-    client_name: String,
+    client_name: &str,
 ) -> Result<(), InternalError> {
     // 开启事务
     let mut tx = database
@@ -207,7 +207,7 @@ pub async fn execute_bulk_insert<T: InsertSqlProvider>(
         .map_err(|e| InternalError::CouldNotStartTransaction(e.to_string()))?;
 
     for chunk in data.chunks(INSERT_CHUNK_SIZE) {
-        let (insert_query, bindings) = generate_insert_query(chunk, user_id, client_name.clone()); // TODO: 这里的clone有点丑陋
+        let (insert_query, bindings) = generate_insert_query(chunk, user_id, client_name); // TODO: 这里的clone有点丑陋
         let mut query = sqlx::query(&insert_query);
 
         for binding in bindings {

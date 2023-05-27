@@ -3,56 +3,18 @@ use abi::{
 };
 use async_trait::async_trait;
 
-pub struct FeedUpdateRecordManager {
-    db_service: DbService,
-}
-
-impl FeedUpdateRecordManager {
-    pub fn new(db_service: DbService) -> Self {
-        Self { db_service }
-    }
-}
+use crate::{TableDeleteOp, TablePullOp, TablePushOp};
 
 #[async_trait]
-pub trait FeedUpdateRecordManageOp {
-    async fn insert_batch(
-        &self,
+impl TablePullOp for FeedUpdateRecord {
+    type Error = InternalError;
+    async fn pull(
+        db: DbService,
         user_id: Id,
-        feed_update_records: Vec<FeedUpdateRecord>,
-        client_name: String,
-    ) -> Result<(), abi::InternalError>;
-    async fn query_need_sync(
-        &self,
-        user_id: Id,
-        timestamp: Option<i64>,
-        client_name: String,
-    ) -> Result<Vec<FeedUpdateRecord>, abi::InternalError>;
-
-    async fn delete_by_user_id(&self, user_id: Id) -> Result<(), abi::InternalError>;
-}
-
-#[async_trait]
-impl FeedUpdateRecordManageOp for FeedUpdateRecordManager {
-    async fn insert_batch(
-        &self,
-        user_id: Id,
-        feed_update_records: Vec<FeedUpdateRecord>,
-        client_name: String,
-    ) -> Result<(), InternalError> {
-        if feed_update_records.is_empty() {
-            return Ok(());
-        }
-        execute_bulk_insert(&self.db_service, feed_update_records, user_id, client_name).await?;
-        Ok(())
-    }
-
-    async fn query_need_sync(
-        &self,
-        user_id: Id,
-        timestamp: Option<i64>,
-        client_name: String,
-    ) -> Result<Vec<FeedUpdateRecord>, InternalError> {
-        let result = match timestamp {
+        last_sync_timestamp: Option<i64>,
+        client_name: &str,
+    ) -> Result<Vec<FeedUpdateRecord>, Self::Error> {
+        let result = match last_sync_timestamp {
             Some(t) => {
                 let sql = format!(
                     "SELECT * FROM feed_update_record WHERE user_id = {} AND update_time > '{}' AND last_sync_device != '{}'",
@@ -61,7 +23,7 @@ impl FeedUpdateRecordManageOp for FeedUpdateRecordManager {
                     client_name
                 );
                 sqlx::query_as::<_, FeedUpdateRecord>(&sql)
-                    .fetch_all(self.db_service.as_ref())
+                    .fetch_all(db.as_ref())
                     .await
                     .map_err(|e| InternalError::DatabaseSelectError(e.to_string()))?
             }
@@ -69,11 +31,32 @@ impl FeedUpdateRecordManageOp for FeedUpdateRecordManager {
         };
         Ok(result)
     }
+}
 
-    async fn delete_by_user_id(&self, user_id: Id) -> Result<(), InternalError> {
+#[async_trait]
+impl TablePushOp for FeedUpdateRecord {
+    type Error = InternalError;
+    async fn push(
+        feed_update_records: Vec<FeedUpdateRecord>,
+        db: DbService,
+        user_id: Id,
+        client_name: &str,
+    ) -> Result<(), Self::Error> {
+        if feed_update_records.is_empty() {
+            return Ok(());
+        }
+        execute_bulk_insert(&db, feed_update_records, user_id, client_name).await?;
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl TableDeleteOp for FeedUpdateRecord {
+    type Error = InternalError;
+    async fn delete(db: DbService, user_id: Id) -> Result<(), Self::Error> {
         let sql = format!("DELETE FROM feed_update_record WHERE user_id = {}", user_id);
         sqlx::query(&sql)
-            .execute(self.db_service.as_ref())
+            .execute(db.as_ref())
             .await
             .map_err(|e| InternalError::DatabaseDeleteError(e.to_string()))?;
         Ok(())

@@ -34,9 +34,7 @@ pub async fn destroy_account(
     user: AuthorizedUser,
 ) -> Result<(), InternalError> {
     let user_delete_future = service.auth_service.delete_user_account(user.get_user_id());
-    let content_delete_future = service
-        .content_service
-        .delete_user_content(user.get_user_id());
+    let content_delete_future = service.content_service.delete(user.get_user_id());
     tokio::try_join!(user_delete_future, content_delete_future)?;
     Ok(())
 }

@@ -11,7 +11,7 @@ pub enum ProLevel {
     Spro = 2,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ClientInfo {
     pub client_name: String,
@@ -294,7 +294,7 @@ impl InsertSqlProvider for Feed {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema, Copy)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema, Copy, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncTimestamp {
     pub feed: Option<i64>,

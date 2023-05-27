@@ -45,7 +45,7 @@ pub struct RefreshTokenRequest {
     pub refresh_token: String,
 }
 
-#[derive(serde::Deserialize, ToSchema)]
+#[derive(serde::Deserialize, ToSchema, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ContentPullRequest {
     pub client: ClientInfo,
