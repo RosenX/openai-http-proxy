@@ -17,13 +17,13 @@ pub trait FeedGroupManageOp {
         &self,
         user_id: Id,
         feed_groups: Vec<FeedGroup>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<(), abi::InternalError>;
     async fn query_need_sync(
         &self,
         user_id: Id,
         timestamp: Option<i64>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<Vec<FeedGroup>, abi::InternalError>;
 
     async fn delete_by_user_id(&self, user_id: Id) -> Result<(), abi::InternalError>;
@@ -35,12 +35,12 @@ impl FeedGroupManageOp for FeedGroupManager {
         &self,
         user_id: Id,
         feed_groups: Vec<FeedGroup>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<(), InternalError> {
         if feed_groups.is_empty() {
             return Ok(());
         }
-        execute_bulk_insert(&self.db_service, feed_groups, user_id, client_id).await?;
+        execute_bulk_insert(&self.db_service, feed_groups, user_id, client_name).await?;
         Ok(())
     }
 
@@ -48,16 +48,16 @@ impl FeedGroupManageOp for FeedGroupManager {
         &self,
         user_id: Id,
         timestamp: Option<i64>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<Vec<FeedGroup>, InternalError> {
         let result = match timestamp {
             Some(t) => {
                 // TODO: Bug here, sync_device change to last_sysnc_device
                 let sql = format!(
-                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY (sync_devices)) and is_deleted = false",
+                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}' AND  last_sync_device != '{}' AND is_deleted = false",
                     user_id,
                     timestamp_to_datetime(t),
-                    client_id
+                    client_name
                 );
                 sqlx::query_as::<_, FeedGroup>(&sql)
                     .fetch_all(self.db_service.as_ref())

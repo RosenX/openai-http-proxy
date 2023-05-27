@@ -17,21 +17,21 @@ pub trait FeedManageOp {
         &self,
         user_id: Id,
         feeds: Vec<Feed>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<(), abi::InternalError>;
 
     async fn insert(
         &self,
         user_id: Id,
         feeds: Feed,
-        client_id: Id,
+        client_name: String,
     ) -> Result<(), abi::InternalError>;
 
     async fn query_need_sync(
         &self,
         user_id: Id,
         timestamp: Option<i64>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<Vec<Feed>, abi::InternalError>;
 
     async fn delete_by_user_id(&self, user_id: Id) -> Result<(), abi::InternalError>;
@@ -43,18 +43,23 @@ impl FeedManageOp for FeedManager {
         &self,
         user_id: Id,
         feeds: Vec<Feed>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<(), InternalError> {
         if feeds.is_empty() {
             return Ok(());
         }
-        execute_bulk_insert(&self.db_service, feeds, user_id, client_id).await?;
+        execute_bulk_insert(&self.db_service, feeds, user_id, client_name).await?;
         Ok(())
     }
 
-    async fn insert(&self, user_id: Id, feeds: Feed, client_id: Id) -> Result<(), InternalError> {
+    async fn insert(
+        &self,
+        user_id: Id,
+        feeds: Feed,
+        client_name: String,
+    ) -> Result<(), InternalError> {
         let feeds = vec![feeds];
-        execute_bulk_insert(&self.db_service, feeds, user_id, client_id).await?;
+        execute_bulk_insert(&self.db_service, feeds, user_id, client_name).await?;
         Ok(())
     }
 
@@ -62,15 +67,15 @@ impl FeedManageOp for FeedManager {
         &self,
         user_id: Id,
         timestamp: Option<i64>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<Vec<Feed>, InternalError> {
         let result = match timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY (sync_devices)) AND is_deleted = false",
+                    "SELECT * FROM feed WHERE user_id = {} AND update_time > '{}' AND last_sync_device != '{}' AND is_deleted = false",
                     user_id,
                     timestamp_to_datetime(t),
-                    client_id
+                    client_name
                 );
                 sqlx::query_as::<_, Feed>(&sql)
                     .fetch_all(self.db_service.as_ref())

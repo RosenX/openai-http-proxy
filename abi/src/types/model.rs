@@ -15,7 +15,7 @@ pub enum ProLevel {
 #[serde(rename_all = "camelCase")]
 pub struct ClientInfo {
     pub client_name: String,
-    pub client_id: Option<i32>,
+    pub client_id: Option<i32>, // TODO: remove this field
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema)]
@@ -52,20 +52,21 @@ impl DbTableName for FeedGroup {
 
 impl InsertSqlProvider for FeedGroup {
     fn sql_columns() -> String {
-        "user_id, name, description, update_time, sync_time, sync_devices, is_deleted".to_string()
+        "user_id, name, description, update_time, sync_time, is_deleted, last_sync_device"
+            .to_string()
     }
-    fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
+    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
         vec![
             SqlValue::I32(user_id),
             SqlValue::String(self.name.clone()),
             SqlValue::NullableString(self.description.clone()),
             SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
             SqlValue::Datetime(Utc::now()),
-            SqlValue::I32Array(vec![client_id]),
             SqlValue::Boolean(self.is_deleted),
+            SqlValue::String(client_name),
         ]
     }
-    fn sql_conflict(client_id: Id) -> String {
+    fn sql_conflict() -> String {
         format!(
             "
             ON CONFLICT (user_id, name) DO UPDATE SET
@@ -73,16 +74,9 @@ impl InsertSqlProvider for FeedGroup {
                 update_time = EXCLUDED.update_time,
                 sync_time = EXCLUDED.sync_time,
                 is_deleted = EXCLUDED.is_deleted,
-                sync_devices = (
-                    CASE
-                        WHEN NOT ({client_id} = ANY({table_name}.sync_devices))
-                        THEN array_append({table_name}.sync_devices, {client_id})
-                        ELSE {table_name}.sync_devices
-                    END
-                )
+                last_sync_device = EXCLUDED.last_sync_device
             WHERE EXCLUDED.update_time > {table_name}.update_time;
         ",
-            client_id = client_id,
             table_name = Self::table_name()
         )
     }
@@ -118,9 +112,9 @@ impl DbTableName for FeedItem {
 
 impl InsertSqlProvider for FeedItem {
     fn sql_columns() -> String {
-        "user_id, feed_url, is_focus, is_seen, title, cover, link, publish_time, authors, tags, category, description, summary_algo, create_time, md5_string, update_time, sync_time, sync_devices, is_deleted, focus_time".to_string()
+        "user_id, feed_url, is_focus, is_seen, title, cover, link, publish_time, authors, tags, category, description, summary_algo, create_time, md5_string, update_time, sync_time, is_deleted, focus_time, last_sync_device".to_string()
     }
-    fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
+    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
         vec![
             SqlValue::I32(user_id),
             SqlValue::String(self.feed_url.clone()),
@@ -139,12 +133,12 @@ impl InsertSqlProvider for FeedItem {
             SqlValue::String(self.md5_string.clone()),
             SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
             SqlValue::Datetime(Utc::now()),
-            SqlValue::I32Array(vec![client_id]),
             SqlValue::Boolean(self.is_deleted),
             SqlValue::NullableDatetime(self.focus_time.map(timestamp_to_datetime)),
+            SqlValue::String(client_name),
         ]
     }
-    fn sql_conflict(client_id: Id) -> String {
+    fn sql_conflict() -> String {
         format!(
             "
             ON CONFLICT (user_id, md5_string) DO UPDATE SET
@@ -163,16 +157,9 @@ impl InsertSqlProvider for FeedItem {
                 is_deleted = EXCLUDED.is_deleted,
                 sync_time = EXCLUDED.sync_time,
                 focus_time = EXCLUDED.focus_time,
-                sync_devices = (
-                    CASE
-                        WHEN NOT ({client_id} = ANY({table_name}.sync_devices))
-                        THEN array_append({table_name}.sync_devices, {client_id})
-                        ELSE {table_name}.sync_devices
-                    END
-                )
+                last_sync_device = EXCLUDED.last_sync_device
             WHERE EXCLUDED.update_time > {table_name}.update_time;
         ",
-            client_id = client_id,
             table_name = Self::table_name()
         )
     }
@@ -197,10 +184,10 @@ impl DbTableName for FeedUpdateRecord {
 // impl SqlProvider for FeedUpdateRecord
 impl InsertSqlProvider for FeedUpdateRecord {
     fn sql_columns() -> String {
-        "user_id, feed_url, last_update, last_content_hash, last_item_publish_time, update_time, sync_time, sync_devices"
+        "user_id, feed_url, last_update, last_content_hash, last_item_publish_time, update_time, sync_time, last_sync_device"
             .to_string()
     }
-    fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
+    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
         vec![
             SqlValue::I32(user_id),
             SqlValue::String(self.feed_url.clone()),
@@ -209,10 +196,10 @@ impl InsertSqlProvider for FeedUpdateRecord {
             SqlValue::NullableDatetime(self.last_item_publish_time.map(timestamp_to_datetime)),
             SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
             SqlValue::Datetime(Utc::now()),
-            SqlValue::I32Array(vec![client_id]),
+            SqlValue::String(client_name),
         ]
     }
-    fn sql_conflict(client_id: Id) -> String {
+    fn sql_conflict() -> String {
         format!(
             "
             ON CONFLICT (user_id, feed_url) DO UPDATE SET
@@ -221,16 +208,9 @@ impl InsertSqlProvider for FeedUpdateRecord {
                 last_item_publish_time = EXCLUDED.last_item_publish_time,
                 update_time = EXCLUDED.update_time,
                 sync_time = EXCLUDED.sync_time,
-                sync_devices = (
-                    CASE
-                        WHEN NOT ({client_id} = ANY({table_name}.sync_devices))
-                        THEN array_append({table_name}.sync_devices, {client_id})
-                        ELSE {table_name}.sync_devices
-                    END
-                )
+                last_sync_device = EXCLUDED.last_sync_device
             WHERE EXCLUDED.update_time > {table_name}.update_time;
         ",
-            client_id = client_id,
             table_name = Self::table_name()
         )
     }
@@ -271,9 +251,9 @@ impl DbTableName for Feed {
 // impl SqlProvider for Feed
 impl InsertSqlProvider for Feed {
     fn sql_columns() -> String {
-        "user_id, url, name, custom_name, logo, custom_logo, description, custom_description, tags, create_time, feed_type, update_time, sync_time, sync_devices, is_deleted".to_string()
+        "user_id, url, name, custom_name, logo, custom_logo, description, custom_description, tags, create_time, feed_type, update_time, sync_time, is_deleted, last_sync_device".to_string()
     }
-    fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue> {
+    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
         vec![
             SqlValue::I32(user_id),
             SqlValue::String(self.url.clone()),
@@ -288,11 +268,11 @@ impl InsertSqlProvider for Feed {
             SqlValue::NullableEnumFeedType(self.feed_type),
             SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
             SqlValue::Datetime(Utc::now()),
-            SqlValue::I32Array(vec![client_id]),
             SqlValue::Bool(self.is_deleted),
+            SqlValue::String(client_name),
         ]
     }
-    fn sql_conflict(client_id: Id) -> String {
+    fn sql_conflict() -> String {
         format!(
             "
             ON CONFLICT (user_id, url) DO UPDATE SET
@@ -306,16 +286,9 @@ impl InsertSqlProvider for Feed {
                 update_time = EXCLUDED.update_time,
                 is_deleted = EXCLUDED.is_deleted,
                 sync_time = EXCLUDED.sync_time,
-                sync_devices = (
-                    CASE
-                        WHEN NOT ({client_id} = ANY({table_name}.sync_devices))
-                        THEN array_append({table_name}.sync_devices, {client_id})
-                        ELSE {table_name}.sync_devices
-                    END
-                )
+                last_sync_device = EXCLUDED.last_sync_device
             WHERE EXCLUDED.update_time > {table_name}.update_time;
         ",
-            client_id = client_id,
             table_name = Self::table_name()
         )
     }

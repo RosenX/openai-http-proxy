@@ -4,6 +4,7 @@ openapi.json
 codegen/code
 config.prod.yaml
 config.test.yaml
+config.dev.yaml
 aliyun-fc
 .env
 .s

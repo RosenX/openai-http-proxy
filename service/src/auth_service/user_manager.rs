@@ -1,4 +1,4 @@
-use abi::{ClientInfo, DbService, Email, Id, InternalError, UserInformation};
+use abi::{DbService, Email, Id, InternalError, UserInformation};
 use async_trait::async_trait;
 
 #[derive(Clone)]
@@ -14,11 +14,6 @@ pub trait UserManagerOp {
         &self,
         email: &Email,
     ) -> Result<Option<UserInformation>, Self::Error>;
-    async fn register_client(
-        &self,
-        user_id: Id,
-        client_name: String,
-    ) -> Result<ClientInfo, Self::Error>;
     async fn delete(&self, user_id: Id) -> Result<(), Self::Error>;
 }
 
@@ -73,25 +68,6 @@ impl UserManagerOp for UserManager {
             .await
             .map_err(|e| InternalError::DatabaseInsertError(e.to_string()))?;
         Ok(res)
-    }
-
-    async fn register_client(
-        &self,
-        user_id: Id,
-        client_name: String,
-    ) -> Result<ClientInfo, Self::Error> {
-        let sql = format!(
-            r#"
-            INSERT INTO user_device (user_id, device_name) VALUES ('{}','{}')
-            RETURNING *
-            "#,
-            user_id, client_name
-        );
-        let client = sqlx::query_as::<_, ClientInfo>(&sql)
-            .fetch_one(self.db_service.as_ref())
-            .await
-            .map_err(|e| InternalError::DatabaseInsertError(e.to_string()))?;
-        Ok(client)
     }
 
     async fn delete(&self, user_id: Id) -> Result<(), Self::Error> {

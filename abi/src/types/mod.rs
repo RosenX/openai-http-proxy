@@ -162,22 +162,22 @@ pub trait DbTableName {
 
 pub trait InsertSqlProvider: DbTableName {
     fn sql_columns() -> String;
-    fn sql_values(&self, user_id: Id, client_id: Id) -> Vec<SqlValue>;
-    fn sql_conflict(client_id: Id) -> String;
+    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue>;
+    fn sql_conflict() -> String;
 }
 
 // 一个通用的生成SQL插入语句的函数
 pub fn generate_insert_query<T: InsertSqlProvider>(
     data: &[T],
     user_id: Id,
-    client_id: Id,
+    client_name: String,
 ) -> (String, Vec<SqlValue>) {
     let columns = T::sql_columns();
     let mut insert_query = format!("INSERT INTO {} ({}) VALUES ", T::table_name(), columns);
     let mut bindings: Vec<SqlValue> = Vec::new();
 
     for (i, item) in data.iter().enumerate() {
-        let values = item.sql_values(user_id, client_id);
+        let values = item.sql_values(user_id, client_name.clone());
         insert_query.push('(');
         for (j, value) in values.iter().enumerate() {
             insert_query.push_str(&format!("${},", i * values.len() + j + 1));
@@ -187,7 +187,7 @@ pub fn generate_insert_query<T: InsertSqlProvider>(
         insert_query.push_str("),");
     }
     insert_query.pop(); // 移除最后一个逗号
-    insert_query.push_str(T::sql_conflict(client_id).as_str());
+    insert_query.push_str(T::sql_conflict().as_str());
     // info!("insert binding: {}", bindings);
 
     (insert_query, bindings)
@@ -198,7 +198,7 @@ pub async fn execute_bulk_insert<T: InsertSqlProvider>(
     database: &DbService,
     data: Vec<T>,
     user_id: Id,
-    client_id: Id,
+    client_name: String,
 ) -> Result<(), InternalError> {
     // 开启事务
     let mut tx = database
@@ -207,7 +207,7 @@ pub async fn execute_bulk_insert<T: InsertSqlProvider>(
         .map_err(|e| InternalError::CouldNotStartTransaction(e.to_string()))?;
 
     for chunk in data.chunks(INSERT_CHUNK_SIZE) {
-        let (insert_query, bindings) = generate_insert_query(chunk, user_id, client_id);
+        let (insert_query, bindings) = generate_insert_query(chunk, user_id, client_name.clone()); // TODO: 这里的clone有点丑陋
         let mut query = sqlx::query(&insert_query);
 
         for binding in bindings {

@@ -19,13 +19,13 @@ pub trait FeedUpdateRecordManageOp {
         &self,
         user_id: Id,
         feed_update_records: Vec<FeedUpdateRecord>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<(), abi::InternalError>;
     async fn query_need_sync(
         &self,
         user_id: Id,
         timestamp: Option<i64>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<Vec<FeedUpdateRecord>, abi::InternalError>;
 
     async fn delete_by_user_id(&self, user_id: Id) -> Result<(), abi::InternalError>;
@@ -37,12 +37,12 @@ impl FeedUpdateRecordManageOp for FeedUpdateRecordManager {
         &self,
         user_id: Id,
         feed_update_records: Vec<FeedUpdateRecord>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<(), InternalError> {
         if feed_update_records.is_empty() {
             return Ok(());
         }
-        execute_bulk_insert(&self.db_service, feed_update_records, user_id, client_id).await?;
+        execute_bulk_insert(&self.db_service, feed_update_records, user_id, client_name).await?;
         Ok(())
     }
 
@@ -50,15 +50,15 @@ impl FeedUpdateRecordManageOp for FeedUpdateRecordManager {
         &self,
         user_id: Id,
         timestamp: Option<i64>,
-        client_id: Id,
+        client_name: String,
     ) -> Result<Vec<FeedUpdateRecord>, InternalError> {
         let result = match timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed_update_record WHERE user_id = {} AND update_time > '{}' AND NOT ({} = ANY(sync_devices))",
+                    "SELECT * FROM feed_update_record WHERE user_id = {} AND update_time > '{}' AND last_sync_device != '{}'",
                     user_id,
                     timestamp_to_datetime(t),
-                    client_id
+                    client_name
                 );
                 sqlx::query_as::<_, FeedUpdateRecord>(&sql)
                     .fetch_all(self.db_service.as_ref())

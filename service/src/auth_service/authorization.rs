@@ -69,29 +69,18 @@ impl AuthServiceApi for AuthService {
 
         let user =
             user_info.ok_or_else(|| InternalError::InvalidUser("User not found".to_string()))?;
-        let mut user_id = -1;
 
         let token = match login_info.verify(&user.password) {
             Ok(true) => {
-                user_id = user.id;
                 let tokens = UserProfile::from(user).encode_tokens(&self.config.jwt)?;
                 tracing::info!("Login success: {}", tokens);
                 Ok(tokens)
             }
             _ => Err(InternalError::WrongPassword("Wrong Password".to_string())),
         }?;
-        let client = request.client;
-        let client = match client.client_id {
-            Some(_) => client,
-            None => {
-                self.user_manager
-                    .register_client(user_id, client.client_name)
-                    .await?
-            }
-        };
         Ok(AuthResponse {
             jwt_tokens: token,
-            client,
+            client: request.client,
         })
     }
 
