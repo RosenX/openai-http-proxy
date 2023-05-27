@@ -55,9 +55,8 @@ impl TablePullOp for FeedGroup {
     ) -> Result<Vec<FeedGroup>, Self::Error> {
         let result = match last_sync_timestamp {
             Some(t) => {
-                // TODO: update time change to sync time
                 let sql = format!(
-                    "SELECT * FROM feed_group WHERE user_id = {} AND update_time > '{}' AND  last_sync_device != '{}' AND is_deleted = false",
+                    "SELECT * FROM feed_group WHERE user_id = {} AND sync_time > '{}' AND  last_sync_device != '{}' AND is_deleted = false",
                     user_id,
                     timestamp_to_datetime(t),
                     client_name

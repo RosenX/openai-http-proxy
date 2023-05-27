@@ -61,11 +61,11 @@ impl Dispatcher<ContentPullRequest> for ContentSyncService {
         )?;
 
         let sync_timestamp = SyncTimestamp {
-            // TODO
-            feed: feeds.last().map(|f| f.update_time),
-            feed_group: feed_groups.last().map(|f| f.update_time),
-            feed_item: feed_items.last().map(|f| f.update_time),
-            feed_update_record: feed_update_records.last().map(|f| f.update_time),
+            // sync time一定有值，数据库NOT NULL
+            feed: feeds.last().map(|f| f.sync_time.unwrap()),
+            feed_group: feed_groups.last().map(|f| f.sync_time.unwrap()),
+            feed_item: feed_items.last().map(|f| f.sync_time.unwrap()),
+            feed_update_record: feed_update_records.last().map(|f| f.sync_time.unwrap()),
         };
         Ok(ContentPullResponse {
             client,

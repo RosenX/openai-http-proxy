@@ -60,7 +60,7 @@ impl TablePullOp for FeedUpdateRecord {
         let result = match last_sync_timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed_update_record WHERE user_id = {} AND update_time > '{}' AND last_sync_device != '{}'",
+                    "SELECT * FROM feed_update_record WHERE user_id = {} AND sync_time > '{}' AND last_sync_device != '{}'",
                     user_id,
                     timestamp_to_datetime(t),
                     client_name

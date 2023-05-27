@@ -14,6 +14,7 @@ impl FromRow<'_, PgRow> for FeedGroup {
             description: row.try_get("description")?,
             update_time: datetime_to_timestamp(row.try_get("update_time")?),
             is_deleted: row.try_get("is_deleted")?,
+            sync_time: datetime_to_timestamp_option(row.try_get("sync_time")?),
         })
     }
 }
@@ -38,6 +39,7 @@ impl FromRow<'_, PgRow> for FeedItem {
             update_time: datetime_to_timestamp(row.try_get("update_time")?),
             is_deleted: row.try_get("is_deleted")?,
             focus_time: datetime_to_timestamp_option(row.try_get("focus_time")?),
+            sync_time: datetime_to_timestamp_option(row.try_get("sync_time")?),
         })
     }
 }
@@ -57,6 +59,7 @@ impl FromRow<'_, PgRow> for Feed {
             feed_type: row.try_get("feed_type")?,
             tags: row.try_get("tags")?,
             is_deleted: row.try_get("is_deleted")?,
+            sync_time: datetime_to_timestamp_option(row.try_get("sync_time")?),
         })
     }
 }
@@ -106,6 +109,7 @@ impl From<FeedInfo> for Feed {
             feed_type: None,
             tags: None,
             is_deleted: false,
+            sync_time: None,
         }
     }
 }
@@ -120,6 +124,7 @@ impl FromRow<'_, PgRow> for FeedUpdateRecord {
             last_item_publish_time: datetime_to_timestamp_option(
                 row.try_get("last_item_publish_time")?,
             ),
+            sync_time: datetime_to_timestamp_option(row.try_get("sync_time")?),
         })
     }
 }

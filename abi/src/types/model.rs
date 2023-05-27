@@ -39,6 +39,7 @@ pub struct FeedGroup {
     pub description: Option<String>,
     pub update_time: i64,
     pub is_deleted: bool,
+    pub sync_time: Option<i64>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema)]
@@ -61,6 +62,7 @@ pub struct FeedItem {
     pub update_time: i64,
     pub is_deleted: bool,
     pub focus_time: Option<i64>,
+    pub sync_time: Option<i64>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema)]
@@ -71,6 +73,7 @@ pub struct FeedUpdateRecord {
     pub last_content_hash: String,
     pub last_item_publish_time: Option<i64>,
     pub update_time: i64,
+    pub sync_time: Option<i64>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, sqlx::Type, ToSchema, Copy)]
@@ -97,6 +100,7 @@ pub struct Feed {
     pub feed_type: Option<FeedTypeServer>,
     pub update_time: i64,
     pub is_deleted: bool,
+    pub sync_time: Option<i64>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema, Copy, Debug, PartialEq)]
