@@ -53,15 +53,21 @@ impl Dispatcher<ContentPullRequest> for ContentSyncService {
             &client.client_name,
         );
 
-        let (feeds, feed_groups, feed_items, feed_update_records) = tokio::try_join!(
+        let (mut feeds, mut feed_groups, mut feed_items, mut feed_update_records) = tokio::try_join!(
             feeds_future,
             feed_groups_future,
             feed_items_future,
             feed_update_records_future
         )?;
 
+        feeds.sort_by(|a, b| a.sync_time.cmp(&b.sync_time));
+        feed_groups.sort_by(|a, b| a.sync_time.cmp(&b.sync_time));
+        feed_items.sort_by(|a, b| a.sync_time.cmp(&b.sync_time));
+        feed_update_records.sort_by(|a, b| a.sync_time.cmp(&b.sync_time));
+
         let sync_timestamp = SyncTimestamp {
             // sync time一定有值，数据库NOT NULL
+            // sort by sync time and return the latest
             feed: feeds.last().map(|f| f.sync_time.unwrap()),
             feed_group: feed_groups.last().map(|f| f.sync_time.unwrap()),
             feed_item: feed_items.last().map(|f| f.sync_time.unwrap()),

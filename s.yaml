@@ -38,7 +38,7 @@ services:
         runtime: custom
         codeUri: ./aliyun-fc
         environmentVariables:
-          FEEDBOX_ENV: prod
+          FEEDBOX_ENV: test
         instanceConcurrency: 15
         caPort: 8000
         customRuntimeConfig:

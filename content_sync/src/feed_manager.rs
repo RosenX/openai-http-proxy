@@ -16,7 +16,23 @@ impl TableName for Feed {
 // impl SqlProvider for Feed
 impl InsertSqlProvider for Feed {
     fn sql_columns() -> String {
-        "user_id, url, name, custom_name, logo, custom_logo, description, custom_description, tags, create_time, feed_type, update_time, sync_time, is_deleted, last_sync_device".to_string()
+        "user_id,
+        url,
+        name,
+        custom_name,
+        logo,
+        custom_logo,
+        description,
+        custom_description,
+        tags,
+        create_time,
+        feed_type,
+        update_time,
+        sync_time,
+        is_deleted,
+        last_sync_device
+        "
+        .to_string()
     }
     fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
         vec![
@@ -49,6 +65,7 @@ impl InsertSqlProvider for Feed {
                 custom_description = EXCLUDED.custom_description,
                 tags = EXCLUDED.tags,
                 update_time = EXCLUDED.update_time,
+                feed_type = EXCLUDED.feed_type,
                 is_deleted = EXCLUDED.is_deleted,
                 sync_time = EXCLUDED.sync_time,
                 last_sync_device = EXCLUDED.last_sync_device
@@ -71,7 +88,7 @@ impl TablePullOp for Feed {
         let result = match last_sync_timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed WHERE user_id = {} AND sync_time > '{}' AND last_sync_device != '{}' AND is_deleted = false",
+                    "SELECT * FROM feed WHERE user_id = {} AND sync_time > '{}' AND last_sync_device != '{}'",
                     user_id,
                     timestamp_to_datetime(t),
                     client_name

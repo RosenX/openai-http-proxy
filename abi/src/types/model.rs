@@ -73,6 +73,7 @@ pub struct FeedUpdateRecord {
     pub last_content_hash: String,
     pub last_item_publish_time: Option<i64>,
     pub update_time: i64,
+    pub is_deleted: bool,
     pub sync_time: Option<i64>,
 }
 

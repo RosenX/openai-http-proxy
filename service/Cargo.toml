@@ -11,7 +11,7 @@ serde = "1.0.154"
 abi = { version = "0.1.0", path = "../abi" }
 async-trait = "0.1.67"
 content_sync = { version = "0.1.0", path = "../content_sync" }
-axum = {version = "0.6.16", features = ['headers', 'tracing']}
+axum = {version = "0.6.16", features = ['headers', 'tracing', 'http2']}
 tokio = {version = "1.27.0", features = ["full"]}
 config = "0.13.3"
 tower-http = {version = "0.4.0", features = ["trace"]}

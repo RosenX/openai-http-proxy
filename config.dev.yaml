@@ -7,7 +7,7 @@ database:
   password: "1234qwer_"
   host: "pgm-uf6v72wptlx73p9dbo.rwlb.rds.aliyuncs.com"
   port: 5432
-  database: "readbot_test"
+  database: "readbot_dev"
   max_connection: 8
 
 auth_service:

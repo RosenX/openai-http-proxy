@@ -125,6 +125,7 @@ impl FromRow<'_, PgRow> for FeedUpdateRecord {
                 row.try_get("last_item_publish_time")?,
             ),
             sync_time: datetime_to_timestamp_option(row.try_get("sync_time")?),
+            is_deleted: row.try_get("is_deleted")?,
         })
     }
 }
