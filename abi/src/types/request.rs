@@ -33,6 +33,13 @@ pub struct LoginRequest {
 
 #[derive(serde::Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
+pub struct ModifyPasswordRequest {
+    pub client: ClientInfo,
+    pub login_info: LoginInfo,
+}
+
+#[derive(serde::Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct RegisterRequest {
     pub client: ClientInfo,
     pub register_info: RegisterInfo,

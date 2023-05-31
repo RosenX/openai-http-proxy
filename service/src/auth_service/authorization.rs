@@ -1,6 +1,7 @@
 use abi::{
     AuthResponse, DbService, DecodeJwt, EncodeJwt, Id, InternalError, JwtConfig, LoginRequest,
-    PasswordVerify, RefreshTokenRequest, RegisterRequest, UserInformation, UserProfile,
+    ModifyPasswordRequest, PasswordEncrypt, PasswordVerify, RefreshTokenRequest, RegisterRequest,
+    UserInformation, UserProfile,
 };
 use async_trait::async_trait;
 use axum::{
@@ -96,6 +97,22 @@ impl AuthServiceApi for AuthService {
 
     async fn delete_user_account(&self, user_id: Id) -> Result<(), Self::Error> {
         self.user_manager.delete(user_id).await?;
+        Ok(())
+    }
+
+    async fn modify_password(&self, request: ModifyPasswordRequest) -> Result<(), Self::Error> {
+        let login_info = request.login_info;
+        let user_info = self
+            .user_manager
+            .find_user_by_email(&login_info.email)
+            .await?;
+        let user =
+            user_info.ok_or_else(|| InternalError::UserNotExist("User not found".to_string()))?;
+
+        let login_info = login_info.hash()?;
+        self.user_manager
+            .modify_password(user.id, login_info.password)
+            .await?;
         Ok(())
     }
 }

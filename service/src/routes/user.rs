@@ -1,5 +1,8 @@
 use crate::auth_service::{AuthServiceApi, AuthorizedUser};
-use abi::{AuthResponse, InternalError, LoginRequest, RefreshTokenRequest, RegisterRequest};
+use abi::{
+    AuthResponse, InternalError, LoginRequest, ModifyPasswordRequest, RefreshTokenRequest,
+    RegisterRequest,
+};
 use axum::extract::{Json, State};
 use content_sync::ContentSyncServiceApi;
 
@@ -36,5 +39,13 @@ pub async fn destroy_account(
     let user_delete_future = service.auth_service.delete_user_account(user.get_user_id());
     let content_delete_future = service.content_service.delete(user.get_user_id());
     tokio::try_join!(user_delete_future, content_delete_future)?;
+    Ok(())
+}
+
+pub async fn modify_password(
+    State(service): State<AppState>,
+    Json(request): Json<ModifyPasswordRequest>,
+) -> Result<(), InternalError> {
+    service.auth_service.modify_password(request).await?;
     Ok(())
 }

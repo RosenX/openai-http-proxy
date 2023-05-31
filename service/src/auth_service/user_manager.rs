@@ -15,6 +15,7 @@ pub trait UserManagerOp {
         email: &Email,
     ) -> Result<Option<UserInformation>, Self::Error>;
     async fn delete(&self, user_id: Id) -> Result<(), Self::Error>;
+    async fn modify_password(&self, user_id: Id, password: String) -> Result<(), Self::Error>;
 }
 
 impl UserManager {
@@ -26,6 +27,23 @@ impl UserManager {
 #[async_trait]
 impl UserManagerOp for UserManager {
     type Error = InternalError;
+
+    async fn modify_password(&self, user_id: Id, password: String) -> Result<(), Self::Error> {
+        let sql = format!(
+            r#"
+            UPDATE user_information
+            SET password = '{}'
+            WHERE id = '{}'
+            "#,
+            password, user_id
+        );
+        sqlx::query(&sql)
+            .execute(self.db_service.as_ref())
+            .await
+            .map_err(|e| InternalError::DatabaseInsertError(e.to_string()))?;
+        Ok(())
+    }
+
     async fn create(&self, user_profile: UserInformation) -> Result<UserInformation, Self::Error> {
         let sql = format!(
             r#"

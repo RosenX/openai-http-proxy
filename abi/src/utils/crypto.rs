@@ -51,3 +51,14 @@ impl PasswordVerify for LoginInfo {
         EncryptUtil::verify_password(&self.password, target)
     }
 }
+
+impl PasswordEncrypt for LoginInfo {
+    type Error = InternalError;
+    fn hash(self) -> Result<Self, Self::Error> {
+        let hash_password = EncryptUtil::hash_password(self.password.as_str())?;
+        Ok(Self {
+            email: self.email,
+            password: hash_password,
+        })
+    }
+}

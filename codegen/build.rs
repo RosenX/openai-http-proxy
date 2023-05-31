@@ -27,6 +27,7 @@ use utoipa::OpenApi;
         abi::SubscribeFeedRequest,
         abi::SubscribeFeedResponse,
         abi::FeedInfo,
+        abi::ModifyPasswordRequest
     ),),
     tags()
 )]

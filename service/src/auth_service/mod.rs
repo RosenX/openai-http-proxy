@@ -1,7 +1,10 @@
 mod authorization;
 mod user_manager;
 
-use abi::{AuthResponse, Id, LoginRequest, RefreshTokenRequest, RegisterRequest, UserProfile};
+use abi::{
+    AuthResponse, Id, LoginRequest, ModifyPasswordRequest, RefreshTokenRequest, RegisterRequest,
+    UserProfile,
+};
 
 use async_trait::async_trait;
 use user_manager::UserManager;
@@ -43,4 +46,6 @@ pub trait AuthServiceApi {
         refresh_token: RefreshTokenRequest,
     ) -> Result<AuthResponse, Self::Error>;
     async fn delete_user_account(&self, user_id: Id) -> Result<(), Self::Error>;
+
+    async fn modify_password(&self, request: ModifyPasswordRequest) -> Result<(), Self::Error>;
 }

@@ -5,7 +5,7 @@ use crate::common::AppState;
 use axum::routing::{delete, get, post};
 use axum::Router;
 use content::{subscribe_feed, sync_pull, sync_push};
-use user::{destroy_account, login_by_email, refresh_token, register_by_email};
+use user::{destroy_account, login_by_email, modify_password, refresh_token, register_by_email};
 
 fn user_routes() -> Router<AppState> {
     Router::new()
@@ -13,6 +13,7 @@ fn user_routes() -> Router<AppState> {
         .route("/register", post(register_by_email))
         .route("/refresh_token", post(refresh_token))
         .route("/destroy", delete(destroy_account))
+        .route("/modify_password", post(modify_password))
 }
 
 fn content_routes() -> Router<AppState> {
