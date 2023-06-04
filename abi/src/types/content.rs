@@ -60,6 +60,7 @@ impl FromRow<'_, PgRow> for Feed {
             tags: row.try_get("tags")?,
             is_deleted: row.try_get("is_deleted")?,
             sync_time: datetime_to_timestamp_option(row.try_get("sync_time")?),
+            group_name: row.try_get("group_name")?,
         })
     }
 }
@@ -110,6 +111,7 @@ impl From<FeedInfo> for Feed {
             tags: None,
             is_deleted: false,
             sync_time: None,
+            group_name: None,
         }
     }
 }

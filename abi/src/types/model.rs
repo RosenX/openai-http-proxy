@@ -102,6 +102,7 @@ pub struct Feed {
     pub update_time: i64,
     pub is_deleted: bool,
     pub sync_time: Option<i64>,
+    pub group_name: Option<String>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema, Copy, Debug, PartialEq)]
