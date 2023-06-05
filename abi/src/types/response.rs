@@ -35,6 +35,7 @@ pub struct SubscribeFeedResponse {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Response<T> {
     pub status_code: u16,
     pub error_code: Option<u32>,
