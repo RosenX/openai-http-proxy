@@ -63,6 +63,7 @@ pub struct FeedItem {
     pub is_deleted: bool,
     pub focus_time: Option<i64>,
     pub sync_time: Option<i64>,
+    pub is_marked: Option<bool>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema)]
