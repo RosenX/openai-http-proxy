@@ -17,14 +17,14 @@ pub struct FeedInfo {
     pub title: Option<String>,
 }
 
-#[derive(serde::Deserialize, ToSchema)]
+#[derive(serde::Deserialize, ToSchema, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct LoginInfo {
     pub email: String,
     pub password: String,
 }
 
-#[derive(serde::Deserialize, ToSchema)]
+#[derive(serde::Deserialize, ToSchema, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct LoginRequest {
     pub client: ClientInfo,

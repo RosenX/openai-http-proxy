@@ -168,6 +168,7 @@ impl ContentSyncServiceApi for ContentSyncService {
         Ok(())
     }
 
+    // TODO
     async fn subscribe_feed(
         &self,
         user_id: Id,

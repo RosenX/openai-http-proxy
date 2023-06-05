@@ -90,3 +90,70 @@ impl IntoResponse for InternalError {
         (code, message).into_response()
     }
 }
+
+impl<T> From<InternalError> for crate::Response<T> {
+    fn from(error: InternalError) -> Self {
+        error!("InternalError: {}", error);
+        match error {
+            InternalError::InvalidToken(_) => {
+                Self::new(StatusCode::UNAUTHORIZED.as_u16(), None, error.to_string())
+            }
+
+            InternalError::InvalidUser(_) => {
+                Self::new(StatusCode::UNAUTHORIZED.as_u16(), None, error.to_string())
+            }
+            InternalError::WrongPassword(_) => {
+                Self::new(StatusCode::UNAUTHORIZED.as_u16(), None, error.to_string())
+            }
+            InternalError::UserExist(_) => {
+                Self::new(StatusCode::BAD_REQUEST.as_u16(), None, error.to_string())
+            }
+            InternalError::UserNotExist(_) => {
+                Self::new(StatusCode::BAD_REQUEST.as_u16(), None, error.to_string())
+            }
+            InternalError::CouldNotStartTransaction(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                None,
+                error.to_string(),
+            ),
+            InternalError::DatabaseStartError(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                None,
+                error.to_string(),
+            ),
+            InternalError::DatabaseInsertError(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                None,
+                error.to_string(),
+            ),
+            InternalError::DatabaseDeleteError(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                None,
+                error.to_string(),
+            ),
+            InternalError::DatabaseSelectError(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                None,
+                error.to_string(),
+            ),
+            InternalError::EncryptHashError(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                None,
+                error.to_string(),
+            ),
+            InternalError::EncryptVerifyError(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                None,
+                error.to_string(),
+            ),
+            InternalError::JwtEncodeError(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                None,
+                error.to_string(),
+            ),
+            InternalError::InvalidRequest(_) => {
+                Self::new(StatusCode::BAD_REQUEST.as_u16(), None, error.to_string())
+            }
+        }
+    }
+}

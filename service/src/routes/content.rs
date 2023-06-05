@@ -1,6 +1,6 @@
 use abi::{
     ContentPullRequest, ContentPullResponse, ContentPushRequest, ContentPushResponse,
-    InternalError, SubscribeFeedRequest, SubscribeFeedResponse,
+    InternalError, Response, SubscribeFeedRequest, SubscribeFeedResponse,
 };
 use axum::extract::{Json, State};
 use content_sync::ContentSyncServiceApi;
@@ -43,4 +43,19 @@ pub async fn subscribe_feed(
         .subscribe_feed(user.get_user_id(), request)
         .await?;
     Ok(Json(response))
+}
+
+pub async fn subscribe_feed_v1(
+    State(service): State<AppState>,
+    user: AuthorizedUser,
+    Json(request): Json<SubscribeFeedRequest>,
+) -> Json<Response<()>> {
+    let response = service
+        .content_service
+        .subscribe_feed(user.get_user_id(), request)
+        .await;
+    match response {
+        Ok(_) => Json(Response::default()),
+        Err(err) => Json(Response::from(err)),
+    }
 }

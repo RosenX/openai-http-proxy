@@ -1,10 +1,11 @@
 use crate::auth_service::{AuthServiceApi, AuthorizedUser};
 use abi::{
-    AuthResponse, InternalError, LoginRequest, ModifyPasswordRequest, RefreshTokenRequest,
-    RegisterRequest,
+    AuthResponse, InternalError, JwtTokens, LoginRequest, ModifyPasswordRequest,
+    RefreshTokenRequest, RegisterRequest, Response,
 };
 use axum::extract::{Json, State};
 use content_sync::ContentSyncServiceApi;
+use tracing::debug;
 
 use super::AppState;
 
@@ -22,6 +23,18 @@ pub async fn login_by_email(
 ) -> Result<Json<AuthResponse>, InternalError> {
     let response = service.auth_service.login_by_email(request).await?;
     Ok(Json(response))
+}
+
+pub async fn login_by_email_v1(
+    State(service): State<AppState>,
+    Json(request): Json<LoginRequest>,
+) -> Json<Response<JwtTokens>> {
+    debug!("Login by email: {:?}", request);
+    let response = service.auth_service.login_by_email(request).await;
+    match response {
+        Ok(response) => Json(Response::default().data(response.jwt_tokens)),
+        Err(err) => Json(Response::from(err)),
+    }
 }
 
 pub async fn refresh_token(
