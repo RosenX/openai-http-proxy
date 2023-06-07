@@ -64,7 +64,9 @@ impl TablePullOp for FeedGroup {
                 sqlx::query_as::<_, FeedGroup>(&sql)
                     .fetch_all(db.as_ref())
                     .await
-                    .map_err(|e| InternalError::DatabaseSelectError(e.to_string()))?
+                    .map_err(|e| {
+                        InternalError::DatabaseSelectError(format!("{}, {}", Self::table_name(), e))
+                    })?
             }
             None => vec![],
         };

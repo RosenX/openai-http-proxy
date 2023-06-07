@@ -238,14 +238,13 @@ pub async fn execute_bulk_insert<T: InsertSqlProvider>(
             query = binding.bind(query);
         }
 
-        query
-            .execute(&mut tx)
-            .await
-            .map_err(|e| InternalError::DatabaseInsertError(e.to_string()))?;
+        query.execute(&mut tx).await.map_err(|e| {
+            InternalError::DatabaseInsertError(format!("{}, {}", T::table_name(), e))
+        })?;
     }
 
-    tx.commit()
-        .await
-        .map_err(|e| InternalError::CouldNotStartTransaction(e.to_string()))?;
+    tx.commit().await.map_err(|e| {
+        InternalError::CouldNotStartTransaction(format!("{}, {}", T::table_name(), e))
+    })?;
     Ok(())
 }
