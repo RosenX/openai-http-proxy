@@ -24,20 +24,22 @@ services:
     component: fc
     actions:
       pre-deploy:
-        - run: make build-fc
+        # test build
+        - run: make build-fc-test
           path: ./
 
     props:
       region: ${vars.cn-region}
       service: ${vars.service}
       function:
-        name: "readbot-service"
+        name: "readbot-service-test"
         description: 'readbot service include Sync & Auth'
         timeout: 30
         memorySize: 128
         runtime: custom
         codeUri: ./aliyun-fc
         environmentVariables:
+          # test env
           FEEDBOX_ENV: test
         instanceConcurrency: 15
         caPort: 8000
