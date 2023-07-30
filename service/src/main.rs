@@ -1,5 +1,4 @@
 #![deny(unused_crate_dependencies)]
-pub mod auth_service;
 pub mod common;
 pub mod routes;
 
@@ -50,7 +49,7 @@ async fn main() {
     let elapsed = end.duration_since(start);
     info!("Config load time: {:?}", elapsed);
 
-    let app_state = AppState::new(app_config.auth_service, app_config.database)
+    let app_state = AppState::new(app_config.authing, app_config.database)
         .await
         .expect("Failed to create app state");
 

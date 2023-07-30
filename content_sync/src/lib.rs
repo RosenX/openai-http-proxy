@@ -8,7 +8,7 @@ mod service;
 
 use abi::{
     ContentPullRequest, ContentPullResponse, ContentPushRequest, ContentPushResponse, DbService,
-    Id, InternalError, SqlValue, SubscribeFeedRequest, SubscribeFeedResponse,
+    InternalError, SqlValue, SubscribeFeedRequest, SubscribeFeedResponse, UserId,
 };
 use async_trait::async_trait;
 use mockall::automock;
@@ -20,7 +20,7 @@ pub struct ContentSyncService {
 #[async_trait]
 pub trait Dispatcher<Req> {
     type Resp;
-    async fn dispatch(&self, user_id: Id, request: Req) -> Result<Self::Resp, InternalError>;
+    async fn dispatch(&self, user_id: &UserId, request: Req) -> Result<Self::Resp, InternalError>;
 }
 
 #[async_trait]
@@ -28,7 +28,7 @@ pub trait TablePullOp {
     type Error;
     async fn pull(
         db: DbService,
-        user_id: Id,
+        user_id: &UserId,
         last_sync_timestamp: Option<i64>,
         client_name: &str,
     ) -> Result<Vec<Self>, Self::Error>
@@ -39,7 +39,7 @@ pub trait TablePullOp {
 #[async_trait]
 pub trait TableDeleteOp {
     type Error;
-    async fn delete(db: DbService, user_id: Id) -> Result<(), Self::Error>;
+    async fn delete(db: DbService, user_id: &UserId) -> Result<(), Self::Error>;
 }
 
 #[async_trait]
@@ -48,7 +48,7 @@ pub trait TablePushOp {
     async fn push(
         data: Vec<Self>,
         db: DbService,
-        user_id: Id,
+        user_id: &UserId,
         client_name: &str,
     ) -> Result<(), Self::Error>
     where
@@ -60,22 +60,22 @@ pub trait TablePushOp {
 pub trait ContentSyncServiceApi {
     async fn pull(
         &self,
-        user_id: Id,
+        user_id: &UserId,
         request: ContentPullRequest,
     ) -> Result<ContentPullResponse, InternalError>;
 
     async fn push(
         &self,
-        user_id: Id,
+        user_id: &UserId,
         request: ContentPushRequest,
     ) -> Result<ContentPushResponse, InternalError>;
 
-    async fn delete(&self, user_id: Id) -> Result<(), InternalError>;
+    async fn delete(&self, user_id: &UserId) -> Result<(), InternalError>;
 
     // TODO merge this method to push
     async fn subscribe_feed(
         &self,
-        user_id: Id,
+        user_id: &UserId,
         request: SubscribeFeedRequest,
     ) -> Result<SubscribeFeedResponse, InternalError>;
 }
@@ -86,6 +86,6 @@ pub trait TableName {
 
 pub trait InsertSqlProvider: TableName {
     fn sql_columns() -> String;
-    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue>;
+    fn sql_values(&self, user_id: &UserId, client_name: String) -> Vec<SqlValue>;
     fn sql_conflict() -> String;
 }

@@ -1,4 +1,4 @@
-use abi::{timestamp_to_datetime, DbService, FeedUpdateRecord, Id, InternalError, SqlValue};
+use abi::{timestamp_to_datetime, DbService, FeedUpdateRecord, InternalError, SqlValue, UserId};
 use async_trait::async_trait;
 use sqlx::types::chrono::Utc;
 
@@ -19,9 +19,9 @@ impl InsertSqlProvider for FeedUpdateRecord {
         "user_id, feed_url, last_update, last_content_hash, last_item_publish_time, update_time, sync_time, last_sync_device, is_deleted"
             .to_string()
     }
-    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
+    fn sql_values(&self, user_id: &UserId, client_name: String) -> Vec<SqlValue> {
         vec![
-            SqlValue::I32(user_id),
+            SqlValue::String(user_id.to_owned()),
             SqlValue::String(self.feed_url.clone()),
             SqlValue::Datetime(timestamp_to_datetime(self.last_update)),
             SqlValue::String(self.last_content_hash.clone()),
@@ -55,14 +55,14 @@ impl TablePullOp for FeedUpdateRecord {
     type Error = InternalError;
     async fn pull(
         db: DbService,
-        user_id: Id,
+        user_id: &UserId,
         last_sync_timestamp: Option<i64>,
         client_name: &str,
     ) -> Result<Vec<FeedUpdateRecord>, Self::Error> {
         let result = match last_sync_timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed_update_record WHERE user_id = {} AND sync_time > '{}' AND last_sync_device != '{}'",
+                    "SELECT * FROM feed_update_record WHERE user_id = '{}' AND sync_time > '{}' AND last_sync_device != '{}'",
                     user_id,
                     timestamp_to_datetime(t),
                     client_name
@@ -84,7 +84,7 @@ impl TablePushOp for FeedUpdateRecord {
     async fn push(
         feed_update_records: Vec<FeedUpdateRecord>,
         db: DbService,
-        user_id: Id,
+        user_id: &UserId,
         client_name: &str,
     ) -> Result<(), Self::Error> {
         if feed_update_records.is_empty() {
@@ -98,7 +98,7 @@ impl TablePushOp for FeedUpdateRecord {
 #[async_trait]
 impl TableDeleteOp for FeedUpdateRecord {
     type Error = InternalError;
-    async fn delete(db: DbService, user_id: Id) -> Result<(), Self::Error> {
+    async fn delete(db: DbService, user_id: &UserId) -> Result<(), Self::Error> {
         let sql = format!("DELETE FROM feed_update_record WHERE user_id = {}", user_id);
         sqlx::query(&sql)
             .execute(db.as_ref())

@@ -95,11 +95,11 @@ fn main() {
         }
     }
 
-    let target_path = "../../readbot_app/lib/common/models/codegen";
-    // remove target path
-    std::fs::remove_dir_all(target_path).unwrap_or_default();
-    // move model folder to target path
-    std::fs::rename(model_path, target_path).unwrap();
-    // remove output path
-    std::fs::remove_dir_all(output_path).unwrap_or_default();
+    // let target_path = "../../readbot_app/lib/common/models/codegen";
+    // // remove target path
+    // std::fs::remove_dir_all(target_path).unwrap_or_default();
+    // // move model folder to target path
+    // std::fs::rename(model_path, target_path).unwrap();
+    // // remove output path
+    // std::fs::remove_dir_all(output_path).unwrap_or_default();
 }

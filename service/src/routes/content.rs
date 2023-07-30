@@ -5,7 +5,7 @@ use abi::{
 use axum::extract::{Json, State};
 use content_sync::ContentSyncServiceApi;
 
-use crate::auth_service::AuthorizedUser;
+use crate::common::AuthorizedUser;
 
 use super::AppState;
 
@@ -16,7 +16,7 @@ pub async fn sync_pull(
 ) -> Result<Json<ContentPullResponse>, InternalError> {
     let response = service
         .content_service
-        .pull(user.get_user_id(), request)
+        .pull(&user.get_user_id(), request)
         .await?;
     Ok(Json(response))
 }
@@ -28,7 +28,7 @@ pub async fn sync_push(
 ) -> Result<Json<ContentPushResponse>, InternalError> {
     let response = service
         .content_service
-        .push(user.get_user_id(), request)
+        .push(&user.get_user_id(), request)
         .await?;
     Ok(Json(response))
 }
@@ -40,7 +40,7 @@ pub async fn subscribe_feed(
 ) -> Result<Json<SubscribeFeedResponse>, InternalError> {
     let response = service
         .content_service
-        .subscribe_feed(user.get_user_id(), request)
+        .subscribe_feed(&user.get_user_id(), request)
         .await?;
     Ok(Json(response))
 }
@@ -52,8 +52,19 @@ pub async fn subscribe_feed_v1(
 ) -> Json<Response<()>> {
     let response = service
         .content_service
-        .subscribe_feed(user.get_user_id(), request)
+        .subscribe_feed(&user.get_user_id(), request)
         .await;
+    match response {
+        Ok(_) => Json(Response::default()),
+        Err(err) => Json(Response::from(err)),
+    }
+}
+
+pub async fn content_delete(
+    State(service): State<AppState>,
+    user: AuthorizedUser,
+) -> Json<Response<()>> {
+    let response = service.content_service.delete(&user.get_user_id()).await;
     match response {
         Ok(_) => Json(Response::default()),
         Err(err) => Json(Response::from(err)),

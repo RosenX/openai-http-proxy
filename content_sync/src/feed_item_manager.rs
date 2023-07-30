@@ -1,4 +1,4 @@
-use abi::{timestamp_to_datetime, DbService, FeedItem, Id, InternalError, SqlValue};
+use abi::{timestamp_to_datetime, DbService, FeedItem, Id, InternalError, SqlValue, UserId};
 use async_trait::async_trait;
 use sqlx::types::chrono::Utc;
 
@@ -39,9 +39,9 @@ impl InsertSqlProvider for FeedItem {
         "
         .to_string()
     }
-    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
+    fn sql_values(&self, user_id: &UserId, client_name: String) -> Vec<SqlValue> {
         vec![
-            SqlValue::I32(user_id),
+            SqlValue::String(user_id.to_owned()),
             SqlValue::String(self.feed_url.clone()),
             SqlValue::Boolean(self.is_focus),
             SqlValue::Boolean(self.is_seen),
@@ -115,14 +115,14 @@ impl TablePullOp for FeedItem {
     type Error = InternalError;
     async fn pull(
         db: DbService,
-        user_id: Id,
+        user_id: &UserId,
         last_sync_timestamp: Option<i64>,
         client_name: &str,
     ) -> Result<Vec<FeedItem>, Self::Error> {
         let result = match last_sync_timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed_item WHERE user_id = {} AND sync_time > '{}' AND last_sync_device != '{}'",
+                    "SELECT * FROM feed_item WHERE user_id = '{}' AND sync_time > '{}' AND last_sync_device != '{}'",
                     user_id,
                     timestamp_to_datetime(t),
                     client_name
@@ -144,7 +144,7 @@ impl TablePushOp for FeedItem {
     async fn push(
         feed_items: Vec<FeedItem>,
         db: DbService,
-        user_id: Id,
+        user_id: &UserId,
         client_name: &str,
     ) -> Result<(), Self::Error> {
         if feed_items.is_empty() {
@@ -158,7 +158,7 @@ impl TablePushOp for FeedItem {
 #[async_trait]
 impl TableDeleteOp for FeedItem {
     type Error = InternalError;
-    async fn delete(db: DbService, user_id: Id) -> Result<(), Self::Error> {
+    async fn delete(db: DbService, user_id: &UserId) -> Result<(), Self::Error> {
         let sql = format!("DELETE FROM feed_item WHERE user_id = {}", user_id);
         sqlx::query(&sql)
             .execute(db.as_ref())

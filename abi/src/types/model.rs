@@ -1,3 +1,4 @@
+use serde::Deserialize;
 use utoipa::ToSchema;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, ToSchema)]
@@ -113,4 +114,45 @@ pub struct SyncTimestamp {
     pub feed_group: Option<i64>,
     pub feed_item: Option<i64>,
     pub feed_update_record: Option<i64>,
+}
+
+#[derive(serde::Deserialize, Debug)]
+#[allow(unused)]
+pub struct AuthingIdTokenPaylaod {
+    pub sub: String,
+    aud: String,
+    iat: i64,
+    exp: i64,
+    iss: String,
+    name: Option<String>,
+    given_name: Option<String>,
+    middle_name: Option<String>,
+    family_name: Option<String>,
+    nickname: Option<String>,
+    preferred_username: Option<String>,
+    profile: Option<String>,
+    picture: Option<String>,
+    website: Option<String>,
+    birthdate: Option<String>,
+    gender: Option<String>,
+    zoneinfo: Option<String>,
+    locale: Option<String>,
+    updated_at: Option<String>,
+    email: Option<String>,
+    email_verified: Option<bool>,
+    phone_number: Option<String>,
+    phone_number_verified: Option<bool>,
+    address: Option<Address>,
+    username: Option<String>,
+    role: Option<Vec<String>>,
+    extended_fields: Option<serde_json::Value>,
+}
+
+#[derive(Deserialize, Debug)]
+#[allow(unused)]
+pub struct Address {
+    country: Option<String>,
+    postal_code: Option<String>,
+    region: Option<String>,
+    formatted: Option<String>,
 }

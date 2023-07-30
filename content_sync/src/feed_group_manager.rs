@@ -2,7 +2,7 @@ use crate::{
     service::execute_bulk_insert, InsertSqlProvider, TableDeleteOp, TableName, TablePullOp,
     TablePushOp,
 };
-use abi::{timestamp_to_datetime, DbService, FeedGroup, Id, InternalError, SqlValue};
+use abi::{timestamp_to_datetime, DbService, FeedGroup, InternalError, SqlValue, UserId};
 use async_trait::async_trait;
 use sqlx::types::chrono::Utc;
 
@@ -17,9 +17,9 @@ impl InsertSqlProvider for FeedGroup {
         "user_id, name, description, update_time, sync_time, is_deleted, last_sync_device"
             .to_string()
     }
-    fn sql_values(&self, user_id: Id, client_name: String) -> Vec<SqlValue> {
+    fn sql_values(&self, user_id: &UserId, client_name: String) -> Vec<SqlValue> {
         vec![
-            SqlValue::I32(user_id),
+            SqlValue::String(user_id.to_owned()),
             SqlValue::String(self.name.clone()),
             SqlValue::NullableString(self.description.clone()),
             SqlValue::Datetime(timestamp_to_datetime(self.update_time)),
@@ -49,14 +49,14 @@ impl TablePullOp for FeedGroup {
     type Error = InternalError;
     async fn pull(
         db: DbService,
-        user_id: Id,
+        user_id: &UserId,
         last_sync_timestamp: Option<i64>,
         client_name: &str,
     ) -> Result<Vec<FeedGroup>, Self::Error> {
         let result = match last_sync_timestamp {
             Some(t) => {
                 let sql = format!(
-                    "SELECT * FROM feed_group WHERE user_id = {} AND sync_time > '{}' AND  last_sync_device != '{}'",
+                    "SELECT * FROM feed_group WHERE user_id = '{}' AND sync_time > '{}' AND  last_sync_device != '{}'",
                     user_id,
                     timestamp_to_datetime(t),
                     client_name
@@ -80,7 +80,7 @@ impl TablePushOp for FeedGroup {
     async fn push(
         feed_groups: Vec<FeedGroup>,
         db: DbService,
-        user_id: Id,
+        user_id: &UserId,
         client_name: &str,
     ) -> Result<(), Self::Error> {
         if feed_groups.is_empty() {
@@ -94,7 +94,7 @@ impl TablePushOp for FeedGroup {
 #[async_trait]
 impl TableDeleteOp for FeedGroup {
     type Error = InternalError;
-    async fn delete(db: DbService, user_id: Id) -> Result<(), Self::Error> {
+    async fn delete(db: DbService, user_id: &UserId) -> Result<(), Self::Error> {
         // TODO feed_group name
         let sql = format!("DELETE FROM feed_group WHERE user_id = {}", user_id);
         sqlx::query(&sql)

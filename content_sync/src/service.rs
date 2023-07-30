@@ -2,7 +2,7 @@ use std::vec;
 
 use abi::{
     ContentPullRequest, ContentPullResponse, ContentPushRequest, ContentPushResponse, DbService,
-    Feed, FeedGroup, FeedItem, FeedUpdateRecord, Id, InternalError, SqlValue, SyncTimestamp,
+    Feed, FeedGroup, FeedItem, FeedUpdateRecord, InternalError, SqlValue, SyncTimestamp, UserId,
     INSERT_CHUNK_SIZE,
 };
 use async_trait::async_trait;
@@ -23,7 +23,7 @@ impl Dispatcher<ContentPullRequest> for ContentSyncService {
     type Resp = ContentPullResponse;
     async fn dispatch(
         &self,
-        user_id: Id,
+        user_id: &UserId,
         request: ContentPullRequest,
     ) -> Result<Self::Resp, InternalError> {
         let timestamps: abi::SyncTimestamp = request.sync_timestamp;
@@ -89,7 +89,7 @@ impl Dispatcher<ContentPushRequest> for ContentSyncService {
     type Resp = ContentPushResponse;
     async fn dispatch(
         &self,
-        user_id: Id,
+        user_id: &UserId,
         request: ContentPushRequest,
     ) -> Result<Self::Resp, InternalError> {
         let ContentPushRequest {
@@ -138,7 +138,7 @@ impl Dispatcher<ContentPushRequest> for ContentSyncService {
 impl ContentSyncServiceApi for ContentSyncService {
     async fn pull(
         &self,
-        user_id: i32,
+        user_id: &UserId,
         request: abi::ContentPullRequest,
     ) -> Result<abi::ContentPullResponse, InternalError> {
         self.dispatch(user_id, request).await
@@ -146,13 +146,13 @@ impl ContentSyncServiceApi for ContentSyncService {
 
     async fn push(
         &self,
-        user_id: i32,
+        user_id: &UserId,
         request: abi::ContentPushRequest,
     ) -> Result<abi::ContentPushResponse, abi::InternalError> {
         self.dispatch(user_id, request).await
     }
 
-    async fn delete(&self, user_id: Id) -> Result<(), abi::InternalError> {
+    async fn delete(&self, user_id: &UserId) -> Result<(), abi::InternalError> {
         let feed_groups_future = FeedGroup::delete(self.db_service.clone(), user_id);
         let feeds_future = Feed::delete(self.db_service.clone(), user_id);
         let feed_items_future = FeedItem::delete(self.db_service.clone(), user_id);
@@ -171,7 +171,7 @@ impl ContentSyncServiceApi for ContentSyncService {
     // TODO
     async fn subscribe_feed(
         &self,
-        user_id: Id,
+        user_id: &UserId,
         request: abi::SubscribeFeedRequest,
     ) -> Result<abi::SubscribeFeedResponse, abi::InternalError> {
         let abi::SubscribeFeedRequest { client, feed_info } = request;
@@ -194,7 +194,7 @@ impl ContentSyncServiceApi for ContentSyncService {
 
 pub fn generate_insert_query<T: InsertSqlProvider>(
     data: &[T],
-    user_id: Id,
+    user_id: &UserId,
     client_name: &str,
 ) -> (String, Vec<SqlValue>) {
     let columns = T::sql_columns();
@@ -221,7 +221,7 @@ pub fn generate_insert_query<T: InsertSqlProvider>(
 pub async fn execute_bulk_insert<T: InsertSqlProvider>(
     database: &DbService,
     data: Vec<T>,
-    user_id: Id,
+    user_id: &UserId,
     client_name: &str,
 ) -> Result<(), InternalError> {
     // 开启事务

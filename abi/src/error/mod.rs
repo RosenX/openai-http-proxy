@@ -13,6 +13,9 @@ pub enum InternalError {
     #[error("Invalid User: {0}")]
     InvalidUser(String),
 
+    #[error("{0}")]
+    TokenNotProvided(String),
+
     #[error("Password wrong: {0}")]
     WrongPassword(String),
 
@@ -86,6 +89,7 @@ impl IntoResponse for InternalError {
                 (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
             }
             InternalError::InvalidRequest(_) => (StatusCode::BAD_REQUEST, self.to_string()),
+            InternalError::TokenNotProvided(_) => (StatusCode::UNAUTHORIZED, self.to_string()),
         };
         (code, message).into_response()
     }
@@ -96,6 +100,9 @@ impl<T> From<InternalError> for crate::Response<T> {
         error!("InternalError: {}", error);
         match error {
             InternalError::InvalidToken(_) => {
+                Self::new(StatusCode::UNAUTHORIZED.as_u16(), None, error.to_string())
+            }
+            InternalError::TokenNotProvided(_) => {
                 Self::new(StatusCode::UNAUTHORIZED.as_u16(), None, error.to_string())
             }
 

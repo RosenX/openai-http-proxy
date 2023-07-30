@@ -20,6 +20,8 @@ pub type Token = String;
 
 pub type Id = i32;
 
+pub type UserId = String;
+
 pub const INSERT_CHUNK_SIZE: usize = 50;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, sqlx::Type)]

@@ -6,14 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "postgres", "macros", "migrate", "chrono", "tls", "offline"]}
 serde = "1.0.154"
 abi = { version = "0.1.0", path = "../abi" }
 async-trait = "0.1.67"
 content_sync = { version = "0.1.0", path = "../content_sync" }
-axum = {version = "0.6.16", features = ['headers', 'tracing', 'http2']}
-tokio = {version = "1.27.0", features = ["full"]}
+axum = { version = "0.6.16", features = ['headers', 'tracing', 'http2'] }
+tokio = { version = "1.27.0", features = ["full"] }
 config = "0.13.3"
-tower-http = {version = "0.4.0", features = ["trace"]}
+tower-http = { version = "0.4.0", features = ["trace"] }
 tracing = "0.1.37"
 tracing-subscriber = "0.3.16"
+jsonwebtoken = "8.3.0"
