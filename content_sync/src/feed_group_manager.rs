@@ -96,7 +96,7 @@ impl TableDeleteOp for FeedGroup {
     type Error = InternalError;
     async fn delete(db: DbService, user_id: &UserId) -> Result<(), Self::Error> {
         // TODO feed_group name
-        let sql = format!("DELETE FROM feed_group WHERE user_id = {}", user_id);
+        let sql = format!("DELETE FROM feed_group WHERE user_id = '{}'", user_id);
         sqlx::query(&sql)
             .execute(db.as_ref())
             .await

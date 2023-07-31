@@ -128,7 +128,7 @@ impl TablePushOp for Feed {
 impl TableDeleteOp for Feed {
     type Error = InternalError;
     async fn delete(db: DbService, user_id: &UserId) -> Result<(), Self::Error> {
-        let sql = format!("DELETE FROM feed WHERE user_id = {}", user_id);
+        let sql = format!("DELETE FROM feed WHERE user_id = '{}'", user_id);
         sqlx::query(&sql)
             .execute(db.as_ref())
             .await
