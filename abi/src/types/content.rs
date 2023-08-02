@@ -41,7 +41,7 @@ impl FromRow<'_, PgRow> for FeedItem {
             focus_time: datetime_to_timestamp_option(row.try_get("focus_time")?),
             sync_time: datetime_to_timestamp_option(row.try_get("sync_time")?),
             is_marked: row.try_get("is_marked")?,
-            is_achieved: row.try_get("is_achieved")?,
+            is_archived: row.try_get("is_archived")?,
         })
     }
 }
