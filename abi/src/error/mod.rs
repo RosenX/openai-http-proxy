@@ -95,6 +95,7 @@ impl IntoResponse for InternalError {
     }
 }
 
+//TODO: 如果报错阿里云不显示
 impl<T> From<InternalError> for crate::Response<T> {
     fn from(error: InternalError) -> Self {
         error!("InternalError: {}", error);
