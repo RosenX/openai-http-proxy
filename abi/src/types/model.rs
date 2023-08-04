@@ -78,6 +78,7 @@ pub struct FeedUpdateRecord {
     pub update_time: i64,
     pub is_deleted: bool,
     pub sync_time: Option<i64>,
+    pub failed_count: Option<i32>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, sqlx::Type, ToSchema, Copy)]
@@ -106,6 +107,7 @@ pub struct Feed {
     pub is_deleted: bool,
     pub sync_time: Option<i64>,
     pub group_name: Option<String>,
+    pub is_followed: Option<bool>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema, Copy, Debug, PartialEq)]

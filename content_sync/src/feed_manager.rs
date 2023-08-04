@@ -31,7 +31,8 @@ impl InsertSqlProvider for Feed {
         sync_time,
         is_deleted,
         last_sync_device,
-        group_name
+        group_name,
+        is_followed
         "
         .to_string()
     }
@@ -53,6 +54,7 @@ impl InsertSqlProvider for Feed {
             SqlValue::Bool(self.is_deleted),
             SqlValue::String(client_name),
             SqlValue::NullableString(self.group_name.clone()),
+            SqlValue::NullableBoolean(self.is_followed),
         ]
     }
     fn sql_conflict() -> String {
@@ -71,7 +73,8 @@ impl InsertSqlProvider for Feed {
                 is_deleted = EXCLUDED.is_deleted,
                 sync_time = EXCLUDED.sync_time,
                 last_sync_device = EXCLUDED.last_sync_device,
-                group_name = EXCLUDED.group_name
+                group_name = EXCLUDED.group_name,
+                is_followed = EXCLUDED.is_followed
             WHERE EXCLUDED.update_time > {table_name}.update_time;
         ",
             table_name = Self::table_name()

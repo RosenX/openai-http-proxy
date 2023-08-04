@@ -63,6 +63,7 @@ impl FromRow<'_, PgRow> for Feed {
             is_deleted: row.try_get("is_deleted")?,
             sync_time: datetime_to_timestamp_option(row.try_get("sync_time")?),
             group_name: row.try_get("group_name")?,
+            is_followed: row.try_get("is_followed")?,
         })
     }
 }
@@ -114,6 +115,7 @@ impl From<FeedInfo> for Feed {
             is_deleted: false,
             sync_time: None,
             group_name: None,
+            is_followed: Some(false),
         }
     }
 }
@@ -130,6 +132,7 @@ impl FromRow<'_, PgRow> for FeedUpdateRecord {
             ),
             sync_time: datetime_to_timestamp_option(row.try_get("sync_time")?),
             is_deleted: row.try_get("is_deleted")?,
+            failed_count: row.try_get("failed_count")?,
         })
     }
 }

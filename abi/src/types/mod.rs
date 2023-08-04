@@ -105,6 +105,7 @@ pub enum SqlValue {
     NullableEnumFeedType(Option<FeedTypeServer>),
     I32Array(Vec<i32>),
     Bool(bool),
+    NullableInt(Option<i32>),
 }
 
 impl SqlValue {
@@ -126,6 +127,7 @@ impl SqlValue {
             SqlValue::Bool(bool) => query.bind(bool),
             SqlValue::NullableEnumFeedType(feed_type) => query.bind(feed_type),
             SqlValue::NullableBoolean(bool) => query.bind(bool),
+            SqlValue::NullableInt(i32) => query.bind(i32),
         }
     }
 }
@@ -153,6 +155,7 @@ impl ToOwned for SqlValue {
                 SqlValue::NullableEnumFeedType(feed_type.to_owned())
             }
             SqlValue::NullableBoolean(bool) => SqlValue::NullableBoolean(bool.to_owned()),
+            SqlValue::NullableInt(i32) => SqlValue::NullableInt(i32.to_owned()),
         }
     }
 }

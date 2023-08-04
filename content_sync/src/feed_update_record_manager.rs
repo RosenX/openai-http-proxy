@@ -16,7 +16,7 @@ impl TableName for FeedUpdateRecord {
 // impl SqlProvider for FeedUpdateRecord
 impl InsertSqlProvider for FeedUpdateRecord {
     fn sql_columns() -> String {
-        "user_id, feed_url, last_update, last_content_hash, last_item_publish_time, update_time, sync_time, last_sync_device, is_deleted"
+        "user_id, feed_url, last_update, last_content_hash, last_item_publish_time, update_time, sync_time, last_sync_device, is_deleted, failed_count"
             .to_string()
     }
     fn sql_values(&self, user_id: &UserId, client_name: String) -> Vec<SqlValue> {
@@ -30,6 +30,7 @@ impl InsertSqlProvider for FeedUpdateRecord {
             SqlValue::Datetime(Utc::now()),
             SqlValue::String(client_name),
             SqlValue::Boolean(self.is_deleted),
+            SqlValue::NullableInt(self.failed_count),
         ]
     }
     fn sql_conflict() -> String {
@@ -42,7 +43,8 @@ impl InsertSqlProvider for FeedUpdateRecord {
                 update_time = EXCLUDED.update_time,
                 sync_time = EXCLUDED.sync_time,
                 is_deleted = EXCLUDED.is_deleted,
-                last_sync_device = EXCLUDED.last_sync_device
+                last_sync_device = EXCLUDED.last_sync_device,
+                failed_count = EXCLUDED.failed_count
             WHERE EXCLUDED.update_time > {table_name}.update_time;
         ",
             table_name = Self::table_name()
