@@ -8,3 +8,4 @@ config.dev.yaml
 aliyun-fc
 .env
 .s
+test

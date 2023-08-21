@@ -1,6 +1,8 @@
 use std::{fmt::Display, ops::Deref};
 
 use serde::Deserialize;
+use sqlx::ConnectOptions;
+use tracing::log::LevelFilter;
 use utoipa::ToSchema;
 
 use crate::InternalError;
@@ -26,6 +28,7 @@ impl Display for DatabaseConfig {
 }
 
 pub type DbOption = sqlx::postgres::PgPoolOptions;
+pub type DbConnectOption = sqlx::postgres::PgConnectOptions;
 pub type DbPool = sqlx::PgPool;
 
 #[derive(Clone)]
@@ -51,11 +54,18 @@ impl DbService {
             "postgres://{}:{}@{}:{}/{}",
             config.user, config.password, config.host, config.port, config.database
         );
+        let connect_options = url
+            .parse::<DbConnectOption>()
+            .unwrap()
+            .log_statements(LevelFilter::Trace)
+            .to_owned();
+
         let pool = DbOption::new()
-            .max_connections(config.max_connection) //todo
-            .connect(&url)
+            .max_connections(config.max_connection)
+            .connect_with(connect_options)
             .await
             .map_err(|e| InternalError::DatabaseStartError(e.to_string()))?;
+
         Ok(Self(pool))
     }
 }

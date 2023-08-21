@@ -7,12 +7,8 @@ database:
   password: "1234qwer_"
   host: "pgm-uf6v72wptlx73p9dbo.rwlb.rds.aliyuncs.com"
   port: 5432
-  database: "readbot_dev"
+  database: "readbot_test"
   max_connection: 8
 
-auth_service:
-  jwt:
-    access_key: "access_secret_key"
-    access_expiration_hour: 168 # 7 days
-    refresh_key: "refresh_secret_key"
-    refresh_expiration_hour:  720 # 30 days
+authing:
+  app_secret: 20c9149848e5986fc84bf57451c12e4f
