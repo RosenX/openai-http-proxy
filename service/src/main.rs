@@ -2,6 +2,7 @@
 pub mod common;
 pub mod routes;
 
+use axum::extract::DefaultBodyLimit;
 use common::{AppConfig, AppState};
 use config::{Config, FileFormat};
 use routes::create_route;
@@ -58,9 +59,12 @@ async fn main() {
     let elapsed = end.duration_since(start);
     info!("App state create time: {:?}", elapsed);
 
-    let app = create_route().with_state(app_state).layer(
-        TraceLayer::new_for_http().make_span_with(DefaultMakeSpan::new().include_headers(true)),
-    );
+    let app = create_route()
+        .with_state(app_state)
+        .layer(
+            TraceLayer::new_for_http().make_span_with(DefaultMakeSpan::new().include_headers(true)),
+        )
+        .layer(DefaultBodyLimit::max(5242880)); // 5MB
 
     let host = format!("{}:{}", app_config.server.ip, app_config.server.port);
 
