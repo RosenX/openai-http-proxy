@@ -8,10 +8,9 @@ edition = "2021"
 [dependencies]
 abi = { version = "0.1.0", path = "../abi" }
 async-trait = "0.1.67"
-mockall = "0.11.4"
-sqlx = { version = "0.6", features = [ "postgres", "macros", "chrono"]}
+sqlx = { version = "0.6", features = ["postgres", "macros", "chrono"] }
 # log = "0.4.17"
-tokio = {version = "1.27.0", features = ["full"]}
+tokio = { version = "1.27.0", features = ["full"] }
 
 [build-dependencies]
 mockall = "0.11.4"

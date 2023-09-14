@@ -1,7 +1,3 @@
 [workspace]
-members = [
-    "service",
-    "content_sync",
-    "abi",
-    "codegen"
-]
+members = ["service", "content_sync", "abi", "codegen"]
+resolver = "2"

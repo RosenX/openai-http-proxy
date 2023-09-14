@@ -11,7 +11,6 @@ use abi::{
     InternalError, SqlValue, SubscribeFeedRequest, SubscribeFeedResponse, UserId,
 };
 use async_trait::async_trait;
-use mockall::automock;
 
 pub struct ContentSyncService {
     db_service: DbService,
@@ -56,7 +55,6 @@ pub trait TablePushOp {
 }
 
 #[async_trait]
-#[automock]
 pub trait ContentSyncServiceApi {
     async fn pull(
         &self,

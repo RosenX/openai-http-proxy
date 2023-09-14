@@ -75,3 +75,15 @@ pub struct ContentPushRequest {
     pub feed_items: Vec<FeedItem>,
     pub client: ClientInfo,
 }
+
+#[derive(serde::Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UserActivityRequest {
+    pub device_id: String,
+    pub activity_time: i64,
+    pub device_type: String,
+    pub user_id: Option<String>,
+    pub feed_num: i32,
+    pub keyword_num: i32,
+    pub app_version: String,
+}
