@@ -16,6 +16,16 @@ pub struct ClientInfo {
     pub client_id: Option<i32>, // TODO: remove this field
 }
 
+#[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct DeviceInfo {
+    pub device_name: String, // different every install
+    pub device_type: String,
+    pub device_id: String,
+    pub system: String,
+    pub system_version: String,
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Clone, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UserProfile {

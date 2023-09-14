@@ -28,7 +28,8 @@ use utoipa::OpenApi;
         abi::SubscribeFeedResponse,
         abi::FeedInfo,
         abi::ModifyPasswordRequest,
-        abi::UserActivityRequest
+        abi::UserActivityRequest,
+        abi::DeviceInfo
     ),),
     tags()
 )]

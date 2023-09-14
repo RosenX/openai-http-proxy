@@ -1,4 +1,4 @@
-use crate::{ClientInfo, Feed, FeedGroup, FeedItem, FeedUpdateRecord, SyncTimestamp};
+use crate::{ClientInfo, DeviceInfo, Feed, FeedGroup, FeedItem, FeedUpdateRecord, SyncTimestamp};
 use utoipa::ToSchema;
 
 #[derive(serde::Deserialize, ToSchema)]
@@ -79,10 +79,9 @@ pub struct ContentPushRequest {
 #[derive(serde::Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UserActivityRequest {
-    pub device_id: String,
     pub activity_time: i64,
-    pub device_type: String,
     pub user_id: Option<String>,
+    pub device_info: DeviceInfo,
     pub feed_num: i32,
     pub keyword_num: i32,
     pub app_version: String,
