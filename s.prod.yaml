@@ -43,7 +43,7 @@ services:
         caPort: 8000
         customRuntimeConfig:
           command:
-            - "./feedbox"
+            - "./readbot"
       triggers:
         - name: httpTrigger
           type: http

@@ -1,0 +1,6 @@
+-- Add down migration script here
+
+
+ALTER TABLE feed ALTER COLUMN name TYPE VARCHAR(100);
+ALTER TABLE feed ALTER COLUMN custom_name TYPE VARCHAR(100);
+ALTER TABLE feed ALTER COLUMN group_name TYPE VARCHAR(100);
