@@ -1,3 +1,4 @@
+mod config;
 mod content;
 mod model;
 mod request;
@@ -5,6 +6,7 @@ mod response;
 mod user;
 
 use chrono::{DateTime, Utc};
+pub use config::*;
 pub use model::*;
 pub use request::*;
 pub use response::*;

@@ -1,11 +1,15 @@
-use abi::{timestamp_to_datetime, DbService, InternalError, UserActivityRequest};
+use abi::{
+    timestamp_to_datetime, DbService, InternalError, PurchaseVerifyRequest, PurchaseVerifyResponse,
+    UserActivityRequest, UserServiceConfig,
+};
+use apple_app_store_receipts::objects::{request_body::RequestBody, response_body::ResponseBody};
 use async_trait::async_trait;
 
 use crate::{UserService, UserServiceApi};
 
 impl UserService {
-    pub fn new(db: DbService) -> Self {
-        Self { db_service: db }
+    pub fn new(db: DbService, config: UserServiceConfig) -> Self {
+        Self { db, config }
     }
 }
 
@@ -48,9 +52,50 @@ impl UserServiceApi for UserService {
         .bind(request.app_version)
         .bind(request.device_info.system)
         .bind(request.device_info.system_version)
-        .execute(self.db_service.as_ref())
+        .execute(self.db.as_ref())
         .await
         .map_err(|e| InternalError::DatabaseInsertError(e.to_string()))?;
         Ok(())
+    }
+
+    async fn purchase_verify(
+        &self,
+        request: PurchaseVerifyRequest,
+    ) -> Result<PurchaseVerifyResponse, InternalError> {
+        let verify_pass = self.verify_purchase(request).await?;
+        Ok(PurchaseVerifyResponse { verify_pass })
+    }
+}
+
+impl UserService {
+    pub async fn verify_purchase(
+        &self,
+        request: PurchaseVerifyRequest,
+    ) -> Result<bool, InternalError> {
+        let host = request.get_verify_host();
+        let verify_request = RequestBody::new(
+            request.purchase_detail.verify_data.as_str(),
+            self.config.app_store_password.as_str(),
+            None,
+        );
+        let resp: ResponseBody = reqwest::Client::new()
+            .post(host)
+            .json(&verify_request)
+            .send()
+            .await
+            .map_err(|e| InternalError::HttpError(e.to_string()))?
+            .json()
+            .await
+            .map_err(|e| InternalError::HttpError(e.to_string()))?;
+
+        match resp {
+            ResponseBody::Success(_) => Ok(true),
+            ResponseBody::Error(e) => match e.is_retryable {
+                Some(true) => Err(InternalError::HttpError(
+                    "[Vip Verify] need retry".to_string(),
+                )),
+                _ => Ok(false),
+            },
+        }
     }
 }

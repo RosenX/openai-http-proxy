@@ -12,3 +12,6 @@ database:
 
 authing:
   app_secret: 20c9149848e5986fc84bf57451c12e4f
+
+user_service:
+  app_store_password: 08db393f5cc349f499925ea04d2a44f0

@@ -68,3 +68,9 @@ impl<T> Response<T> {
         }
     }
 }
+
+#[derive(serde::Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct PurchaseVerifyResponse {
+    pub verify_pass: bool,
+}

@@ -53,6 +53,12 @@ pub enum InternalError {
 
     #[error("Invalid request: {0}")]
     InvalidRequest(String),
+
+    #[error("Purchase verify error: {0}")]
+    PurchaseVerifyError(String),
+
+    #[error("Http error: {0}")]
+    HttpError(String),
 }
 
 impl IntoResponse for InternalError {
@@ -64,6 +70,10 @@ impl IntoResponse for InternalError {
             InternalError::WrongPassword(_) => (StatusCode::UNAUTHORIZED, self.to_string()),
             InternalError::UserExist(_) => (StatusCode::BAD_REQUEST, self.to_string()),
             InternalError::UserNotExist(_) => (StatusCode::BAD_REQUEST, self.to_string()),
+            InternalError::PurchaseVerifyError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
+            }
+            InternalError::HttpError(_) => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
             InternalError::CouldNotStartTransaction(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, self.to_string())
             }
@@ -106,6 +116,11 @@ impl<T> From<InternalError> for crate::Response<T> {
             InternalError::TokenNotProvided(_) => {
                 Self::new(StatusCode::UNAUTHORIZED.as_u16(), None, error.to_string())
             }
+            InternalError::HttpError(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                None,
+                error.to_string(),
+            ),
 
             InternalError::InvalidUser(_) => {
                 Self::new(StatusCode::UNAUTHORIZED.as_u16(), None, error.to_string())
@@ -119,6 +134,11 @@ impl<T> From<InternalError> for crate::Response<T> {
             InternalError::UserNotExist(_) => {
                 Self::new(StatusCode::BAD_REQUEST.as_u16(), None, error.to_string())
             }
+            InternalError::PurchaseVerifyError(_) => Self::new(
+                StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                None,
+                error.to_string(),
+            ),
             InternalError::CouldNotStartTransaction(_) => Self::new(
                 StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
                 None,

@@ -4,7 +4,7 @@ pub mod auth;
 
 use std::sync::Arc;
 
-use abi::{DatabaseConfig, DbService, InternalError};
+use abi::{DatabaseConfig, DbService, InternalError, UserServiceConfig};
 pub use app_config::AppConfig;
 pub use auth::AuthorizedUser;
 use content_sync::ContentSyncService;
@@ -22,17 +22,18 @@ pub struct AppState {
 
 impl AppState {
     pub async fn new(
-        auth_config: AuthingConfig,
+        auth_service_config: AuthingConfig,
+        user_service_config: UserServiceConfig,
         database_config: DatabaseConfig,
     ) -> Result<Self, InternalError> {
         info!("Starting database service from config: {}", database_config);
-        let db_service = DbService::from_config(database_config).await?;
-        let content_service = Arc::new(ContentSyncService::new(db_service.clone()));
-        let user_service = Arc::new(UserService::new(db_service));
+        let db = DbService::from_config(database_config).await?;
+        let content_service = Arc::new(ContentSyncService::new(db.clone()));
+        let user_service = Arc::new(UserService::new(db, user_service_config));
         Ok(Self {
             content_service,
             user_service,
-            authing: Arc::new(auth_config),
+            authing: Arc::new(auth_service_config),
         })
     }
 }

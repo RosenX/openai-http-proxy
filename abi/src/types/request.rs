@@ -1,4 +1,8 @@
-use crate::{ClientInfo, DeviceInfo, Feed, FeedGroup, FeedItem, FeedUpdateRecord, SyncTimestamp};
+use crate::{
+    ClientInfo, DeviceInfo, Feed, FeedGroup, FeedItem, FeedUpdateRecord, SyncTimestamp,
+    APP_STORE_VERIFY_URL, APP_STORE_VERIFY_URL_SANDBOX,
+};
+use serde::Serialize;
 use utoipa::ToSchema;
 
 #[derive(serde::Deserialize, ToSchema)]
@@ -85,4 +89,38 @@ pub struct UserActivityRequest {
     pub feed_num: i32,
     pub keyword_num: i32,
     pub app_version: String,
+}
+
+#[derive(serde::Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct PurchaseDetail {
+    pub product_id: String,
+    pub purchase_time: i64,
+    pub verify_data: String,
+    pub source: String,
+}
+
+#[derive(serde::Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct PurchaseVerifyRequest {
+    pub purchase_detail: PurchaseDetail,
+    pub is_test: bool,
+    pub platform: String,
+}
+
+impl PurchaseVerifyRequest {
+    pub fn get_verify_host(&self) -> String {
+        if self.is_test {
+            APP_STORE_VERIFY_URL_SANDBOX.to_string()
+        } else {
+            APP_STORE_VERIFY_URL.to_string()
+        }
+    }
+}
+
+#[derive(Serialize, Debug)]
+pub struct AppStoreVerifyRequest {
+    pub receipt_data: String,
+    pub password: String,
+    pub exclude_old_transactions: Option<bool>,
 }

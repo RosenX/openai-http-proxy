@@ -50,9 +50,13 @@ async fn main() {
     let elapsed = end.duration_since(start);
     info!("Config load time: {:?}", elapsed);
 
-    let app_state = AppState::new(app_config.authing, app_config.database)
-        .await
-        .expect("Failed to create app state");
+    let app_state = AppState::new(
+        app_config.authing,
+        app_config.user_service,
+        app_config.database,
+    )
+    .await
+    .expect("Failed to create app state");
 
     // stat create app state time
     let end = std::time::Instant::now();
