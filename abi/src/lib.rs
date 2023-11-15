@@ -29,6 +29,10 @@ pub const APP_STORE_VERIFY_URL_SANDBOX: &str = "https://sandbox.itunes.apple.com
 
 pub const PLATFORM_APPLE: &str = "apple";
 
+pub const READBOT_FOREVER: &str = "readbot_forever";
+pub const READBOT_ONE_MONTH: &str = "readbot_1_month";
+pub const READBOT_ONE_YEAR: &str = "readbot_1_year";
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, sqlx::Type)]
 #[sqlx(type_name = "pro_level", rename_all = "lowercase")]
 enum ProLevelPostgres {

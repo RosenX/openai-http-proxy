@@ -1,7 +1,8 @@
 use crate::{
     ClientInfo, DeviceInfo, Feed, FeedGroup, FeedItem, FeedUpdateRecord, SyncTimestamp,
-    APP_STORE_VERIFY_URL, APP_STORE_VERIFY_URL_SANDBOX,
+    READBOT_FOREVER, READBOT_ONE_MONTH, READBOT_ONE_YEAR,
 };
+use chrono::Duration;
 use serde::Serialize;
 use utoipa::ToSchema;
 
@@ -109,12 +110,28 @@ pub struct PurchaseVerifyRequest {
 }
 
 impl PurchaseVerifyRequest {
-    pub fn get_verify_host(&self) -> String {
-        if self.is_test {
-            APP_STORE_VERIFY_URL_SANDBOX.to_string()
-        } else {
-            APP_STORE_VERIFY_URL.to_string()
+    pub fn is_forever(&self) -> bool {
+        if self.purchase_detail.product_id == READBOT_FOREVER {
+            return true;
         }
+        false
+    }
+
+    pub fn get_pro_duration_ms(&self) -> i64 {
+        if self.purchase_detail.product_id == READBOT_ONE_MONTH {
+            return Duration::days(31).num_milliseconds();
+        }
+        if self.purchase_detail.product_id == READBOT_ONE_YEAR {
+            return Duration::days(365).num_milliseconds();
+        }
+        if self.is_forever() {
+            return Duration::days(36500).num_milliseconds();
+        }
+        0
+    }
+
+    pub fn get_pro_end_time(&self) -> i64 {
+        self.purchase_detail.purchase_time + self.get_pro_duration_ms()
     }
 }
 

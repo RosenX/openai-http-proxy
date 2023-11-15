@@ -1,6 +1,8 @@
 use serde::Deserialize;
 use utoipa::ToSchema;
 
+use crate::UserId;
+
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum ProLevel {
@@ -168,4 +170,19 @@ pub struct Address {
     postal_code: Option<String>,
     region: Option<String>,
     formatted: Option<String>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, ToSchema)]
+pub struct VipStatus {
+    pub user_id: UserId,
+    pub is_forever: bool,
+    pub pro_end_time: i64,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, ToSchema)]
+pub struct UserPurchaseDetail {
+    pub user_id: UserId,
+    pub product_id: String,
+    pub purchase_time: i64,
+    pub source: String,
 }

@@ -9,7 +9,7 @@ use content::{content_delete, subscribe_feed, sync_pull, sync_push};
 
 use self::content::subscribe_feed_v1;
 use self::user::user_activity;
-use self::vip::purchase_verify;
+use self::vip::{get_vip_status, purchase_verify};
 
 fn content_routes() -> Router<AppState> {
     Router::new()
@@ -35,7 +35,9 @@ fn user_routes_v1() -> Router<AppState> {
 }
 
 fn vip_routes_v1() -> Router<AppState> {
-    Router::new().route("/verify", post(purchase_verify))
+    Router::new()
+        .route("/verify", post(purchase_verify))
+        .route("/status", get(get_vip_status))
 }
 
 fn content_routes_v1() -> Router<AppState> {

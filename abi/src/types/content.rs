@@ -2,7 +2,8 @@ use std::fmt::Display;
 
 use crate::{
     datetime_to_timestamp, datetime_to_timestamp_option, ClientInfo, Feed, FeedGroup, FeedInfo,
-    FeedItem, FeedTypeServer, FeedUpdateRecord, ProLevel, ProLevelPostgres,
+    FeedItem, FeedTypeServer, FeedUpdateRecord, ProLevel, ProLevelPostgres, UserPurchaseDetail,
+    VipStatus,
 };
 use chrono::Utc;
 use sqlx::{postgres::PgRow, FromRow, Row};
@@ -15,6 +16,27 @@ impl FromRow<'_, PgRow> for FeedGroup {
             update_time: datetime_to_timestamp(row.try_get("update_time")?),
             is_deleted: row.try_get("is_deleted")?,
             sync_time: datetime_to_timestamp_option(row.try_get("sync_time")?),
+        })
+    }
+}
+
+impl FromRow<'_, PgRow> for VipStatus {
+    fn from_row(row: &'_ PgRow) -> Result<Self, sqlx::Error> {
+        Ok(Self {
+            user_id: row.try_get("user_id")?,
+            is_forever: row.try_get("is_forever")?,
+            pro_end_time: datetime_to_timestamp(row.try_get("pro_end_time")?),
+        })
+    }
+}
+
+impl FromRow<'_, PgRow> for UserPurchaseDetail {
+    fn from_row(row: &'_ PgRow) -> Result<Self, sqlx::Error> {
+        Ok(Self {
+            user_id: row.try_get("user_id")?,
+            product_id: row.try_get("product_id")?,
+            purchase_time: datetime_to_timestamp(row.try_get("purchase_time")?),
+            source: row.try_get("source")?,
         })
     }
 }
